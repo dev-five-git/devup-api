@@ -1,0 +1,28 @@
+{
+  "name": "@devup-api/webpack-plugin",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && bun build --target node --outfile=dist/index.js src/index.ts --production && bun build --target node --outfile=dist/index.cjs --format=cjs src/index.ts --production"
+  },
+  "dependencies": {
+    "@devup-api/utils": "workspace:*",
+    "@devup-api/core": "workspace:*"
+  },
+  "peerDependencies": {
+    "webpack": "*",
+    "@devup-api/core": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10",
+    "@types/webpack": "^5.28",
+    "typescript": "^5.9"
+  }
+}

@@ -4,7 +4,17 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@biomejs/biome": "^2.3",
+    "husky": "^9"
+  },
+  "author": "JeongMin Oh",
+  "license": "Apache-2.0",
+  "scripts": {
+    "lint": "biome check",
+    "lint:fix": "biome check --write",
+    "prepare": "husky",
+    "build": "bun run --workspaces build"
   },
   "workspaces": [
     "packages/*"

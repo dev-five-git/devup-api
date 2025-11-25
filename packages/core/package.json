@@ -1,0 +1,19 @@
+{
+  "name": "@devup-api/core",
+  "version": "0.1.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc && bun build --target node --outfile=dist/index.js src/index.ts --production && bun build --target node --outfile=dist/index.cjs --format=cjs src/index.ts --production"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10",
+    "typescript": "^5.9"
+  }
+}

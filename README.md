@@ -1,9 +1,9 @@
-# Devup API
+# devup API
 
 **A fully typed API client generator powered by OpenAPI.  
 Fetch-compatible, auto-generated types, zero generics required.**
 
-Devup API reads your `openapi.json` file and automatically generates a fully typed client that behaves like an ergonomic, type-safe version of `fetch()`.  
+devup API reads your `openapi.json` file and automatically generates a fully typed client that behaves like an ergonomic, type-safe version of `fetch()`.  
 No manual type declarations. No generics. No SDK boilerplate.  
 Just write API calls — the types are already there.
 
@@ -17,7 +17,7 @@ Just write API calls — the types are already there.
 - No need to write or maintain separate TypeScript definitions.
 
 ### **🪝 Fetch-compatible design**
-Devup API feels like using `fetch`, but with superpowers:
+devup API feels like using `fetch`, but with superpowers:
 
 - Path params automatically replaced  
 - Query/body/header types enforced  
@@ -112,7 +112,7 @@ await api.get("/posts/{id}", {
 
 ---
 
-## 🎯 Why Devup API?
+## 🎯 Why devup API?
 
 - No code generators
 - No build steps
