@@ -35,7 +35,7 @@ devup API feels like using `fetch`, but with superpowers:
 import { devupApi } from "devup-api";
 
 // create api instance
-const api = await devupApi("https://api.example.com");
+const api = devupApi("https://api.example.com");
 ```
 
 ### **2. Call endpoints — types are automatic**

@@ -11,10 +11,8 @@ npm install @devup-api/core
 ## Usage
 
 ```typescript
-import { devupApiCore } from '@devup-api/core';
+import { devupApi } from '@devup-api/core';
 
-const core = new devupApiCore({
-  // options
-});
+const core = devupApi("https://example.com");
 ```
 
