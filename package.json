@@ -1,0 +1,12 @@
+{
+  "name": "devup-api",
+  "module": "index.ts",
+  "type": "module",
+  "private": true,
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "workspaces": [
+    "packages/*"
+  ]
+}
