@@ -22,8 +22,16 @@ export interface EndpointDefinition {
   params?: Record<string, ParameterDefinition>
   body?: unknown
   query?: Record<string, ParameterDefinition>
+  response?: unknown
 }
 
+// Helper function to extract schema names from $ref
+function extractSchemaNameFromRef(ref: string): string | null {
+  if (ref.startsWith('#/components/schemas/')) {
+    return ref.replace('#/components/schemas/', '')
+  }
+  return null
+}
 export function generateInterface(
   schema: OpenAPIV3_1.Document,
   options?: DevupApiTypeGeneratorOptions,
@@ -39,14 +47,6 @@ export function generateInterface(
     patch: {},
   } as const
   const convertCaseType = options?.convertCase ?? 'camel'
-
-  // Helper function to extract schema names from $ref
-  const extractSchemaNameFromRef = (ref: string): string | null => {
-    if (ref.startsWith('#/components/schemas/')) {
-      return ref.replace('#/components/schemas/', '')
-    }
-    return null
-  }
 
   // Helper function to collect schema names from a schema object
   const collectSchemaNames = (
@@ -246,6 +246,94 @@ export function generateInterface(
         }
         if (requestBodyType !== undefined) {
           endpoint.body = requestBodyType
+        }
+
+        // Extract response
+        // Check if response uses a component schema
+        let responseType: unknown
+        if (operation.responses) {
+          // Prefer 200 response, fallback to first available response
+          const successResponse =
+            operation.responses['200'] ||
+            operation.responses['201'] ||
+            Object.values(operation.responses)[0]
+
+          if (successResponse) {
+            if ('$ref' in successResponse) {
+              // ResponseObject reference - skip for now
+              // Could resolve if needed
+            } else if ('content' in successResponse) {
+              const content = successResponse.content
+              const jsonContent = content?.['application/json']
+              if (
+                jsonContent &&
+                'schema' in jsonContent &&
+                jsonContent.schema
+              ) {
+                // Check if schema is a direct reference to components.schemas
+                if ('$ref' in jsonContent.schema) {
+                  const schemaName = extractSchemaNameFromRef(
+                    jsonContent.schema.$ref,
+                  )
+                  // Check if schema exists in components.schemas and is used in response
+                  if (
+                    schemaName &&
+                    schema.components?.schemas?.[schemaName] &&
+                    responseSchemaNames.has(schemaName)
+                  ) {
+                    // Use component reference
+                    responseType = `DevupResponseComponentStruct['${schemaName}']`
+                  } else {
+                    // Extract schema type
+                    const { type: schemaType } = getTypeFromSchema(
+                      jsonContent.schema,
+                      schema,
+                    )
+                    responseType = schemaType
+                  }
+                } else {
+                  // Check if it's an array with items referencing a component schema
+                  const schemaObj =
+                    jsonContent.schema as OpenAPIV3_1.SchemaObject
+                  if (
+                    schemaObj.type === 'array' &&
+                    schemaObj.items &&
+                    '$ref' in schemaObj.items
+                  ) {
+                    const schemaName = extractSchemaNameFromRef(
+                      schemaObj.items.$ref,
+                    )
+                    // Check if schema exists in components.schemas and is used in response
+                    if (
+                      schemaName &&
+                      schema.components?.schemas?.[schemaName] &&
+                      responseSchemaNames.has(schemaName)
+                    ) {
+                      // Use component reference for array items
+                      responseType = `Array<DevupResponseComponentStruct['${schemaName}']>`
+                    } else {
+                      // Extract schema type
+                      const { type: schemaType } = getTypeFromSchema(
+                        jsonContent.schema,
+                        schema,
+                      )
+                      responseType = schemaType
+                    }
+                  } else {
+                    // Extract schema type
+                    const { type: schemaType } = getTypeFromSchema(
+                      jsonContent.schema,
+                      schema,
+                    )
+                    responseType = schemaType
+                  }
+                }
+              }
+            }
+          }
+        }
+        if (responseType !== undefined) {
+          endpoint.response = responseType
         }
 
         // Generate path key (normalize path by replacing {param} with converted param and removing slashes)

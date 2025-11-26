@@ -175,6 +175,20 @@
   },
   "components": {
     "schemas": {
+      "Post": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "integer"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time",
+            "default": "2021-01-01T00:00:00Z"
+          }
+        },
+        "required": ["id"]
+      },
       "User": {
         "type": "object",
         "properties": {
