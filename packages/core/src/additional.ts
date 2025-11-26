@@ -8,4 +8,5 @@ export type RequiredOptions<T extends object> = keyof T extends undefined
   : T
 export type DevupApiRequestInit = Omit<RequestInit, 'body'> & {
   body?: object | RequestInit['body']
+  params?: Record<string, string | number | boolean | null | undefined>
 }
