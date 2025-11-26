@@ -34,12 +34,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'GET',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   GET<
@@ -49,12 +49,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'GET',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   post<
@@ -64,12 +64,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'POST',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   POST<
@@ -79,12 +79,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'POST',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   put<
@@ -94,12 +94,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'PUT',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   PUT<
@@ -109,12 +109,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'PUT',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   delete<
@@ -124,12 +124,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'DELETE',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   DELETE<
@@ -139,12 +139,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'DELETE',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   patch<
@@ -154,12 +154,12 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'PATCH',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
   PATCH<
@@ -169,24 +169,19 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     return this.request(path, {
       method: 'PATCH',
       ...options[0],
-    } as DevupApiRequestInit & O)
+    } as DevupApiRequestInit & Omit<O, 'response'>)
   }
 
-  request<
-    T extends DevupApiStructKey,
-    O extends Additional<T, DevupApiStruct> & {
-      params?: Record<string, string | number | boolean | null | undefined>
-    },
-  >(
+  request<T extends DevupApiStructKey, O extends Additional<T, DevupApiStruct>>(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & O]
+      : [options: DevupApiRequestInit & Omit<O, 'response'>]
   ) {
     const { method, url } = getUrlWithMethod(path)
     const mergedOptions = {

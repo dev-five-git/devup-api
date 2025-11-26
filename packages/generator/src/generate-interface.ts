@@ -284,10 +284,13 @@ export function generateInterface(
                     // Use component reference
                     responseType = `DevupResponseComponentStruct['${schemaName}']`
                   } else {
-                    // Extract schema type
+                    // Extract schema type with response options
+                    const responseDefaultNonNullable =
+                      options?.responseDefaultNonNullable ?? true
                     const { type: schemaType } = getTypeFromSchema(
                       jsonContent.schema,
                       schema,
+                      { defaultNonNullable: responseDefaultNonNullable },
                     )
                     responseType = schemaType
                   }
@@ -312,18 +315,24 @@ export function generateInterface(
                       // Use component reference for array items
                       responseType = `Array<DevupResponseComponentStruct['${schemaName}']>`
                     } else {
-                      // Extract schema type
+                      // Extract schema type with response options
+                      const responseDefaultNonNullable =
+                        options?.responseDefaultNonNullable ?? true
                       const { type: schemaType } = getTypeFromSchema(
                         jsonContent.schema,
                         schema,
+                        { defaultNonNullable: responseDefaultNonNullable },
                       )
                       responseType = schemaType
                     }
                   } else {
-                    // Extract schema type
+                    // Extract schema type with response options
+                    const responseDefaultNonNullable =
+                      options?.responseDefaultNonNullable ?? true
                     const { type: schemaType } = getTypeFromSchema(
                       jsonContent.schema,
                       schema,
+                      { defaultNonNullable: responseDefaultNonNullable },
                     )
                     responseType = schemaType
                   }
@@ -363,9 +372,17 @@ export function generateInterface(
       schema.components.schemas,
     )) {
       if (schemaObj) {
+        const requestDefaultNonNullable =
+          options?.requestDefaultNonNullable ?? false
+        const responseDefaultNonNullable =
+          options?.responseDefaultNonNullable ?? true
+
         const { type: schemaType } = getTypeFromSchema(
           schemaObj as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
           schema,
+          requestSchemaNames.has(schemaName)
+            ? { defaultNonNullable: requestDefaultNonNullable }
+            : { defaultNonNullable: responseDefaultNonNullable },
         )
         // Keep original schema name as-is
         if (requestSchemaNames.has(schemaName)) {

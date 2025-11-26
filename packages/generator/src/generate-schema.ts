@@ -65,12 +65,16 @@ export function resolveSchemaRef(
 export function getTypeFromSchema(
   schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
   document: OpenAPIV3_1.Document,
+  options?: {
+    defaultNonNullable?: boolean
+  },
 ): { type: unknown; default?: unknown } {
+  const defaultNonNullable = options?.defaultNonNullable ?? false
   // Handle $ref
   if ('$ref' in schema) {
     const resolved = resolveSchemaRef(schema.$ref, document)
     if (resolved) {
-      return getTypeFromSchema(resolved, document)
+      return getTypeFromSchema(resolved, document, options)
     }
     return { type: 'unknown', default: undefined }
   }
@@ -79,7 +83,9 @@ export function getTypeFromSchema(
 
   // Handle allOf, anyOf, oneOf
   if (schemaObj.allOf) {
-    const types = schemaObj.allOf.map((s) => getTypeFromSchema(s, document))
+    const types = schemaObj.allOf.map((s) =>
+      getTypeFromSchema(s, document, options),
+    )
     return {
       type:
         types.length > 0
@@ -91,7 +97,7 @@ export function getTypeFromSchema(
 
   if (schemaObj.anyOf || schemaObj.oneOf) {
     const types = (schemaObj.anyOf || schemaObj.oneOf || []).map((s) =>
-      getTypeFromSchema(s, document),
+      getTypeFromSchema(s, document, options),
     )
     return {
       type:
@@ -130,7 +136,7 @@ export function getTypeFromSchema(
   if (schemaObj.type === 'array') {
     const items = schemaObj.items
     if (items) {
-      const itemType = getTypeFromSchema(items, document)
+      const itemType = getTypeFromSchema(items, document, options)
       return {
         type: `Array<${formatTypeValue(itemType.type)}>`,
         default: schemaObj.default,
@@ -146,9 +152,26 @@ export function getTypeFromSchema(
 
     if (schemaObj.properties) {
       for (const [key, value] of Object.entries(schemaObj.properties)) {
-        const propType = getTypeFromSchema(value, document)
-        // Mark as optional if not in required array
-        if (!required.includes(key)) {
+        const propType = getTypeFromSchema(value, document, options)
+        // Check if property has default value
+        // Need to resolve $ref if present to check for default
+        let hasDefault = false
+        if ('$ref' in value) {
+          const resolved = resolveSchemaRef(value.$ref, document)
+          if (resolved) {
+            hasDefault = resolved.default !== undefined
+          }
+        } else {
+          const propSchema = value as OpenAPIV3_1.SchemaObject
+          hasDefault = propSchema.default !== undefined
+        }
+        const isInRequired = required.includes(key)
+
+        // If defaultNonNullable is true and has default, treat as required
+        // Otherwise, mark as optional if not in required array
+        if (defaultNonNullable && hasDefault && !isInRequired) {
+          props[key] = propType
+        } else if (!isInRequired) {
           props[`${key}?`] = propType
         } else {
           props[key] = propType
@@ -164,6 +187,7 @@ export function getTypeFromSchema(
         const additionalType = getTypeFromSchema(
           schemaObj.additionalProperties,
           document,
+          options,
         )
         props['[key: string]'] = {
           type: additionalType.type,
@@ -373,6 +397,7 @@ export function extractParameters(
         const { type: paramType, default: paramDefault } = getTypeFromSchema(
           paramSchema,
           document,
+          { defaultNonNullable: false },
         )
         const result = {
           ...resolved,
@@ -394,6 +419,7 @@ export function extractParameters(
     const { type: paramType, default: paramDefault } = getTypeFromSchema(
       paramSchema,
       document,
+      { defaultNonNullable: false },
     )
     const result = {
       ...param,
@@ -434,7 +460,9 @@ export function extractRequestBody(
         resolved.content as OpenAPIV3_1.RequestBodyObject['content']
       const jsonContent = content['application/json']
       if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
-        return getTypeFromSchema(jsonContent.schema, document).type
+        return getTypeFromSchema(jsonContent.schema, document, {
+          defaultNonNullable: false,
+        }).type
       }
     }
     return 'unknown'
@@ -444,7 +472,9 @@ export function extractRequestBody(
   if (content) {
     const jsonContent = content['application/json']
     if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
-      return getTypeFromSchema(jsonContent.schema, document).type
+      return getTypeFromSchema(jsonContent.schema, document, {
+        defaultNonNullable: false,
+      }).type
     }
   }
 
