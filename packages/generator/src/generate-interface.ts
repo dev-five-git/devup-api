@@ -7,6 +7,7 @@ import {
   extractParameters,
   extractRequestBody,
   formatTypeValue,
+  getTypeFromSchema,
 } from './generate-schema'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
@@ -39,6 +40,118 @@ export function generateInterface(
     patch: {},
   } as const
   const convertCaseType = options?.convertCase ?? 'camel'
+
+  // Helper function to extract schema names from $ref
+  const extractSchemaNameFromRef = (ref: string): string | null => {
+    if (ref.startsWith('#/components/schemas/')) {
+      return ref.replace('#/components/schemas/', '')
+    }
+    return null
+  }
+
+  // Helper function to collect schema names from a schema object
+  const collectSchemaNames = (
+    schemaObj: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+    targetSet: Set<string>,
+  ): void => {
+    if ('$ref' in schemaObj) {
+      const schemaName = extractSchemaNameFromRef(schemaObj.$ref)
+      if (schemaName) {
+        targetSet.add(schemaName)
+      }
+      return
+    }
+
+    const schema = schemaObj as OpenAPIV3_1.SchemaObject
+
+    // Check allOf, anyOf, oneOf
+    if (schema.allOf) {
+      schema.allOf.forEach((s) => {
+        collectSchemaNames(s, targetSet)
+      })
+    }
+    if (schema.anyOf) {
+      schema.anyOf.forEach((s) => {
+        collectSchemaNames(s, targetSet)
+      })
+    }
+    if (schema.oneOf) {
+      schema.oneOf.forEach((s) => {
+        collectSchemaNames(s, targetSet)
+      })
+    }
+
+    // Check properties
+    if (schema.properties) {
+      Object.values(schema.properties).forEach((prop) => {
+        collectSchemaNames(prop, targetSet)
+      })
+    }
+
+    // Check items (for arrays)
+    if (schema.type === 'array' && 'items' in schema && schema.items) {
+      collectSchemaNames(schema.items, targetSet)
+    }
+  }
+
+  // Track which schemas are used in request body and responses
+  const requestSchemaNames = new Set<string>()
+  const responseSchemaNames = new Set<string>()
+
+  // First, collect schema names used in request body and responses
+  if (schema.paths) {
+    for (const pathItem of Object.values(schema.paths)) {
+      if (!pathItem) continue
+
+      const methods = ['get', 'post', 'put', 'delete', 'patch'] as const
+      for (const method of methods) {
+        const operation = pathItem[method]
+        if (!operation) continue
+
+        // Collect request body schemas
+        if (operation.requestBody) {
+          if ('$ref' in operation.requestBody) {
+            // Extract schema name from $ref if it's a schema reference
+            const schemaName = extractSchemaNameFromRef(
+              operation.requestBody.$ref,
+            )
+            if (schemaName) {
+              requestSchemaNames.add(schemaName)
+            }
+          } else {
+            const content = operation.requestBody.content
+            const jsonContent = content?.['application/json']
+            if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
+              collectSchemaNames(jsonContent.schema, requestSchemaNames)
+            }
+          }
+        }
+
+        // Collect response schemas
+        if (operation.responses) {
+          for (const response of Object.values(operation.responses)) {
+            if ('$ref' in response) {
+              // Extract schema name from $ref if it's a schema reference
+              const schemaName = extractSchemaNameFromRef(response.$ref)
+              if (schemaName) {
+                responseSchemaNames.add(schemaName)
+              }
+            } else if ('content' in response) {
+              const content = response.content
+              const jsonContent = content?.['application/json']
+              if (
+                jsonContent &&
+                'schema' in jsonContent &&
+                jsonContent.schema
+              ) {
+                collectSchemaNames(jsonContent.schema, responseSchemaNames)
+              }
+            }
+          }
+        }
+      }
+    }
+  }
 
   // Iterate through OpenAPI paths and extract each endpoint
   if (schema.paths) {
@@ -82,9 +195,58 @@ export function generateInterface(
         }
 
         // Extract request body
-        const requestBody = extractRequestBody(operation.requestBody, schema)
-        if (requestBody !== undefined) {
-          endpoint.body = requestBody
+        // Check if request body uses a component schema
+        let requestBodyType: unknown
+        if (operation.requestBody) {
+          if ('$ref' in operation.requestBody) {
+            // RequestBodyObject reference - skip for now
+            const requestBody = extractRequestBody(
+              operation.requestBody,
+              schema,
+            )
+            if (requestBody !== undefined) {
+              requestBodyType = requestBody
+            }
+          } else {
+            const content = operation.requestBody.content
+            const jsonContent = content?.['application/json']
+            if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
+              // Check if schema is a direct reference to components.schemas
+              if ('$ref' in jsonContent.schema) {
+                const schemaName = extractSchemaNameFromRef(
+                  jsonContent.schema.$ref,
+                )
+                // Check if schema exists in components.schemas and is used in request body
+                if (
+                  schemaName &&
+                  schema.components?.schemas?.[schemaName] &&
+                  requestSchemaNames.has(schemaName)
+                ) {
+                  // Use component reference
+                  requestBodyType = `DevupRequestComponentStruct['${schemaName}']`
+                } else {
+                  const requestBody = extractRequestBody(
+                    operation.requestBody,
+                    schema,
+                  )
+                  if (requestBody !== undefined) {
+                    requestBodyType = requestBody
+                  }
+                }
+              } else {
+                const requestBody = extractRequestBody(
+                  operation.requestBody,
+                  schema,
+                )
+                if (requestBody !== undefined) {
+                  requestBodyType = requestBody
+                }
+              }
+            }
+          }
+        }
+        if (requestBodyType !== undefined) {
+          endpoint.body = requestBodyType
         }
 
         // Generate path key (normalize path by replacing {param} with converted param and removing slashes)
@@ -101,6 +263,29 @@ export function generateInterface(
             convertCaseType,
           )
           endpoints[method][operationIdKey] = endpoint
+        }
+      }
+    }
+  }
+
+  // Extract components schemas
+  const requestComponents: Record<string, unknown> = {}
+  const responseComponents: Record<string, unknown> = {}
+  if (schema.components?.schemas) {
+    for (const [schemaName, schemaObj] of Object.entries(
+      schema.components.schemas,
+    )) {
+      if (schemaObj) {
+        const { type: schemaType } = getTypeFromSchema(
+          schemaObj as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+          schema,
+        )
+        // Keep original schema name as-is
+        if (requestSchemaNames.has(schemaName)) {
+          requestComponents[schemaName] = schemaType
+        }
+        if (responseSchemaNames.has(schemaName)) {
+          responseComponents[schemaName] = schemaType
         }
       }
     }
@@ -133,5 +318,35 @@ export function generateInterface(
     })
     .join('\n')
 
-  return `import "@devup-api/fetch";\n\ndeclare module "@devup-api/fetch" {\n${interfaceContent}\n}`
+  // Generate RequestComponentStruct interface
+  const requestComponentEntries = Object.entries(requestComponents)
+    .map(([key, value]) => {
+      const formattedValue = formatTypeValue(value, 2)
+      return `    ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
+    })
+    .join(';\n')
+
+  const requestComponentInterface =
+    requestComponentEntries.length > 0
+      ? `  interface DevupRequestComponentStruct {\n${requestComponentEntries};\n  }`
+      : '  interface DevupRequestComponentStruct {}'
+
+  // Generate ResponseComponentStruct interface
+  const responseComponentEntries = Object.entries(responseComponents)
+    .map(([key, value]) => {
+      const formattedValue = formatTypeValue(value, 2)
+      return `    ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
+    })
+    .join(';\n')
+
+  const responseComponentInterface =
+    responseComponentEntries.length > 0
+      ? `  interface DevupResponseComponentStruct {\n${responseComponentEntries};\n  }`
+      : '  interface DevupResponseComponentStruct {}'
+
+  const allInterfaces = interfaceContent
+    ? `${interfaceContent}\n\n${requestComponentInterface}\n\n${responseComponentInterface}`
+    : `${requestComponentInterface}\n\n${responseComponentInterface}`
+
+  return `import "@devup-api/fetch";\n\ndeclare module "@devup-api/fetch" {\n${allInterfaces}\n}`
 }

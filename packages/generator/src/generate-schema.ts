@@ -249,6 +249,11 @@ export function formatType(
 
   const entries = Object.entries(obj)
     .map(([key, value]) => {
+      // Handle string values (e.g., component references)
+      if (typeof value === 'string') {
+        return `${nextIndentStr}${key}: ${value}`
+      }
+
       // Handle ParameterDefinition for params and query
       if (isParameterDefinition(value)) {
         const typeStr = formatTypeValue(value.type, nextIndent)
@@ -272,29 +277,13 @@ export function formatType(
       // Handle { type: unknown, default?: unknown } structure (from getTypeFromSchema)
       if (isTypeObject(value)) {
         const formattedValue = formatTypeValue(value.type, nextIndent)
-        // Remove '?' from key if it exists (from getTypeFromSchema)
-        const cleanKey = key.endsWith('?') ? key.slice(0, -1) : key
-        // Check if the type object represents an object with all optional properties
-        const valueAllOptional =
-          typeof value.type === 'object' &&
-          value.type !== null &&
-          !Array.isArray(value.type) &&
-          areAllPropertiesOptional(value.type as Record<string, unknown>)
-        const optionalMarker = valueAllOptional ? '?' : ''
-        return `${nextIndentStr}${cleanKey}${optionalMarker}: ${formattedValue}`
+        // Key already has '?' if it's optional (from getTypeFromSchema), keep it as is
+        return `${nextIndentStr}${key}: ${formattedValue}`
       }
 
       const formattedValue = formatTypeValue(value, nextIndent)
-      // Remove '?' from key if it exists (from getTypeFromSchema)
-      const cleanKey = key.endsWith('?') ? key.slice(0, -1) : key
-      // Check if value is an object with all optional properties
-      const valueAllOptional =
-        typeof value === 'object' &&
-        value !== null &&
-        !Array.isArray(value) &&
-        areAllPropertiesOptional(value as Record<string, unknown>)
-      const optionalMarker = valueAllOptional ? '?' : ''
-      return `${nextIndentStr}${cleanKey}${optionalMarker}: ${formattedValue}`
+      // Key already has '?' if it's optional (from getTypeFromSchema), keep it as is
+      return `${nextIndentStr}${key}: ${formattedValue}`
     })
     .join(';\n')
 

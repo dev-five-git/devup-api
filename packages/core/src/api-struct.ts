@@ -15,6 +15,12 @@ export interface DevupDeleteApiStruct {}
 // biome-ignore lint/suspicious/noEmptyInterface: empty interface
 export interface DevupPatchApiStruct {}
 
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface
+export interface DevupRequestComponentStruct {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface
+export interface DevupResponseComponentStruct {}
+
 export type DevupApiStruct = DevupGetApiStruct &
   DevupPostApiStruct &
   DevupPutApiStruct &

@@ -155,6 +155,9 @@
           "email": {
             "type": "string",
             "format": "email"
+          },
+          "optional": {
+            "type": "string"
           }
         },
         "required": ["name", "email"]
