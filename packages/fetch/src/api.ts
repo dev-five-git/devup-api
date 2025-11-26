@@ -13,10 +13,24 @@ import type {
   DevupPostApiStructKey,
   DevupPutApiStruct,
   DevupPutApiStructKey,
+  ExtractValue,
   RequiredOptions,
 } from '@devup-api/core'
+import { convertResponse } from './response-converter'
 import { getUrlWithMethod } from './url-map'
 import { getApiEndpoint, isPlainObject } from './utils'
+
+type DevupApiResponse<T, E = unknown> =
+  | {
+      data: T
+      error?: undefined
+      response: Response
+    }
+  | {
+      data?: undefined
+      error: E
+      response: Response
+    }
 
 export class DevupApi {
   private baseUrl: string
@@ -34,8 +48,13 @@ export class DevupApi {
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'GET',
       ...options[0],
@@ -50,7 +69,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'GET',
       ...options[0],
@@ -65,7 +89,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'POST',
       ...options[0],
@@ -80,7 +109,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'POST',
       ...options[0],
@@ -95,7 +129,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'PUT',
       ...options[0],
@@ -110,7 +149,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'PUT',
       ...options[0],
@@ -125,7 +169,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'DELETE',
       ...options[0],
@@ -140,7 +189,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'DELETE',
       ...options[0],
@@ -155,7 +209,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'PATCH',
       ...options[0],
@@ -170,7 +229,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     return this.request(path, {
       method: 'PATCH',
       ...options[0],
@@ -182,7 +246,12 @@ export class DevupApi {
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
       : [options: DevupApiRequestInit & Omit<O, 'response'>]
-  ) {
+  ): Promise<
+    DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error', unknown>
+    >
+  > {
     const { method, url } = getUrlWithMethod(path)
     const mergedOptions = {
       ...this.defaultOptions,
@@ -195,7 +264,7 @@ export class DevupApi {
     if (requestOptions.body && isPlainObject(requestOptions.body)) {
       requestOptions.body = JSON.stringify(requestOptions.body)
     }
-    return fetch(
+    const request = new Request(
       getApiEndpoint(
         this.baseUrl,
         url,
@@ -210,6 +279,14 @@ export class DevupApi {
       ),
       requestOptions as RequestInit,
     )
+    return fetch(request).then((response) =>
+      convertResponse(request, response),
+    ) as Promise<
+      DevupApiResponse<
+        ExtractValue<O, 'response'>,
+        ExtractValue<O, 'error', unknown>
+      >
+    >
   }
 
   setDefaultOptions(options: DevupApiRequestInit) {

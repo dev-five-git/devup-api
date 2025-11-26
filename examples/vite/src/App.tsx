@@ -19,7 +19,7 @@ function App() {
         // query: { postId: 1 },
       })
       .then((res) => {
-        console.log(res)
+        console.log(res.data?.[0]?.createdAt, res.error?.message)
       })
 
     api
