@@ -16,6 +16,7 @@ function App() {
     api
       .get('/users/{userId}/posts', {
         params: { userId: 1 },
+        // query: { postId: 1 },
       })
       .then((res) => {
         console.log(res)

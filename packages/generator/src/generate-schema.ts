@@ -281,9 +281,16 @@ export function formatType(
         return `${nextIndentStr}${key}: ${formattedValue}`
       }
 
+      // Check if value is an object (like params, query) with all optional properties
+      const valueAllOptional =
+        typeof value === 'object' &&
+        value !== null &&
+        !Array.isArray(value) &&
+        areAllPropertiesOptional(value as Record<string, unknown>)
+      const optionalMarker = valueAllOptional ? '?' : ''
+
       const formattedValue = formatTypeValue(value, nextIndent)
-      // Key already has '?' if it's optional (from getTypeFromSchema), keep it as is
-      return `${nextIndentStr}${key}: ${formattedValue}`
+      return `${nextIndentStr}${key}${optionalMarker}: ${formattedValue}`
     })
     .join(';\n')
 

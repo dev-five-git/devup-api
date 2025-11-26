@@ -54,6 +54,55 @@
       }
     },
     "/users/{user_id}/posts": {
+      "delete": {
+        "summary": "Get user posts by ID",
+        "operationId": "getUserPostsById",
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer",
+              "default": 1
+            },
+            "description": "User ID"
+          },
+          {
+            "name": "post_id",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Post ID"
+          },
+          {
+            "name": "required",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            },
+            "description": "Post ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Post"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
       "get": {
         "summary": "Get user posts by ID",
         "operationId": "getUserPostsById",

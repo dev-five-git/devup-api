@@ -3,7 +3,6 @@ import { toPascal } from '@devup-api/utils'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import {
-  areAllPropertiesOptional,
   extractParameters,
   extractRequestBody,
   formatTypeValue,
@@ -299,14 +298,9 @@ export function generateInterface(
         const interfaceEntries = entries
           .map(([key, endpointValue]) => {
             const formattedValue = formatTypeValue(endpointValue, 2)
-            // Check if all properties in endpointValue are optional
-            const allOptional =
-              typeof endpointValue === 'object' &&
-              endpointValue !== null &&
-              !Array.isArray(endpointValue) &&
-              areAllPropertiesOptional(endpointValue as Record<string, unknown>)
-            const optionalMarker = allOptional ? '?' : ''
-            return `    ${wrapInterfaceKeyGuard(key)}${optionalMarker}: ${formattedValue}`
+            // Top-level keys in ApiStruct should never be optional
+            // Only params, query, body etc. can be optional if all their properties are optional
+            return `    ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
           })
           .join(';\n')
 
