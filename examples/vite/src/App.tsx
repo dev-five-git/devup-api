@@ -14,8 +14,8 @@ function App() {
     })
 
     api
-      .get('getUserById', {
-        params: { id: 1 },
+      .get('/users/{userId}/posts', {
+        params: { userId: 1 },
       })
       .then((res) => {
         console.log(res)

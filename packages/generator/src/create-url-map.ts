@@ -4,7 +4,6 @@ import { convertCase } from './convert-case'
 
 export function createUrlMap(
   schema: OpenAPIV3_1.Document,
-
   options?: DevupApiTypeGeneratorOptions,
 ) {
   const convertCaseType = options?.convertCase ?? 'camel'
@@ -14,6 +13,10 @@ export function createUrlMap(
     for (const method of ['get', 'post', 'put', 'delete', 'patch'] as const) {
       const operation = pathItem[method]
       if (!operation) continue
+      const normalizedPath = path.replace(/\{([^}]+)\}/g, (_, param) => {
+        // Convert param name based on case type
+        return `{${convertCase(param, convertCaseType)}}`
+      })
       if (operation.operationId) {
         urlMap[convertCase(operation.operationId, convertCaseType)] = {
           method: method.toUpperCase() as
@@ -22,17 +25,17 @@ export function createUrlMap(
             | 'PUT'
             | 'DELETE'
             | 'PATCH',
-          url: path,
+          url: normalizedPath,
         }
       }
-      urlMap[path] = {
+      urlMap[normalizedPath] = {
         method: method.toUpperCase() as
           | 'GET'
           | 'POST'
           | 'PUT'
           | 'DELETE'
           | 'PATCH',
-        url: path,
+        url: normalizedPath,
       }
     }
   }

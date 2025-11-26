@@ -3,15 +3,25 @@ import { toPascal } from '@devup-api/utils'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import {
+  areAllPropertiesOptional,
   extractParameters,
   extractRequestBody,
   formatTypeValue,
 } from './generate-schema'
+import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
-interface EndpointDefinition {
-  params?: Record<string, unknown>
+export type ParameterDefinition = Omit<
+  OpenAPIV3_1.ParameterObject,
+  'schema'
+> & {
+  type: unknown
+  default?: unknown
+}
+
+export interface EndpointDefinition {
+  params?: Record<string, ParameterDefinition>
   body?: unknown
-  query?: Record<string, unknown>
+  query?: Record<string, ParameterDefinition>
 }
 
 export function generateInterface(
@@ -52,13 +62,13 @@ export function generateInterface(
         )
 
         // Apply case conversion to parameter names
-        const convertedPathParams: Record<string, unknown> = {}
+        const convertedPathParams: Record<string, ParameterDefinition> = {}
         for (const [key, value] of Object.entries(pathParams)) {
           const convertedKey = convertCase(key, convertCaseType)
           convertedPathParams[convertedKey] = value
         }
 
-        const convertedQueryParams: Record<string, unknown> = {}
+        const convertedQueryParams: Record<string, ParameterDefinition> = {}
         for (const [key, value] of Object.entries(queryParams)) {
           const convertedKey = convertCase(key, convertCaseType)
           convertedQueryParams[convertedKey] = value
@@ -78,15 +88,12 @@ export function generateInterface(
         }
 
         // Generate path key (normalize path by replacing {param} with converted param and removing slashes)
-        const normalizedPath = path
-          .replace(/\{([^}]+)\}/g, (_, param) => {
-            // Convert param name based on case type
-            return convertCase(param, convertCaseType)
-          })
-          .replace(/^\//, '')
-          .replace(/\//g, '')
-        const pathKey = convertCase(normalizedPath, convertCaseType)
+        const normalizedPath = path.replace(/\{([^}]+)\}/g, (_, param) => {
+          // Convert param name based on case type
+          return `{${convertCase(param, convertCaseType)}}`
+        })
 
+        endpoints[method][normalizedPath] = endpoint
         if (operation.operationId) {
           // If operationId exists, create both operationId and path keys
           const operationIdKey = convertCase(
@@ -94,16 +101,6 @@ export function generateInterface(
             convertCaseType,
           )
           endpoints[method][operationIdKey] = endpoint
-
-          // Add path key if different from operationId key
-          if (pathKey && pathKey !== operationIdKey) {
-            endpoints[method][pathKey] = endpoint
-          }
-        } else {
-          // If operationId doesn't exist, only use path key
-          if (pathKey) {
-            endpoints[method][pathKey] = endpoint
-          }
         }
       }
     }
@@ -114,16 +111,27 @@ export function generateInterface(
     .flatMap(([method, value]) => {
       const entries = Object.entries(value)
       if (entries.length > 0) {
+        const interfaceEntries = entries
+          .map(([key, endpointValue]) => {
+            const formattedValue = formatTypeValue(endpointValue, 2)
+            // Check if all properties in endpointValue are optional
+            const allOptional =
+              typeof endpointValue === 'object' &&
+              endpointValue !== null &&
+              !Array.isArray(endpointValue) &&
+              areAllPropertiesOptional(endpointValue as Record<string, unknown>)
+            const optionalMarker = allOptional ? '?' : ''
+            return `    ${wrapInterfaceKeyGuard(key)}${optionalMarker}: ${formattedValue}`
+          })
+          .join(';\n')
+
         return [
-          `interface Devup${toPascal(method)}ApiStruct{${entries
-            .map(([key, value]) => {
-              return `${key}:${formatTypeValue(value)}`
-            })
-            .join(';')}}`,
+          `  interface Devup${toPascal(method)}ApiStruct {\n${interfaceEntries};\n  }`,
         ]
       }
       return []
     })
-    .flat()
-  return `import "@devup-api/fetch";declare module "@devup-api/fetch"{${interfaceContent.join('')}}`
+    .join('\n')
+
+  return `import "@devup-api/fetch";\n\ndeclare module "@devup-api/fetch" {\n${interfaceContent}\n}`
 }
