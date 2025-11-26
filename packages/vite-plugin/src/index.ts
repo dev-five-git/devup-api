@@ -1,2 +1,2 @@
 export * from './plugin'
-export { devupApiVitePlugin as default } from './plugin'
+export { devupApi as default } from './plugin'

@@ -123,7 +123,7 @@ export class devupApi {
     path: T,
     options?: RequestInit & Additional<T, DevupApiStruct>,
   ) {
-    const [method, url] = getUrlWithMethod(path)
+    const { method, url } = getUrlWithMethod(path)
     return fetch(`${this.baseUrl}${url}`, {
       method,
       ...this.defaultOptions,
