@@ -5,7 +5,6 @@ import { convertCase } from './convert-case'
 import {
   extractParameters,
   extractRequestBody,
-  formatType,
   formatTypeValue,
 } from './generate-schema'
 

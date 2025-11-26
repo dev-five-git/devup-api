@@ -9,9 +9,28 @@ function App() {
     : null
 
   useEffect(() => {
-    api.get('getUserById').then((res) => {
+    api.get('getUsers', {}).then((res) => {
       console.log(res)
     })
+
+    api
+      .get('getUserById', {
+        params: { id: 1 },
+      })
+      .then((res) => {
+        console.log(res)
+      })
+
+    api
+      .post('createUser', {
+        body: {
+          name: 'John Doe',
+          email: 'foo@bar.com',
+        },
+      })
+      .then((res) => {
+        console.log(res)
+      })
   }, [])
 
   return (

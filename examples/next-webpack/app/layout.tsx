@@ -1,9 +1,8 @@
 import type { Metadata } from 'next'
-import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Next.js Webpack Example - devup-api',
-  description: 'Example Next.js app with devup-api plugin (Webpack)',
+  title: 'Next.js Example - devup-api',
+  description: 'Example Next.js app with devup-api plugin',
 }
 
 export default function RootLayout({

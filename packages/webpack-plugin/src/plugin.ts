@@ -44,7 +44,9 @@ export class devupApiWebpackPlugin {
           const urlMap = createUrlMap(schema, this.options)
           const define: Record<string, string> = {}
           if (urlMap) {
-            define['process.env.DEVUP_API_URL_MAP'] = JSON.stringify(urlMap)
+            define['process.env.DEVUP_API_URL_MAP'] = JSON.stringify(
+              JSON.stringify(urlMap),
+            )
           }
 
           // Add DefinePlugin to webpack configuration

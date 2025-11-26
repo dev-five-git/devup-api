@@ -1,30 +1,58 @@
 'use client'
 
+import { createApi } from '@devup-api/fetch'
+import { Box, Text } from '@devup-ui/react'
+import { useEffect } from 'react'
+
+const api = createApi('https://api.example.com')
+
 export default function Home() {
+  useEffect(() => {
+    api.get('getUsers', {}).then((res) => {
+      console.log(res)
+    })
+
+    api
+      .get('getUserById', {
+        params: { id: 1 },
+      })
+      .then((res) => {
+        console.log(res)
+      })
+
+    api
+      .post('createUser', {
+        body: {
+          name: 'John Doe',
+          email: 'foo@bar.com',
+        },
+      })
+      .then((res) => {
+        console.log(res)
+      })
+  }, [])
   return (
-    <main className="flex min-h-screen flex-col items-center justify-center p-24">
-      <div className="z-10 max-w-5xl w-full items-center justify-between font-mono text-sm">
-        <h1 className="text-4xl font-bold mb-8">Next.js Example (Turbopack)</h1>
-        <p className="mb-4">
-          This example uses Next.js with Turbopack and devup-api plugin.
-        </p>
-        <div className="mt-8 p-4 bg-gray-100 rounded">
-          <p className="font-semibold mb-2">Environment Variables:</p>
-          <pre className="text-xs overflow-auto">
-            {(() => {
-              try {
-                const urlMap = process.env.DEVUP_API_URL_MAP
-                if (!urlMap) return 'Not available'
-                const parsed =
-                  typeof urlMap === 'string' ? JSON.parse(urlMap) : urlMap
-                return JSON.stringify(parsed, null, 2)
-              } catch {
-                return 'Error parsing URL map'
-              }
-            })()}
-          </pre>
-        </div>
-      </div>
-    </main>
+    <Box>
+      <Text>Next.js Example (Turbopack)</Text>
+      <Box>
+        <Box>
+          <Box>
+            <Box>
+              {(() => {
+                try {
+                  const urlMap = process.env.DEVUP_API_URL_MAP
+                  if (!urlMap) return 'Not available'
+                  const parsed =
+                    typeof urlMap === 'string' ? JSON.parse(urlMap) : urlMap
+                  return JSON.stringify(parsed, null, 2)
+                } catch {
+                  return 'Error parsing URL map'
+                }
+              })()}
+            </Box>
+          </Box>
+        </Box>
+      </Box>
+    </Box>
   )
 }

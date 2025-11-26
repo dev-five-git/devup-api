@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "next lint"
@@ -13,9 +13,11 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "@devup-api/next-plugin": "workspace:*",
-    "@devup-api/core": "workspace:*"
+    "@devup-api/fetch": "workspace:*",
+    "@devup-ui/react": "^1"
   },
   "devDependencies": {
+    "@devup-ui/next-plugin": "^1",
     "@types/node": "^24",
     "@types/react": "^19",
     "@types/react-dom": "^19",

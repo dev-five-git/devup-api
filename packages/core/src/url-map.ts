@@ -1,4 +1,4 @@
 export interface UrlMapValue {
-  method: 'get' | 'post' | 'put' | 'delete' | 'patch'
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
   url: string
 }

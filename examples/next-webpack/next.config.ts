@@ -1,13 +1,8 @@
 import devupApi from '@devup-api/next-plugin'
+import { DevupUI } from '@devup-ui/next-plugin'
 
-const config = devupApi(
-  {
-    reactStrictMode: true,
-  },
-  {
-    openapiFile: './openapi.json',
-    tempDir: '.devup-api',
-  },
-)
+const config = devupApi({
+  reactStrictMode: true,
+})
 
-export default config
+export default DevupUI(config)

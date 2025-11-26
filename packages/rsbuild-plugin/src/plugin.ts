@@ -31,7 +31,7 @@ export function devupApiRsbuildPlugin(
         config.source.define ??= {}
         if (urlMap) {
           config.source.define['process.env.DEVUP_API_URL_MAP'] =
-            JSON.stringify(urlMap)
+            JSON.stringify(JSON.stringify(urlMap))
         }
         return config
       })

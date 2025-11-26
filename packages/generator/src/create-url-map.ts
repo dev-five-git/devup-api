@@ -14,7 +14,26 @@ export function createUrlMap(
     for (const method of ['get', 'post', 'put', 'delete', 'patch'] as const) {
       const operation = pathItem[method]
       if (!operation) continue
-      urlMap[convertCase(path, convertCaseType)] = { method, url: path }
+      if (operation.operationId) {
+        urlMap[convertCase(operation.operationId, convertCaseType)] = {
+          method: method.toUpperCase() as
+            | 'GET'
+            | 'POST'
+            | 'PUT'
+            | 'DELETE'
+            | 'PATCH',
+          url: path,
+        }
+      }
+      urlMap[path] = {
+        method: method.toUpperCase() as
+          | 'GET'
+          | 'POST'
+          | 'PUT'
+          | 'DELETE'
+          | 'PATCH',
+        url: path,
+      }
     }
   }
   return urlMap

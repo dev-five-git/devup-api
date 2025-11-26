@@ -3,13 +3,7 @@ import { defineConfig } from '@rsbuild/core'
 import { pluginReact } from '@rsbuild/plugin-react'
 
 export default defineConfig({
-  plugins: [
-    pluginReact(),
-    devupApiRsbuildPlugin({
-      openapiFile: './openapi.json',
-      tempDir: '.devup-api',
-    }),
-  ],
+  plugins: [pluginReact(), devupApiRsbuildPlugin()],
   source: {
     entry: {
       index: './src/main.tsx',

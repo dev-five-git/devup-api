@@ -1,137 +1,223 @@
 import type {
   Additional,
+  DevupApiRequestInit,
   DevupApiStruct,
   DevupApiStructKey,
   DevupDeleteApiStruct,
+  DevupDeleteApiStructKey,
   DevupGetApiStruct,
+  DevupGetApiStructKey,
   DevupPatchApiStruct,
+  DevupPatchApiStructKey,
   DevupPostApiStruct,
+  DevupPostApiStructKey,
   DevupPutApiStruct,
+  DevupPutApiStructKey,
+  RequiredOptions,
 } from '@devup-api/core'
-import { getUrl, getUrlWithMethod } from './url-map'
+import { getUrlWithMethod } from './url-map'
+import { getApiEndpoint, isPlainObject } from './utils'
 
 export class DevupApi {
   private baseUrl: string
-  private defaultOptions: RequestInit
+  private defaultOptions: DevupApiRequestInit
 
-  constructor(baseUrl: string, defaultOptions: RequestInit = {}) {
-    this.baseUrl = baseUrl
+  constructor(baseUrl: string, defaultOptions: DevupApiRequestInit = {}) {
+    this.baseUrl = baseUrl.replace(/\/$/, '')
     this.defaultOptions = defaultOptions
   }
 
-  get<T extends DevupApiStructKey>(
+  get<
+    T extends DevupGetApiStructKey,
+    O extends Additional<T, DevupGetApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupGetApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'GET',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  GET<T extends DevupApiStructKey>(
+  GET<
+    T extends DevupGetApiStructKey,
+    O extends Additional<T, DevupGetApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupGetApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'GET',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  post<T extends DevupApiStructKey>(
+  post<
+    T extends DevupPostApiStructKey,
+    O extends Additional<T, DevupPostApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupPostApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'POST',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  POST<T extends DevupApiStructKey>(
+  POST<
+    T extends DevupPostApiStructKey,
+    O extends Additional<T, DevupPostApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupPostApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'POST',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  put<T extends DevupApiStructKey>(
+  put<
+    T extends DevupPutApiStructKey,
+    O extends Additional<T, DevupPutApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupPutApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'PUT',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  PUT<T extends DevupApiStructKey>(
+  PUT<
+    T extends DevupPutApiStructKey,
+    O extends Additional<T, DevupPutApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupPutApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'PUT',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  delete<T extends DevupApiStructKey>(
+  delete<
+    T extends DevupDeleteApiStructKey,
+    O extends Additional<T, DevupDeleteApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupDeleteApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'DELETE',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  DELETE<T extends DevupApiStructKey>(
+  DELETE<
+    T extends DevupDeleteApiStructKey,
+    O extends Additional<T, DevupDeleteApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupDeleteApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'DELETE',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  patch<T extends DevupApiStructKey>(
+  patch<
+    T extends DevupPatchApiStructKey,
+    O extends Additional<T, DevupPatchApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupPatchApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'PATCH',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  PATCH<T extends DevupApiStructKey>(
+  PATCH<
+    T extends DevupPatchApiStructKey,
+    O extends Additional<T, DevupPatchApiStruct>,
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupPatchApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
-    return fetch(`${this.baseUrl}${getUrl(path)}`, {
-      ...this.defaultOptions,
-      ...options,
-    })
+    return this.request(path, {
+      method: 'PATCH',
+      ...options[0],
+    } as DevupApiRequestInit & O)
   }
 
-  request<T extends DevupApiStructKey>(
+  request<
+    T extends DevupApiStructKey,
+    O extends Additional<T, DevupApiStruct> & {
+      params?: Record<string, string | number | boolean | null | undefined>
+    },
+  >(
     path: T,
-    options?: RequestInit & Additional<T, DevupApiStruct>,
+    ...options: [RequiredOptions<O>] extends [never]
+      ? [options?: DevupApiRequestInit]
+      : [options: DevupApiRequestInit & O]
   ) {
     const { method, url } = getUrlWithMethod(path)
-    return fetch(`${this.baseUrl}${url}`, {
-      method,
+    const mergedOptions = {
       ...this.defaultOptions,
-      ...options,
-    })
+      ...options[0],
+    }
+    const requestOptions = {
+      ...mergedOptions,
+      method: mergedOptions.method || method,
+    }
+    if (requestOptions.body && isPlainObject(requestOptions.body)) {
+      requestOptions.body = JSON.stringify(requestOptions.body)
+    }
+    return fetch(
+      getApiEndpoint(
+        this.baseUrl,
+        url,
+        (
+          requestOptions as {
+            params?: Record<
+              string,
+              string | number | boolean | null | undefined
+            >
+          }
+        ).params,
+      ),
+      requestOptions as RequestInit,
+    )
   }
 
-  setDefaultOptions(options: RequestInit) {
+  setDefaultOptions(options: DevupApiRequestInit) {
     this.defaultOptions = options
   }
 
