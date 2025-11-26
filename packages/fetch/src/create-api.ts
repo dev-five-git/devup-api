@@ -1,5 +1,8 @@
-import { devupApi } from './api'
+import { DevupApi } from './api'
 
-export function createApi(baseUrl: string, defaultOptions?: RequestInit) {
-  return new devupApi(baseUrl, defaultOptions).get('a')
+export function createApi(
+  baseUrl: string,
+  defaultOptions?: RequestInit,
+): DevupApi {
+  return new DevupApi(baseUrl, defaultOptions)
 }

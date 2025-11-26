@@ -17,6 +17,7 @@
     "build": "bun run --workspaces build"
   },
   "workspaces": [
-    "packages/*"
+    "packages/*",
+    "examples/*"
   ]
 }

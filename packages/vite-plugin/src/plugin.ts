@@ -25,7 +25,10 @@ export function devupApi(options?: DevupApiOptions): Plugin {
       const urlMap = createUrlMap(schema, options)
       const define: Record<string, string> = {}
       if (urlMap) {
-        define['process.env.DEVUP_API_URL_MAP'] = JSON.stringify(urlMap)
+        // json stringify twice to avoid JSON.parse error
+        define['process.env.DEVUP_API_URL_MAP'] = JSON.stringify(
+          JSON.stringify(urlMap),
+        )
       }
       return {
         define,

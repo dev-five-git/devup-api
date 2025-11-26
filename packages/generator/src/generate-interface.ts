@@ -1,4 +1,5 @@
 import type { DevupApiTypeGeneratorOptions } from '@devup-api/core'
+import { toPascal } from '@devup-api/utils'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import {
@@ -18,7 +19,16 @@ export function generateInterface(
   schema: OpenAPIV3_1.Document,
   options?: DevupApiTypeGeneratorOptions,
 ): string {
-  const endpoints: Record<string, EndpointDefinition> = {}
+  const endpoints: Record<
+    'get' | 'post' | 'put' | 'delete' | 'patch',
+    Record<string, EndpointDefinition>
+  > = {
+    get: {},
+    post: {},
+    put: {},
+    delete: {},
+    patch: {},
+  } as const
   const convertCaseType = options?.convertCase ?? 'camel'
 
   // Iterate through OpenAPI paths and extract each endpoint
@@ -84,16 +94,16 @@ export function generateInterface(
             operation.operationId,
             convertCaseType,
           )
-          endpoints[operationIdKey] = endpoint
+          endpoints[method][operationIdKey] = endpoint
 
           // Add path key if different from operationId key
           if (pathKey && pathKey !== operationIdKey) {
-            endpoints[pathKey] = endpoint
+            endpoints[method][pathKey] = endpoint
           }
         } else {
           // If operationId doesn't exist, only use path key
           if (pathKey) {
-            endpoints[pathKey] = endpoint
+            endpoints[method][pathKey] = endpoint
           }
         }
       }
@@ -102,27 +112,19 @@ export function generateInterface(
 
   // Generate TypeScript interface string
   const interfaceContent = Object.entries(endpoints)
-    .map(([key, value]) => {
-      const props: string[] = []
-
-      if (value.params) {
-        props.push(`params?: ${formatType(value.params)}`)
+    .flatMap(([method, value]) => {
+      const entries = Object.entries(value)
+      if (entries.length > 0) {
+        return [
+          `interface Devup${toPascal(method)}ApiStruct{${entries
+            .map(([key, value]) => {
+              return `${key}:${formatTypeValue(value)}`
+            })
+            .join(';')}}`,
+        ]
       }
-      if (value.body) {
-        props.push(`body?: ${formatTypeValue(value.body)}`)
-      }
-      if (value.query) {
-        props.push(`query?: ${formatType(value.query)}`)
-      }
-
-      return `  ${key}: {\n    ${props.join(';\n    ')}${props.length > 0 ? ';' : ''}\n  }`
+      return []
     })
-    .join(';\n\n')
-
-  return `import "@devup-api/fetch";
-declare module "@devup-api/fetch" {
-  interface devupApiStruct {
-${interfaceContent}
-  }
-}`
+    .flat()
+  return `import "@devup-api/fetch";declare module "@devup-api/fetch"{${interfaceContent.join('')}}`
 }

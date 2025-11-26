@@ -135,11 +135,11 @@ export function formatType(obj: Record<string, unknown>): string {
   const entries = Object.entries(obj)
     .map(([key, value]) => {
       const formattedValue = formatTypeValue(value)
-      return `    ${key}: ${formattedValue}`
+      return `${key}:${formattedValue}`
     })
-    .join(';\n')
+    .join(';')
 
-  return `{\n${entries}\n  }`
+  return `{${entries}}`
 }
 
 /**

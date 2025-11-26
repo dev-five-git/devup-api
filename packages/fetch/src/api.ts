@@ -10,7 +10,7 @@ import type {
 } from '@devup-api/core'
 import { getUrl, getUrlWithMethod } from './url-map'
 
-export class devupApi {
+export class DevupApi {
   private baseUrl: string
   private defaultOptions: RequestInit
 
