@@ -19,7 +19,25 @@ function App() {
         // query: { postId: 1 },
       })
       .then((res) => {
-        console.log(res.data?.[0]?.createdAt, res.error?.message)
+        console.log(res.data?.[0]?.createdAt)
+      })
+
+    api
+      .get('/users/{id}', {
+        params: { id: 1 },
+        // query: { postId: 1 },
+      })
+      .then((res) => {
+        console.log(res.data?.createdAt, res.error?.message)
+      })
+
+    api
+      .get('getUserById', {
+        params: { id: 1 },
+        // query: { postId: 1 },
+      })
+      .then((res) => {
+        console.log(res.data?.createdAt, res.error?.message)
       })
 
     api
