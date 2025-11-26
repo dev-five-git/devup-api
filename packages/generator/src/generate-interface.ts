@@ -1,5 +1,5 @@
 import type { DevupApiTypeGeneratorOptions } from '@devup-api/core'
-import type { OpenAPIV3 } from 'openapi-types'
+import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import {
   extractParameters,
@@ -15,7 +15,7 @@ interface EndpointDefinition {
 }
 
 export function generateInterface(
-  schema: OpenAPIV3.Document,
+  schema: OpenAPIV3_1.Document,
   options?: DevupApiTypeGeneratorOptions,
 ): string {
   const endpoints: Record<string, EndpointDefinition> = {}

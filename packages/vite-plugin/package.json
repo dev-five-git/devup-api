@@ -14,7 +14,8 @@
   },
   "dependencies": {
     "@devup-api/utils": "workspace:*",
-    "@devup-api/core": "workspace:*"
+    "@devup-api/core": "workspace:*",
+    "@devup-api/generator": "workspace:*"
   },
   "peerDependencies": {
     "vite": "*",

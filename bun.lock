@@ -79,6 +79,7 @@
       "version": "0.1.0",
       "devDependencies": {
         "@types/node": "^24.10",
+        "openapi-types": "^12.1",
         "typescript": "^5.9",
       },
     },
@@ -87,6 +88,7 @@
       "version": "0.1.0",
       "dependencies": {
         "@devup-api/core": "workspace:*",
+        "@devup-api/generator": "workspace:*",
         "@devup-api/utils": "workspace:*",
       },
       "devDependencies": {

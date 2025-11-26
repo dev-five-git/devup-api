@@ -29,7 +29,27 @@ export class devupApi {
     })
   }
 
+  GET<T extends DevupApiStructKey>(
+    path: T,
+    options?: RequestInit & Additional<T, DevupGetApiStruct>,
+  ) {
+    return fetch(`${this.baseUrl}${getUrl(path)}`, {
+      ...this.defaultOptions,
+      ...options,
+    })
+  }
+
   post<T extends DevupApiStructKey>(
+    path: T,
+    options?: RequestInit & Additional<T, DevupPostApiStruct>,
+  ) {
+    return fetch(`${this.baseUrl}${getUrl(path)}`, {
+      ...this.defaultOptions,
+      ...options,
+    })
+  }
+
+  POST<T extends DevupApiStructKey>(
     path: T,
     options?: RequestInit & Additional<T, DevupPostApiStruct>,
   ) {
@@ -49,6 +69,16 @@ export class devupApi {
     })
   }
 
+  PUT<T extends DevupApiStructKey>(
+    path: T,
+    options?: RequestInit & Additional<T, DevupPutApiStruct>,
+  ) {
+    return fetch(`${this.baseUrl}${getUrl(path)}`, {
+      ...this.defaultOptions,
+      ...options,
+    })
+  }
+
   delete<T extends DevupApiStructKey>(
     path: T,
     options?: RequestInit & Additional<T, DevupDeleteApiStruct>,
@@ -59,7 +89,27 @@ export class devupApi {
     })
   }
 
+  DELETE<T extends DevupApiStructKey>(
+    path: T,
+    options?: RequestInit & Additional<T, DevupDeleteApiStruct>,
+  ) {
+    return fetch(`${this.baseUrl}${getUrl(path)}`, {
+      ...this.defaultOptions,
+      ...options,
+    })
+  }
+
   patch<T extends DevupApiStructKey>(
+    path: T,
+    options?: RequestInit & Additional<T, DevupPatchApiStruct>,
+  ) {
+    return fetch(`${this.baseUrl}${getUrl(path)}`, {
+      ...this.defaultOptions,
+      ...options,
+    })
+  }
+
+  PATCH<T extends DevupApiStructKey>(
     path: T,
     options?: RequestInit & Additional<T, DevupPatchApiStruct>,
   ) {

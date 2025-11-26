@@ -1,12 +1,12 @@
-import type { OpenAPIV3 } from 'openapi-types'
+import type { OpenAPIV3_1 } from 'openapi-types'
 
 /**
  * Resolve $ref reference in OpenAPI schema
  */
 export function resolveRef(
   ref: string,
-  document: OpenAPIV3.Document,
-): OpenAPIV3.SchemaObject | null {
+  document: OpenAPIV3_1.Document,
+): OpenAPIV3_1.SchemaObject | null {
   if (!ref.startsWith('#/')) {
     return null
   }
@@ -23,7 +23,7 @@ export function resolveRef(
   }
 
   if (current && typeof current === 'object' && !('$ref' in current)) {
-    return current as OpenAPIV3.SchemaObject
+    return current as OpenAPIV3_1.SchemaObject
   }
 
   return null
@@ -33,8 +33,8 @@ export function resolveRef(
  * Convert OpenAPI schema to TypeScript type representation
  */
 export function getTypeFromSchema(
-  schema: OpenAPIV3.SchemaObject | OpenAPIV3.ReferenceObject,
-  document: OpenAPIV3.Document,
+  schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+  document: OpenAPIV3_1.Document,
 ): unknown {
   // Handle $ref
   if ('$ref' in schema) {
@@ -45,7 +45,7 @@ export function getTypeFromSchema(
     return 'unknown'
   }
 
-  const schemaObj = schema as OpenAPIV3.SchemaObject
+  const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
   // Handle allOf, anyOf, oneOf
   if (schemaObj.allOf) {
@@ -161,9 +161,9 @@ export function formatTypeValue(value: unknown): string {
  * Extract parameters from OpenAPI operation
  */
 export function extractParameters(
-  pathItem: OpenAPIV3.PathItemObject | undefined,
-  operation: OpenAPIV3.OperationObject | undefined,
-  document: OpenAPIV3.Document,
+  pathItem: OpenAPIV3_1.PathItemObject | undefined,
+  operation: OpenAPIV3_1.OperationObject | undefined,
+  document: OpenAPIV3_1.Document,
 ): {
   pathParams: Record<string, unknown>
   queryParams: Record<string, unknown>
@@ -223,10 +223,10 @@ export function extractParameters(
  */
 export function extractRequestBody(
   requestBody:
-    | OpenAPIV3.RequestBodyObject
-    | OpenAPIV3.ReferenceObject
+    | OpenAPIV3_1.RequestBodyObject
+    | OpenAPIV3_1.ReferenceObject
     | undefined,
-  document: OpenAPIV3.Document,
+  document: OpenAPIV3_1.Document,
 ): unknown {
   if (!requestBody) {
     return undefined
@@ -235,7 +235,8 @@ export function extractRequestBody(
   if ('$ref' in requestBody) {
     const resolved = resolveRef(requestBody.$ref, document)
     if (resolved && 'content' in resolved && resolved.content) {
-      const content = resolved.content as OpenAPIV3.RequestBodyObject['content']
+      const content =
+        resolved.content as OpenAPIV3_1.RequestBodyObject['content']
       const jsonContent = content['application/json']
       if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
         return getTypeFromSchema(jsonContent.schema, document)

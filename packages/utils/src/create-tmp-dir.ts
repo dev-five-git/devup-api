@@ -1,40 +1,33 @@
 import { existsSync, mkdirSync } from 'node:fs'
 import { mkdir } from 'node:fs/promises'
-import { join } from 'node:path'
 
 /**
  * Synchronous function that checks if the df folder exists and creates it if it doesn't
- * @param basePath Base path (default: current working directory)
+ * @param tempDir Temporary directory (default: 'df')
  * @returns Full path of the created folder
  */
-export function createTmpDir(basePath?: string): string {
-  const targetPath = basePath ?? process.cwd()
-  const dfPath = join(targetPath, 'df')
-
-  if (!existsSync(dfPath)) {
-    mkdirSync(dfPath, { recursive: true })
+export function createTmpDir(tempDir: string = 'df'): string {
+  if (!existsSync(tempDir)) {
+    mkdirSync(tempDir, { recursive: true })
   }
-
-  return dfPath
+  return tempDir
 }
 
 /**
  * Async function that checks if the df folder exists and creates it if it doesn't
- * @param basePath Base path (default: current working directory)
+ * @param tempDir Temporary directory (default: 'df')
  * @returns Promise that resolves to the full path of the created folder
  */
-export async function createTmpDirAsync(basePath?: string): Promise<string> {
-  const targetPath = basePath ?? process.cwd()
-  const dfPath = join(targetPath, 'df')
-
+export async function createTmpDirAsync(
+  tempDir: string = 'df',
+): Promise<string> {
   try {
-    await mkdir(dfPath, { recursive: true })
+    await mkdir(tempDir, { recursive: true })
   } catch (error) {
     // Ignore if folder already exists
     if ((error as NodeJS.ErrnoException).code !== 'EEXIST') {
       throw error
     }
   }
-
-  return dfPath
+  return tempDir
 }
