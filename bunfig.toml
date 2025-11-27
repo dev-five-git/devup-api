@@ -1,0 +1,3 @@
+[test]
+coverage = true
+coveragePathIgnorePatterns = ["node_modules", "**/dist/**"]
