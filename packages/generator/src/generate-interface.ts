@@ -10,10 +10,8 @@ import {
 } from './generate-schema'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
-export type ParameterDefinition = Omit<
-  OpenAPIV3_1.ParameterObject,
-  'schema'
-> & {
+export interface ParameterDefinition
+  extends Omit<OpenAPIV3_1.ParameterObject, 'schema'> {
   type: unknown
   default?: unknown
 }
@@ -377,7 +375,7 @@ export function generateInterface(
             operation.responses['404'] ||
             operation.responses['422'] ||
             operation.responses['500'] ||
-            operation.responses['default'] ||
+            operation.responses.default ||
             Object.entries(operation.responses).find(([statusCode]) =>
               isErrorStatusCode(statusCode),
             )?.[1]
