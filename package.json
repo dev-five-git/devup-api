@@ -14,7 +14,7 @@
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "prepare": "husky",
-    "build": "bun run --workspaces build"
+    "build": "bun run -F @devup-api/* build"
   },
   "workspaces": [
     "packages/*",
