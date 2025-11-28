@@ -89,7 +89,11 @@ test.each([
   expect(plugin.config).toBeDefined()
   expect(typeof plugin.config).toBe('function')
 
-  const result = await plugin.config?.()
+  const result = await (
+    plugin as unknown as {
+      config?: () => Promise<{ define: Record<string, string> }>
+    }
+  ).config?.()
   expect(mockReadOpenapiAsync).toHaveBeenCalledWith(options?.openapiFile)
   expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
   expect(result).toEqual({
@@ -104,7 +108,11 @@ test.each([
 test('devupApi config hook returns empty define when urlMap is null', async () => {
   mockCreateUrlMap.mockReturnValue(null as never)
   const plugin = devupApi()
-  const result = await plugin.config?.()
+  const result = await (
+    plugin as unknown as {
+      config?: () => Promise<{ define: Record<string, string> }>
+    }
+  ).config?.()
   expect(result).toEqual({
     define: {},
   })
@@ -113,7 +121,11 @@ test('devupApi config hook returns empty define when urlMap is null', async () =
 test('devupApi config hook returns empty define when urlMap is undefined', async () => {
   mockCreateUrlMap.mockReturnValue(undefined as never)
   const plugin = devupApi()
-  const result = await plugin.config?.()
+  const result = await (
+    plugin as unknown as {
+      config?: () => Promise<{ define: Record<string, string> }>
+    }
+  ).config?.()
   expect(result).toEqual({
     define: {},
   })
@@ -137,7 +149,9 @@ test.each([
   expect(plugin.configResolved).toBeDefined()
   expect(typeof plugin.configResolved).toBe('function')
 
-  await plugin.configResolved?.()
+  await (
+    plugin as unknown as { configResolved?: () => Promise<void> }
+  ).configResolved?.()
   expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
   expect(mockReadOpenapiAsync).toHaveBeenCalledWith(options?.openapiFile)
   expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)

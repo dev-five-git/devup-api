@@ -6,7 +6,7 @@
     "useIgnoreFile": true
   },
   "files": {
-    "includes": ["**", "!**/dist", "!.changepacks/**"]
+    "includes": ["**", "!**/dist", "!.changepacks"]
   },
   "javascript": {
     "formatter": {

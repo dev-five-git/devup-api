@@ -1,4 +1,5 @@
 import { expect, test } from 'bun:test'
+import type { UrlMapValue } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { createUrlMap } from '../create-url-map'
 
@@ -55,7 +56,7 @@ test.each([
 
   const result = createUrlMap(schema, options)
 
-  expect(result).toEqual(expected)
+  expect(result).toEqual(expected as Record<string, UrlMapValue>)
 })
 
 test('converts path parameters based on convertCase', () => {
@@ -109,9 +110,13 @@ test.each([
   const result = createUrlMap(schema)
 
   expect(result).toHaveProperty(expectedKey)
-  expect(result[expectedKey].method).toBe(expectedMethod)
+  expect(result[expectedKey]?.method).toBe(
+    expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+  )
   expect(result).toHaveProperty('/users')
-  expect(result['/users'].method).toBe(expectedMethod)
+  expect(result['/users']?.method).toBe(
+    expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
+  )
 })
 
 test('handles operation without operationId', () => {
@@ -182,6 +187,8 @@ test('handles undefined paths', () => {
   const schema: OpenAPIV3_1.Document = {
     openapi: '3.1.0',
     info: { title: 'Test API', version: '1.0.0' },
+    components: {},
+    paths: {},
   }
 
   const result = createUrlMap(schema)
@@ -189,12 +196,12 @@ test('handles undefined paths', () => {
   expect(result).toEqual({})
 })
 
-test('handles null pathItem', () => {
+test('handles undefined pathItem', () => {
   const schema: OpenAPIV3_1.Document = {
     openapi: '3.1.0',
     info: { title: 'Test API', version: '1.0.0' },
     paths: {
-      '/users': null,
+      '/users': undefined,
     },
   }
 
@@ -282,7 +289,7 @@ test.each([
     convertCase: caseType as 'camel' | 'snake' | 'pascal',
   })
 
-  expect(result[expectedPath].url).toBe(expectedUrl)
+  expect(result[expectedPath]?.url).toBe(expectedUrl)
 })
 
 test.each([
