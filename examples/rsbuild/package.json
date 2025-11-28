@@ -1,0 +1,24 @@
+{
+  "name": "rsbuild-example",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "rsbuild dev",
+    "build": "rsbuild build",
+    "preview": "rsbuild preview"
+  },
+  "dependencies": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "@devup-api/fetch": "workspace:*"
+  },
+  "devDependencies": {
+    "@rsbuild/core": "*",
+    "@rsbuild/plugin-react": "*",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "typescript": "^5",
+    "@devup-api/rsbuild-plugin": "workspace:*"
+  }
+}
