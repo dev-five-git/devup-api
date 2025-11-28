@@ -24,9 +24,10 @@ jobs:
         with:
           bun-version: latest
       - run: bun i
-      - run: bun test --coverage
       - run: bun lint
       - run: bun run build
+      - run: bun lint
+      - run: bun test --coverage
 
   changepacks:
     name: changepacks
