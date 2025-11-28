@@ -69,6 +69,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           files: ./coverage/lcov.info
-      - run: bun publish --access public --ignore-scripts
+      - run: bun run -F @devup-api/* publish --access public --ignore-scripts
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
