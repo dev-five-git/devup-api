@@ -1,0 +1,228 @@
+import { beforeEach, expect, mock, spyOn, test } from 'bun:test'
+import { join } from 'node:path'
+import type { DevupApiOptions } from '@devup-api/core'
+import * as generator from '@devup-api/generator'
+import * as utils from '@devup-api/utils'
+import { devupApiRsbuildPlugin } from '../plugin'
+
+let mockCreateTmpDirAsync: ReturnType<typeof spyOn>
+let mockReadOpenapiAsync: ReturnType<typeof spyOn>
+let mockWriteInterfaceAsync: ReturnType<typeof spyOn>
+let mockCreateUrlMap: ReturnType<typeof spyOn>
+let mockGenerateInterface: ReturnType<typeof spyOn>
+
+const mockSchema = {
+  openapi: '3.1.0',
+  paths: {
+    '/users': {
+      get: {
+        operationId: 'getUsers',
+        responses: {
+          '200': {
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'array',
+                  items: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  },
+} as const
+
+const mockUrlMap = {
+  getUsers: {
+    method: 'GET' as const,
+    url: '/users',
+  },
+  '/users': {
+    method: 'GET' as const,
+    url: '/users',
+  },
+}
+
+const mockInterfaceContent = 'export interface Test {}'
+
+const createMockBuild = () => {
+  const modifyRsbuildConfigMock = mock(
+    (modifier: (config: unknown) => unknown) => {
+      const config = { source: { define: {} } }
+      return modifier(config)
+    },
+  )
+  return {
+    modifyRsbuildConfig: modifyRsbuildConfigMock,
+  }
+}
+
+beforeEach(() => {
+  mockCreateTmpDirAsync = spyOn(utils, 'createTmpDirAsync').mockResolvedValue(
+    'df',
+  )
+  mockReadOpenapiAsync = spyOn(utils, 'readOpenapiAsync').mockResolvedValue(
+    mockSchema as never,
+  )
+  mockWriteInterfaceAsync = spyOn(
+    utils,
+    'writeInterfaceAsync',
+  ).mockResolvedValue(undefined)
+  mockCreateUrlMap = spyOn(generator, 'createUrlMap').mockReturnValue(
+    mockUrlMap as never,
+  )
+  mockGenerateInterface = spyOn(generator, 'generateInterface').mockReturnValue(
+    mockInterfaceContent,
+  )
+  mockCreateTmpDirAsync.mockClear()
+  mockReadOpenapiAsync.mockClear()
+  mockWriteInterfaceAsync.mockClear()
+  mockCreateUrlMap.mockClear()
+  mockGenerateInterface.mockClear()
+})
+
+test('devupApiRsbuildPlugin returns plugin with correct name', () => {
+  const plugin = devupApiRsbuildPlugin()
+  expect(plugin.name).toBe('devup-api')
+})
+
+test.each([
+  [undefined],
+  [{ tempDir: 'custom-dir' }],
+  [{ openapiFile: 'custom-openapi.json' }],
+  [
+    {
+      tempDir: 'custom-dir',
+      openapiFile: 'custom-openapi.json',
+      convertCase: 'snake' as const,
+    },
+  ],
+] as const)('devupApiRsbuildPlugin returns plugin with setup hook: %s', async (options:
+  | DevupApiOptions
+  | undefined) => {
+  const plugin = devupApiRsbuildPlugin(options)
+  expect(plugin.setup).toBeDefined()
+  expect(typeof plugin.setup).toBe('function')
+
+  const build = createMockBuild()
+  await plugin.setup?.(build as never)
+
+  expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
+  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(options?.openapiFile)
+  expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'api.d.ts'),
+    mockInterfaceContent,
+  )
+  expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
+  expect(build.modifyRsbuildConfig).toHaveBeenCalled()
+})
+
+test('devupApiRsbuildPlugin setup hook modifies config with urlMap', async () => {
+  const plugin = devupApiRsbuildPlugin()
+  const build = createMockBuild()
+  await plugin.setup?.(build as never)
+
+  const configModifier = (build.modifyRsbuildConfig as ReturnType<typeof mock>)
+    .mock.calls[0]?.[0] as (config: {
+    source?: { define?: Record<string, string> }
+  }) => unknown
+  const config = { source: { define: {} } }
+  const result = configModifier(config)
+
+  expect(result).toEqual({
+    source: {
+      define: {
+        'process.env.DEVUP_API_URL_MAP': JSON.stringify(
+          JSON.stringify(mockUrlMap),
+        ),
+      },
+    },
+  })
+})
+
+test('devupApiRsbuildPlugin setup hook handles config without source', async () => {
+  const plugin = devupApiRsbuildPlugin()
+  const build = createMockBuild()
+  await plugin.setup?.(build as never)
+
+  const configModifier = (build.modifyRsbuildConfig as ReturnType<typeof mock>)
+    .mock.calls[0]?.[0] as (config: Record<string, unknown>) => unknown
+  const config = {}
+  const result = configModifier(config)
+
+  expect(result).toEqual({
+    source: {
+      define: {
+        'process.env.DEVUP_API_URL_MAP': JSON.stringify(
+          JSON.stringify(mockUrlMap),
+        ),
+      },
+    },
+  })
+})
+
+test('devupApiRsbuildPlugin setup hook handles config without define', async () => {
+  const plugin = devupApiRsbuildPlugin()
+  const build = createMockBuild()
+  await plugin.setup?.(build as never)
+
+  const configModifier = (build.modifyRsbuildConfig as ReturnType<typeof mock>)
+    .mock.calls[0]?.[0] as (config: {
+    source?: Record<string, unknown>
+  }) => unknown
+  const config = { source: {} }
+  const result = configModifier(config)
+
+  expect(result).toEqual({
+    source: {
+      define: {
+        'process.env.DEVUP_API_URL_MAP': JSON.stringify(
+          JSON.stringify(mockUrlMap),
+        ),
+      },
+    },
+  })
+})
+
+test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is null', async () => {
+  mockCreateUrlMap.mockReturnValueOnce(null as never)
+  const plugin = devupApiRsbuildPlugin()
+  const build = createMockBuild()
+  await plugin.setup?.(build as never)
+
+  const configModifier = (build.modifyRsbuildConfig as ReturnType<typeof mock>)
+    .mock.calls[0]?.[0] as (config: {
+    source?: { define?: Record<string, string> }
+  }) => unknown
+  const config = { source: { define: {} } }
+  const result = configModifier(config)
+
+  expect(result).toEqual({
+    source: {
+      define: {},
+    },
+  })
+})
+
+test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is undefined', async () => {
+  mockCreateUrlMap.mockReturnValueOnce(undefined as never)
+  const plugin = devupApiRsbuildPlugin()
+  const build = createMockBuild()
+  await plugin.setup?.(build as never)
+
+  const configModifier = (build.modifyRsbuildConfig as ReturnType<typeof mock>)
+    .mock.calls[0]?.[0] as (config: {
+    source?: { define?: Record<string, string> }
+  }) => unknown
+  const config = { source: { define: {} } }
+  const result = configModifier(config)
+
+  expect(result).toEqual({
+    source: {
+      define: {},
+    },
+  })
+})
