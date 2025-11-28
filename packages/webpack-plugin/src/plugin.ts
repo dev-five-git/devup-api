@@ -11,7 +11,7 @@ import { DefinePlugin } from 'webpack'
 
 export class devupApiWebpackPlugin {
   options: DevupApiOptions
-  private initialized = false
+  initialized = false
 
   constructor(options?: DevupApiOptions) {
     this.options = options || {}
