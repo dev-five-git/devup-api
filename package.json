@@ -14,7 +14,8 @@
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "prepare": "husky",
-    "build": "bun run -F @devup-api/core build && bun run -F @devup-api/utils build && bun run -F @devup-api/generator build && bun run -F @devup-api/fetch build && bun run -F @devup-api/webpack-plugin build && bun run -F @devup-api/vite-plugin build && bun run -F @devup-api/next-plugin build && bun run -F @devup-api/rsbuild-plugin build"
+    "build": "bun run -F @devup-api/core build && bun run -F @devup-api/utils build && bun run -F @devup-api/generator build && bun run -F @devup-api/fetch build && bun run -F @devup-api/webpack-plugin build && bun run -F @devup-api/vite-plugin build && bun run -F @devup-api/next-plugin build && bun run -F @devup-api/rsbuild-plugin build",
+    "publish": "bun run -F @devup-api/core publish && bun run -F @devup-api/utils publish && bun run -F @devup-api/generator publish && bun run -F @devup-api/fetch publish && bun run -F @devup-api/webpack-plugin publish && bun run -F @devup-api/vite-plugin publish && bun run -F @devup-api/next-plugin publish && bun run -F @devup-api/rsbuild-plugin publish"
   },
   "workspaces": [
     "packages/*",
