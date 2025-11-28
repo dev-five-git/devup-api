@@ -2,8 +2,9 @@ export function isPlainObject(obj: unknown): obj is object {
   if (obj === null || typeof obj !== 'object') return false
 
   const proto = Object.getPrototypeOf(obj)
-  return proto === Object.prototype || proto === null
+  return proto === Object.prototype
 }
+
 export function getApiEndpoint(
   baseUrl: string,
   path: string,
