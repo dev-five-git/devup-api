@@ -12,6 +12,9 @@
   "scripts": {
     "build": "tsc && bun build --target node --outfile=dist/index.js src/index.ts --production --packages=external && bun build --target node --outfile=dist/index.cjs --format=cjs src/index.ts --production --packages=external"
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "dependencies": {
     "@devup-api/utils": "workspace:*",
     "@devup-api/core": "workspace:*",
