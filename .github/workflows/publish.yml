@@ -14,45 +14,45 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v5
+  # check:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v5
 
-      - uses: oven-sh/setup-bun@v2
-        with:
-          bun-version: latest
-      - run: bun i
-      - run: bun lint
-      - run: bun run build
-      - run: bun lint
-      - run: bun test --coverage
+  #     - uses: oven-sh/setup-bun@v2
+  #       with:
+  #         bun-version: latest
+  #     - run: bun i
+  #     - run: bun lint
+  #     - run: bun run build
+  #     - run: bun lint
+  #     - run: bun test --coverage
 
-  changepacks:
-    name: changepacks
-    runs-on: ubuntu-latest
-    permissions:
-      # create pull request comments
-      pull-requests: write
+  # changepacks:
+  #   name: changepacks
+  #   runs-on: ubuntu-latest
+  #   permissions:
+  #     # create pull request comments
+  #     pull-requests: write
 
-      # Actions > General > Workflow permissions for creating pull request
-      # Create brench to create pull request
-      contents: write
-    needs:
-      - check
-    steps:
-      - uses: actions/checkout@v5
-      - uses: changepacks/action@main
-        id: changepacks
-    outputs:
-      changepacks: ${{ steps.changepacks.outputs.changepacks }}
+  #     # Actions > General > Workflow permissions for creating pull request
+  #     # Create brench to create pull request
+  #     contents: write
+  #   needs:
+  #     - check
+  #   steps:
+  #     - uses: actions/checkout@v5
+  #     - uses: changepacks/action@main
+  #       id: changepacks
+  #   outputs:
+  #     changepacks: ${{ steps.changepacks.outputs.changepacks }}
 
   publish:
     runs-on: ubuntu-latest
-    needs:
-      - changepacks
-    if: contains(needs.changepacks.outputs.changepacks, 'package.json')
+    # needs:
+    #   - changepacks
+    # if: contains(needs.changepacks.outputs.changepacks, 'package.json')
     steps:
       - name: Checkout
         uses: actions/checkout@v5
@@ -69,6 +69,6 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           files: ./coverage/lcov.info
-      - run: bun run -F @devup-api/* publish --access public --ignore-scripts
+      - run: bun run publish --access public --ignore-scripts
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
