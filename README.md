@@ -349,6 +349,12 @@ bun run lint:fix
 
 ---
 
+## 🙏 Acknowledgments
+
+This project is inspired by [openapi-fetch](https://github.com/drwpow/openapi-typescript/tree/main/packages/openapi-fetch), a fantastic library for type-safe API clients. devup-api builds upon similar concepts while providing additional features like build-time type generation and seamless integration with modern build tools.
+
+---
+
 ## 📄 License
 
 Apache 2.0
