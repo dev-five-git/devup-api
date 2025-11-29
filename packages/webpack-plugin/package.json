@@ -1,6 +1,7 @@
 {
   "name": "@devup-api/webpack-plugin",
   "version": "0.1.0",
+  "license": "Apache-2.0",
   "type": "module",
   "exports": {
     ".": {
@@ -9,6 +10,9 @@
       "types": "./dist/index.d.ts"
     }
   },
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsc && bun build --target node --outfile=dist/index.js src/index.ts --production --packages=external && bun build --target node --outfile=dist/index.cjs --format=cjs src/index.ts --production --packages=external"
   },
