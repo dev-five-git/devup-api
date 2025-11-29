@@ -2,41 +2,11 @@ import type { OpenAPIV3_1 } from 'openapi-types'
 import type { ParameterDefinition } from './generate-interface'
 
 /**
- * Resolve $ref reference in OpenAPI parameter
- */
-export function resolveParameterRef(
-  ref: string,
-  document: OpenAPIV3_1.Document,
-): OpenAPIV3_1.ParameterObject | null {
-  if (!ref.startsWith('#/')) {
-    return null
-  }
-
-  const parts = ref.slice(2).split('/')
-  let current: unknown = document
-
-  for (const part of parts) {
-    if (current && typeof current === 'object' && part in current) {
-      current = (current as Record<string, unknown>)[part]
-    } else {
-      return null
-    }
-  }
-
-  if (current && typeof current === 'object' && !('$ref' in current)) {
-    return current as OpenAPIV3_1.ParameterObject
-  }
-
-  return null
-}
-
-/**
  * Resolve $ref reference in OpenAPI schema
  */
-export function resolveSchemaRef(
-  ref: string,
-  document: OpenAPIV3_1.Document,
-): OpenAPIV3_1.SchemaObject | null {
+export function resolveSchemaRef<
+  T extends OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ParameterObject,
+>(ref: string, document: OpenAPIV3_1.Document): T | null {
   if (!ref.startsWith('#/')) {
     return null
   }
@@ -53,7 +23,7 @@ export function resolveSchemaRef(
   }
 
   if (current && typeof current === 'object' && !('$ref' in current)) {
-    return current as OpenAPIV3_1.SchemaObject
+    return current as T
   }
 
   return null
@@ -72,7 +42,10 @@ export function getTypeFromSchema(
   const defaultNonNullable = options?.defaultNonNullable ?? false
   // Handle $ref
   if ('$ref' in schema) {
-    const resolved = resolveSchemaRef(schema.$ref, document)
+    const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+      schema.$ref,
+      document,
+    )
     if (resolved) {
       return getTypeFromSchema(resolved, document, options)
     }
@@ -157,7 +130,10 @@ export function getTypeFromSchema(
         // Need to resolve $ref if present to check for default
         let hasDefault = false
         if ('$ref' in value) {
-          const resolved = resolveSchemaRef(value.$ref, document)
+          const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+            value.$ref,
+            document,
+          )
           if (resolved) {
             hasDefault = resolved.default !== undefined
           }
@@ -384,7 +360,10 @@ export function extractParameters(
   for (const param of allParams) {
     if ('$ref' in param) {
       // Resolve $ref parameter
-      const resolved = resolveParameterRef(param.$ref, document)
+      const resolved = resolveSchemaRef<OpenAPIV3_1.ParameterObject>(
+        param.$ref,
+        document,
+      )
       if (
         resolved &&
         'in' in resolved &&
