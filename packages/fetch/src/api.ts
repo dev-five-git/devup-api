@@ -272,7 +272,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
       if (middleware.onRequest) {
         const result = await middleware.onRequest({
           request,
-          schemaPath: path,
+          schemaPath: url,
           params: requestOptions.params,
           query: requestOptions.query,
           headers: requestOptions.headers,
@@ -310,7 +310,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
         const result = await (response && middleware.onResponse
           ? middleware.onResponse({
               request,
-              schemaPath: path,
+              schemaPath: url,
               params: requestOptions.params,
               query: requestOptions.query,
               headers: requestOptions.headers,
@@ -320,7 +320,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
           : error && middleware.onError
             ? middleware.onError({
                 request,
-                schemaPath: path,
+                schemaPath: url,
                 params: requestOptions.params,
                 query: requestOptions.query,
                 headers: requestOptions.headers,
