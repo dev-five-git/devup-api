@@ -25,7 +25,6 @@
     "@devup-api/generator": "workspace:*"
   },
   "peerDependencies": {
-    "webpack": "*",
     "@devup-api/core": "*"
   },
   "devDependencies": {

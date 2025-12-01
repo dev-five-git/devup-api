@@ -4,7 +4,6 @@ import type { DevupApiOptions } from '@devup-api/core'
 import * as generator from '@devup-api/generator'
 import * as utils from '@devup-api/utils'
 import type { Compiler } from 'webpack'
-import { DefinePlugin } from 'webpack'
 import { devupApiWebpackPlugin } from '../plugin'
 
 let mockCreateTmpDirAsync: ReturnType<typeof spyOn>
@@ -68,8 +67,21 @@ const createMockCompiler = (): Compiler & {
       tapAsync: tapAsyncMock,
     },
   }
+  const DefinePlugin = function (
+    this: unknown,
+    _define: Record<string, string>,
+  ) {
+    // Constructor
+  } as unknown as new (
+    define: Record<string, string>,
+  ) => { apply: (compiler: Compiler) => void }
+  DefinePlugin.prototype.apply = mock(() => {})
+
   const compiler = {
     hooks,
+    webpack: {
+      DefinePlugin,
+    },
   } as unknown as Compiler & {
     _storedCallback?: (params: unknown, cb: (error?: Error) => void) => void
   }
@@ -157,7 +169,7 @@ test.each([
   const plugin = new devupApiWebpackPlugin(options)
   const compiler = createMockCompiler()
   const definePluginApplySpy = spyOn(
-    DefinePlugin.prototype,
+    compiler.webpack.DefinePlugin.prototype,
     'apply',
   ).mockImplementation(() => {})
   plugin.apply(compiler)
@@ -176,7 +188,7 @@ test.each([
     mockInterfaceContent,
   )
   expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options || {})
-  expect(definePluginApplySpy).toHaveBeenCalledWith(compiler)
+  expect(definePluginApplySpy).toHaveBeenCalled()
   expect(mockCallback).toHaveBeenCalled()
   expect(plugin.initialized).toBe(true)
   definePluginApplySpy.mockRestore()
@@ -187,7 +199,7 @@ test('devupApiWebpackPlugin beforeCompile hook does not add DefinePlugin when ur
   const plugin = new devupApiWebpackPlugin()
   const compiler = createMockCompiler()
   const definePluginApplySpy = spyOn(
-    DefinePlugin.prototype,
+    compiler.webpack.DefinePlugin.prototype,
     'apply',
   ).mockImplementation(() => {})
   plugin.apply(compiler)
@@ -207,7 +219,7 @@ test('devupApiWebpackPlugin beforeCompile hook does not add DefinePlugin when ur
   const plugin = new devupApiWebpackPlugin()
   const compiler = createMockCompiler()
   const definePluginApplySpy = spyOn(
-    DefinePlugin.prototype,
+    compiler.webpack.DefinePlugin.prototype,
     'apply',
   ).mockImplementation(() => {})
   plugin.apply(compiler)

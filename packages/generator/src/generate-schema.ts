@@ -4,7 +4,7 @@ import type { ParameterDefinition } from './generate-interface'
 /**
  * Resolve $ref reference in OpenAPI schema
  */
-export function resolveSchemaRef<
+function resolveSchemaRef<
   T extends OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ParameterObject,
 >(ref: string, document: OpenAPIV3_1.Document): T | null {
   if (!ref.startsWith('#/')) {
@@ -195,9 +195,7 @@ function isParameterDefinition(value: unknown): value is ParameterDefinition {
 /**
  * Check if all properties in an object are optional
  */
-export function areAllPropertiesOptional(
-  obj: Record<string, unknown>,
-): boolean {
+function areAllPropertiesOptional(obj: Record<string, unknown>): boolean {
   const entries = Object.entries(obj)
   if (entries.length === 0) {
     return true
@@ -216,14 +214,14 @@ export function areAllPropertiesOptional(
 
     // If it's a type object, check if the type itself is optional
     if (isTypeObject(value)) {
-      // For type objects, check if the type is an object with all optional properties
-      if (
-        typeof value.type === 'object' &&
-        value.type !== null &&
-        !Array.isArray(value.type)
-      ) {
-        return areAllPropertiesOptional(value.type as Record<string, unknown>)
-      }
+      // // For type objects, check if the type is an object with all optional properties
+      // if (
+      //   typeof value.type === 'object' &&
+      //   value.type !== null &&
+      //   !Array.isArray(value.type)
+      // ) {
+      //   return areAllPropertiesOptional(value.type as Record<string, unknown>)
+      // }
       return false
     }
 
@@ -239,10 +237,7 @@ export function areAllPropertiesOptional(
 /**
  * Format a type object to TypeScript interface/type string
  */
-export function formatType(
-  obj: Record<string, unknown>,
-  indent: number = 0,
-): string {
+function formatType(obj: Record<string, unknown>, indent: number = 0): string {
   const indentStr = '  '.repeat(indent)
   const nextIndent = indent + 1
   const nextIndentStr = '  '.repeat(nextIndent)

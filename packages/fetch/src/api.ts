@@ -17,7 +17,7 @@ import type {
   RequiredOptions,
 } from '@devup-api/core'
 import { convertResponse } from './response-converter'
-import { getUrlWithMethod } from './url-map'
+import { getApiEndpointInfo } from './url-map'
 import { getApiEndpoint, isPlainObject } from './utils'
 
 // biome-ignore lint/suspicious/noExplicitAny: any is used to allow for flexibility in the type
@@ -220,7 +220,7 @@ export class DevupApi {
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
-    const { method, url } = getUrlWithMethod(path)
+    const { method, url } = getApiEndpointInfo(path)
     const mergedOptions = {
       ...this.defaultOptions,
       ...options[0],

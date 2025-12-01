@@ -1,0 +1,1345 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`generateInterface returns interface for schema: %s 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {};
+    getUsers: {};
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 2`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {};
+    GetUsers: {};
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 3`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {};
+    get_users: {};
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 4`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {};
+    getUsers: {};
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 5`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {};
+    getUsers: {};
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 6`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+    getUsers: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+  }
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      response: DevupResponseComponentStruct['User'];
+    };
+    createUser: {
+      response: DevupResponseComponentStruct['User'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 7`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+    GetUsers: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+  }
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      response: DevupResponseComponentStruct['User'];
+    };
+    CreateUser: {
+      response: DevupResponseComponentStruct['User'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 8`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+    get_users: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+  }
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      response: DevupResponseComponentStruct['User'];
+    };
+    create_user: {
+      response: DevupResponseComponentStruct['User'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 9`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+    getUsers: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+  }
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      response: DevupResponseComponentStruct['User'];
+    };
+    createUser: {
+      response: DevupResponseComponentStruct['User'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface returns interface for schema: %s 10`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+    getUsers: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+  }
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      response: DevupResponseComponentStruct['User'];
+    };
+    createUser: {
+      response: DevupResponseComponentStruct['User'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles all HTTP methods 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+    };
+    getUsers: {
+      response?: {};
+    };
+  }
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      response?: {};
+    };
+    createUser: {
+      response?: {};
+    };
+  }
+  interface DevupPutApiStruct {
+    [\`/users\`]: {
+      response?: {};
+    };
+    updateUser: {
+      response?: {};
+    };
+  }
+  interface DevupDeleteApiStruct {
+    [\`/users\`]: {};
+    deleteUser: {};
+  }
+  interface DevupPatchApiStruct {
+    [\`/users\`]: {
+      response?: {};
+    };
+    patchUser: {
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles path parameters 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users/{userId}\`]: {
+      params: {
+        userId: string;
+      };
+      response?: {};
+    };
+    getUser: {
+      params: {
+        userId: string;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles query parameters 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      query: {
+        page?: number;
+        limit: number;
+      };
+      response?: {};
+    };
+    getUsers: {
+      query: {
+        page?: number;
+        limit: number;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles path and query parameters together 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users/{userId}/posts\`]: {
+      params: {
+        userId: string;
+      };
+      query?: {
+        page?: number;
+      };
+      response?: {};
+    };
+    getUserPosts: {
+      params: {
+        userId: string;
+      };
+      query?: {
+        page?: number;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles request body 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body?: {
+        name?: string;
+        email?: string;
+      };
+      response?: {};
+    };
+    createUser: {
+      body?: {
+        name?: string;
+        email?: string;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles request body with $ref 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body: DevupRequestComponentStruct['User'];
+      response?: {};
+    };
+    createUser: {
+      body: DevupRequestComponentStruct['User'];
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {
+    User: {
+      name?: string;
+      email?: string;
+    };
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles 200 response 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+    getUsers: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles 201 response 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      response: DevupResponseComponentStruct['User'];
+    };
+    createUser: {
+      response: DevupResponseComponentStruct['User'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles response with other status codes 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {
+        message?: string;
+      };
+    };
+    getUsers: {
+      response?: {
+        message?: string;
+      };
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles error responses 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+      error?: {
+        error?: string;
+      };
+    };
+    getUsers: {
+      response?: {};
+      error?: {
+        error?: string;
+      };
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {
+    Error: {
+      code?: string;
+      message?: string;
+    };
+  }
+}"
+`;
+
+exports[`generateInterface handles default error response 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+      error?: {
+        error?: string;
+      };
+    };
+    getUsers: {
+      response?: {};
+      error?: {
+        error?: string;
+      };
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles component schemas for request 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body: DevupRequestComponentStruct['CreateUserRequest'];
+      response?: {};
+    };
+    createUser: {
+      body: DevupRequestComponentStruct['CreateUserRequest'];
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {
+    CreateUserRequest: {
+      name?: string;
+      email?: string;
+    };
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles component schemas for response 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: DevupResponseComponentStruct['User'];
+    };
+    getUsers: {
+      response: DevupResponseComponentStruct['User'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles component schemas for error 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+      error: DevupErrorComponentStruct['Error'];
+    };
+    getUsers: {
+      response?: {};
+      error: DevupErrorComponentStruct['Error'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {
+    Error: {
+      code?: string;
+      message?: string;
+    };
+  }
+}"
+`;
+
+exports[`generateInterface handles array response with component schema 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+    getUsers: {
+      response: Array<DevupResponseComponentStruct['User']>;
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface creates both operationId and path keys 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users/{userId}\`]: {
+      params: {
+        userId: string;
+      };
+      response?: {};
+    };
+    getUserById: {
+      params: {
+        userId: string;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles endpoints without operationId 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles requestDefaultNonNullable option 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body?: {
+        name?: string;
+        email?: string;
+      };
+      response?: {};
+    };
+    createUser: {
+      body?: {
+        name?: string;
+        email?: string;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles requestDefaultNonNullable option 2`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body?: {
+        name?: string;
+        email?: string;
+      };
+      response?: {};
+    };
+    createUser: {
+      body?: {
+        name?: string;
+        email?: string;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles responseDefaultNonNullable option 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: {
+        id: string;
+        name?: string;
+      };
+    };
+    getUsers: {
+      response: {
+        id: string;
+        name?: string;
+      };
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles responseDefaultNonNullable option 2`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {
+        id?: string;
+        name?: string;
+      };
+    };
+    getUsers: {
+      response?: {
+        id?: string;
+        name?: string;
+      };
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles nested schemas in allOf 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: {
+  id?: string;
+} & {
+  extra?: string;
+};
+    };
+    getUsers: {
+      response: {
+  id?: string;
+} & {
+  extra?: string;
+};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    Base: {
+      id?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles empty paths 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles pathItem parameters 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users/{userId}\`]: {
+      params: {
+        userId: string;
+      };
+      response?: {};
+    };
+    getUser: {
+      params: {
+        userId: string;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles requestBody $ref 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body?: {
+        name?: string;
+      };
+      response?: {};
+    };
+    createUser: {
+      body?: {
+        name?: string;
+      };
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles response $ref 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {};
+    getUsers: {};
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles complex scenario with all features 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users/{userId}/posts/{postId}\`]: {
+      params: {
+        userId: string;
+        postId: string;
+      };
+      query?: {
+        include?: string;
+      };
+      response: DevupResponseComponentStruct['Post'];
+      error: DevupErrorComponentStruct['Error'];
+    };
+    getUserPost: {
+      params: {
+        userId: string;
+        postId: string;
+      };
+      query?: {
+        include?: string;
+      };
+      response: DevupResponseComponentStruct['Post'];
+      error: DevupErrorComponentStruct['Error'];
+    };
+  }
+  interface DevupPutApiStruct {
+    [\`/users/{userId}/posts/{postId}\`]: {
+      params: {
+        userId: string;
+      };
+      body: DevupRequestComponentStruct['UpdatePostRequest'];
+      response: DevupResponseComponentStruct['Post'];
+    };
+    updateUserPost: {
+      params: {
+        userId: string;
+      };
+      body: DevupRequestComponentStruct['UpdatePostRequest'];
+      response: DevupResponseComponentStruct['Post'];
+    };
+  }
+
+  interface DevupRequestComponentStruct {
+    UpdatePostRequest: {
+      title?: string;
+      content?: string;
+    };
+  }
+
+  interface DevupResponseComponentStruct {
+    Post: {
+      id?: string;
+      title?: string;
+      content?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {
+    Error: {
+      code?: string;
+      message?: string;
+    };
+  }
+}"
+`;
+
+exports[`generateInterface handles anyOf in schema collection 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: ({
+  id?: string;
+} | {
+  id?: string;
+  role?: string;
+});
+    };
+    getUsers: {
+      response: ({
+  id?: string;
+} | {
+  id?: string;
+  role?: string;
+});
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+    };
+    Admin: {
+      id?: string;
+      role?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles oneOf in schema collection 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: ({
+  id?: string;
+} | {
+  name?: string;
+});
+    };
+    getUsers: {
+      response: ({
+  id?: string;
+} | {
+  name?: string;
+});
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    User: {
+      id?: string;
+    };
+    Guest: {
+      name?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles requestBody $ref that extracts schema name 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body: unknown;
+      response?: {};
+    };
+    createUser: {
+      body: unknown;
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {
+    CreateUserRequest: {
+      name?: string;
+    };
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles response $ref that extracts schema name 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {};
+    getUsers: {};
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    UserResponse: {
+      id?: string;
+    };
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles requestBody with $ref that is not a component schema 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupPostApiStruct {
+    [\`/users\`]: {
+      body: unknown;
+      response?: {};
+    };
+    createUser: {
+      body: unknown;
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles response with $ref that is not a component schema 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: unknown;
+    };
+    getUsers: {
+      response: unknown;
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles error response with $ref that is not a component schema 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+      error: unknown;
+    };
+    getUsers: {
+      response?: {};
+      error: unknown;
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles array response with $ref that is not a component schema 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response: Array<unknown>;
+    };
+    getUsers: {
+      response: Array<unknown>;
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles error array response with $ref that is not a component schema 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+      error: Array<unknown>;
+    };
+    getUsers: {
+      response?: {};
+      error: Array<unknown>;
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles error array response with component schema 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+      error: Array<DevupErrorComponentStruct['Error']>;
+    };
+    getUsers: {
+      response?: {};
+      error: Array<DevupErrorComponentStruct['Error']>;
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {
+    Error: {
+      code?: string;
+      message?: string;
+    };
+  }
+}"
+`;
+
+exports[`generateInterface handles error response with $ref to response object 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+    };
+    getUsers: {
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles error response $ref that extracts schema name 1`] = `
+"import "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupGetApiStruct {
+    [\`/users\`]: {
+      response?: {};
+    };
+    getUsers: {
+      response?: {};
+    };
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {
+    ServerError: {
+      error?: string;
+    };
+  }
+}"
+`;

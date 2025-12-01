@@ -7,7 +7,6 @@ import {
   writeInterfaceAsync,
 } from '@devup-api/utils'
 import type { Compiler } from 'webpack'
-import { DefinePlugin } from 'webpack'
 
 export class devupApiWebpackPlugin {
   options: DevupApiOptions
@@ -51,7 +50,7 @@ export class devupApiWebpackPlugin {
 
           // Add DefinePlugin to webpack configuration
           if (Object.keys(define).length > 0) {
-            new DefinePlugin(define).apply(compiler)
+            new compiler.webpack.DefinePlugin(define).apply(compiler)
           }
 
           callback()

@@ -84,7 +84,7 @@
     },
     "packages/core": {
       "name": "@devup-api/core",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "devDependencies": {
         "@types/node": "^24.10",
         "typescript": "^5.9",
@@ -92,7 +92,7 @@
     },
     "packages/fetch": {
       "name": "@devup-api/fetch",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "dependencies": {
         "@devup-api/core": "workspace:*",
       },
@@ -103,7 +103,7 @@
     },
     "packages/generator": {
       "name": "@devup-api/generator",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "dependencies": {
         "@devup-api/core": "workspace:*",
         "@devup-api/utils": "workspace:*",
@@ -116,7 +116,7 @@
     },
     "packages/next-plugin": {
       "name": "@devup-api/next-plugin",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "dependencies": {
         "@devup-api/core": "workspace:*",
         "@devup-api/generator": "workspace:*",
@@ -135,7 +135,7 @@
     },
     "packages/rsbuild-plugin": {
       "name": "@devup-api/rsbuild-plugin",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "dependencies": {
         "@devup-api/core": "workspace:*",
         "@devup-api/generator": "workspace:*",
@@ -152,7 +152,7 @@
     },
     "packages/utils": {
       "name": "@devup-api/utils",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "devDependencies": {
         "@types/node": "^24.10",
         "openapi-types": "^12.1",
@@ -161,7 +161,7 @@
     },
     "packages/vite-plugin": {
       "name": "@devup-api/vite-plugin",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "dependencies": {
         "@devup-api/core": "workspace:*",
         "@devup-api/generator": "workspace:*",
@@ -178,7 +178,7 @@
     },
     "packages/webpack-plugin": {
       "name": "@devup-api/webpack-plugin",
-      "version": "0.1.0",
+      "version": "0.1.3",
       "dependencies": {
         "@devup-api/core": "workspace:*",
         "@devup-api/generator": "workspace:*",
@@ -191,7 +191,6 @@
       },
       "peerDependencies": {
         "@devup-api/core": "*",
-        "webpack": "*",
       },
     },
   },
