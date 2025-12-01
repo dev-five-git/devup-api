@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/style/noNonNullAssertion: test code */
 import { expect, test } from 'bun:test'
 import type { UrlMapValue } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
@@ -54,9 +55,12 @@ test.each([
     },
   }
 
-  const result = createUrlMap(schema, options)
+  const result = createUrlMap({ '': schema }, options)
 
-  expect(result).toEqual(expected as Record<string, UrlMapValue>)
+  expect(result).toEqual({ '': expected } as Record<
+    string,
+    Record<string, UrlMapValue>
+  >)
 })
 
 test('converts path parameters based on convertCase', () => {
@@ -73,16 +77,18 @@ test('converts path parameters based on convertCase', () => {
     },
   }
 
-  const result = createUrlMap(schema, { convertCase: 'camel' })
+  const result = createUrlMap({ '': schema }, { convertCase: 'camel' })
 
   expect(result).toEqual({
-    getUserPost: {
-      method: 'GET',
-      url: '/users/{userId}/posts/{postId}',
-    },
-    '/users/{userId}/posts/{postId}': {
-      method: 'GET',
-      url: '/users/{userId}/posts/{postId}',
+    '': {
+      getUserPost: {
+        method: 'GET',
+        url: '/users/{userId}/posts/{postId}',
+      },
+      '/users/{userId}/posts/{postId}': {
+        method: 'GET',
+        url: '/users/{userId}/posts/{postId}',
+      },
     },
   })
 })
@@ -107,14 +113,14 @@ test.each([
     },
   }
 
-  const result = createUrlMap(schema)
+  const result = createUrlMap({ '': schema })
 
-  expect(result).toHaveProperty(expectedKey)
-  expect(result[expectedKey]?.method).toBe(
+  expect(result['']).toHaveProperty(expectedKey)
+  expect(result['']![expectedKey]?.method).toBe(
     expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
   )
-  expect(result).toHaveProperty('/users')
-  expect(result['/users']?.method).toBe(
+  expect(result['']).toHaveProperty('/users')
+  expect(result['']!['/users']?.method).toBe(
     expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
   )
 })
@@ -132,15 +138,17 @@ test('handles operation without operationId', () => {
     },
   }
 
-  const result = createUrlMap(schema)
+  const result = createUrlMap({ '': schema })
 
   expect(result).toEqual({
-    '/users': {
-      method: 'GET',
-      url: '/users',
+    '': {
+      '/users': {
+        method: 'GET',
+        url: '/users',
+      },
     },
   })
-  expect(result).not.toHaveProperty('getUsers')
+  expect(result['']).not.toHaveProperty('getUsers')
 })
 
 test('handles multiple paths', () => {
@@ -163,12 +171,12 @@ test('handles multiple paths', () => {
     },
   }
 
-  const result = createUrlMap(schema)
+  const result = createUrlMap({ '': schema })
 
-  expect(result).toHaveProperty('getUsers')
-  expect(result).toHaveProperty('getPosts')
-  expect(result).toHaveProperty('/users')
-  expect(result).toHaveProperty('/posts')
+  expect(result['']).toHaveProperty('getUsers')
+  expect(result['']).toHaveProperty('getPosts')
+  expect(result['']).toHaveProperty('/users')
+  expect(result['']).toHaveProperty('/posts')
 })
 
 test('handles empty paths', () => {
@@ -178,9 +186,9 @@ test('handles empty paths', () => {
     paths: {},
   }
 
-  const result = createUrlMap(schema)
+  const result = createUrlMap({ '': schema })
 
-  expect(result).toEqual({})
+  expect(result).toEqual({ '': {} })
 })
 
 test('handles undefined paths', () => {
@@ -191,9 +199,9 @@ test('handles undefined paths', () => {
     paths: {},
   }
 
-  const result = createUrlMap(schema)
+  const result = createUrlMap({ '': schema })
 
-  expect(result).toEqual({})
+  expect(result).toEqual({ '': {} })
 })
 
 test('handles undefined pathItem', () => {
@@ -205,9 +213,9 @@ test('handles undefined pathItem', () => {
     },
   }
 
-  const result = createUrlMap(schema)
+  const result = createUrlMap({ '': schema })
 
-  expect(result).toEqual({})
+  expect(result).toEqual({ '': {} })
 })
 
 test('skips operations that do not exist', () => {
@@ -225,16 +233,18 @@ test('skips operations that do not exist', () => {
     },
   }
 
-  const result = createUrlMap(schema)
+  const result = createUrlMap({ '': schema })
 
   expect(result).toEqual({
-    getUsers: {
-      method: 'GET',
-      url: '/users',
-    },
-    '/users': {
-      method: 'GET',
-      url: '/users',
+    '': {
+      getUsers: {
+        method: 'GET',
+        url: '/users',
+      },
+      '/users': {
+        method: 'GET',
+        url: '/users',
+      },
     },
   })
 })
@@ -253,16 +263,18 @@ test('handles complex path with multiple parameters', () => {
     },
   }
 
-  const result = createUrlMap(schema, { convertCase: 'snake' })
+  const result = createUrlMap({ '': schema }, { convertCase: 'snake' })
 
   expect(result).toEqual({
-    get_user_post_comment: {
-      method: 'GET',
-      url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
-    },
-    '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}': {
-      method: 'GET',
-      url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
+    '': {
+      get_user_post_comment: {
+        method: 'GET',
+        url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
+      },
+      '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}': {
+        method: 'GET',
+        url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
+      },
     },
   })
 })
@@ -285,11 +297,14 @@ test.each([
     },
   }
 
-  const result = createUrlMap(schema, {
-    convertCase: caseType as 'camel' | 'snake' | 'pascal',
-  })
+  const result = createUrlMap(
+    { '': schema },
+    {
+      convertCase: caseType as 'camel' | 'snake' | 'pascal',
+    },
+  )
 
-  expect(result[expectedPath]?.url).toBe(expectedUrl)
+  expect(result[''][expectedPath]?.url).toBe(expectedUrl)
 })
 
 test.each([
@@ -310,9 +325,12 @@ test.each([
     },
   }
 
-  const result = createUrlMap(schema, {
-    convertCase: caseType as 'camel' | 'snake' | 'pascal',
-  })
+  const result = createUrlMap(
+    { '': schema },
+    {
+      convertCase: caseType as 'camel' | 'snake' | 'pascal',
+    },
+  )
 
-  expect(result).toHaveProperty(expectedKey)
+  expect(result['']).toHaveProperty(expectedKey)
 })

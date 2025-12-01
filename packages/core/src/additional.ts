@@ -1,7 +1,7 @@
 export type Additional<
   T extends string,
   Target extends object,
-> = T extends keyof Target ? Target[T] : object
+> = T extends keyof Target ? Target[T] & object : object
 
 export type RequiredOptions<T extends object> = keyof T extends undefined
   ? never

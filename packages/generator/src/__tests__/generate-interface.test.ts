@@ -12,6 +12,14 @@ const createDocument = (
     ...document,
   }) as OpenAPIV3_1.Document
 
+// Helper function to convert Document to Record format for testing
+const createSchemas = (
+  document: OpenAPIV3_1.Document,
+  fileName = 'openapi.json',
+): Record<string, OpenAPIV3_1.Document> => ({
+  [fileName]: document,
+})
+
 test.each([
   [
     {
@@ -78,24 +86,26 @@ test.each([
     },
   ],
 ] as const)('generateInterface returns interface for schema: %s', (schema) => {
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any)), {
       convertCase: 'pascal',
     }),
   ).toMatchSnapshot()
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any)), {
       convertCase: 'snake',
     }),
   ).toMatchSnapshot()
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any)), {
       convertCase: 'camel',
     }),
   ).toMatchSnapshot()
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any)), {
       convertCase: 'maintain',
     }),
   ).toMatchSnapshot()
@@ -169,7 +179,9 @@ test('generateInterface handles all HTTP methods', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test path parameters
@@ -201,7 +213,9 @@ test('generateInterface handles path parameters', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test query parameters
@@ -239,7 +253,9 @@ test('generateInterface handles query parameters', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test path and query parameters together
@@ -277,7 +293,9 @@ test('generateInterface handles path and query parameters together', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test request body
@@ -314,7 +332,9 @@ test('generateInterface handles request body', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test request body with $ref
@@ -358,7 +378,9 @@ test('generateInterface handles request body with $ref', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test response with 200 status
@@ -398,7 +420,9 @@ test('generateInterface handles 200 response', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test response with 201 status
@@ -435,7 +459,9 @@ test('generateInterface handles 201 response', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test response with other status codes (fallback)
@@ -464,7 +490,9 @@ test('generateInterface handles response with other status codes', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test error responses
@@ -535,7 +563,9 @@ test('generateInterface handles error responses', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test default error response
@@ -572,7 +602,9 @@ test('generateInterface handles default error response', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test component schemas for request
@@ -616,7 +648,9 @@ test('generateInterface handles component schemas for request', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test component schemas for response
@@ -653,7 +687,9 @@ test('generateInterface handles component schemas for response', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test component schemas for error
@@ -698,7 +734,9 @@ test('generateInterface handles component schemas for error', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test array response with component schema
@@ -738,7 +776,9 @@ test('generateInterface handles array response with component schema', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test operationId and path keys
@@ -770,7 +810,9 @@ test('generateInterface creates both operationId and path keys', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test without operationId
@@ -793,7 +835,9 @@ test('generateInterface handles endpoints without operationId', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test requestDefaultNonNullable option
@@ -831,12 +875,12 @@ test('generateInterface handles requestDefaultNonNullable option', () => {
     },
   }
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any)), {
       requestDefaultNonNullable: true,
     }),
   ).toMatchSnapshot()
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any)), {
       requestDefaultNonNullable: false,
     }),
   ).toMatchSnapshot()
@@ -870,12 +914,12 @@ test('generateInterface handles responseDefaultNonNullable option', () => {
     },
   }
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any)), {
       responseDefaultNonNullable: true,
     }),
   ).toMatchSnapshot()
   expect(
-    generateInterface(createDocument(schema as any), {
+    generateInterface(createSchemas(createDocument(schema as any)), {
       responseDefaultNonNullable: false,
     }),
   ).toMatchSnapshot()
@@ -922,7 +966,9 @@ test('generateInterface handles nested schemas in allOf', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test empty paths
@@ -930,7 +976,9 @@ test('generateInterface handles empty paths', () => {
   const schema = {
     paths: {},
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test pathItem parameters
@@ -962,7 +1010,9 @@ test('generateInterface handles pathItem parameters', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test requestBody $ref
@@ -1005,7 +1055,9 @@ test('generateInterface handles requestBody $ref', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test response $ref
@@ -1050,7 +1102,9 @@ test('generateInterface handles response $ref', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test complex scenario with all features
@@ -1158,7 +1212,9 @@ test('generateInterface handles complex scenario with all features', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test anyOf in schema collection
@@ -1204,7 +1260,9 @@ test('generateInterface handles anyOf in schema collection', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test oneOf in schema collection
@@ -1249,7 +1307,9 @@ test('generateInterface handles oneOf in schema collection', () => {
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test requestBody $ref that extracts schema name
@@ -1286,7 +1346,9 @@ test('generateInterface handles requestBody $ref that extracts schema name', () 
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test response $ref that extracts schema name
@@ -1315,7 +1377,9 @@ test('generateInterface handles response $ref that extracts schema name', () => 
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test requestBody with $ref that is not a component schema
@@ -1348,7 +1412,9 @@ test('generateInterface handles requestBody with $ref that is not a component sc
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test response with $ref that is not a component schema
@@ -1374,7 +1440,9 @@ test('generateInterface handles response with $ref that is not a component schem
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test error response with $ref that is not a component schema
@@ -1408,7 +1476,9 @@ test('generateInterface handles error response with $ref that is not a component
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test array response with $ref that is not a component schema
@@ -1437,7 +1507,9 @@ test('generateInterface handles array response with $ref that is not a component
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test error array response with $ref that is not a component schema
@@ -1474,7 +1546,9 @@ test('generateInterface handles error array response with $ref that is not a com
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test error array response with component schema
@@ -1522,7 +1596,9 @@ test('generateInterface handles error array response with component schema', () 
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test error response with $ref (response object reference)
@@ -1572,7 +1648,9 @@ test('generateInterface handles error response with $ref to response object', ()
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
 
 // Test error response with $ref that extracts schema name (line 147 coverage)
@@ -1609,5 +1687,7 @@ test('generateInterface handles error response $ref that extracts schema name', 
       },
     },
   }
-  expect(generateInterface(createDocument(schema as any))).toMatchSnapshot()
+  expect(
+    generateInterface(createSchemas(createDocument(schema as any))),
+  ).toMatchSnapshot()
 })
