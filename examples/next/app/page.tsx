@@ -19,6 +19,9 @@ export default function Home() {
     api
       .get('getUserById', {
         params: { id: 1 },
+        query: {
+          name: 'John Doe',
+        },
       })
       .then((res) => {
         console.log(res)
