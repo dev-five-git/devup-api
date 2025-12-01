@@ -1,3 +1,4 @@
+/** biome-ignore-all lint/suspicious/noExplicitAny: any is used to allow for flexibility in the type */
 import { afterEach, beforeEach, expect, mock, test } from 'bun:test'
 import { DevupApi } from '../api'
 
@@ -24,7 +25,7 @@ test.each([
   ['http://localhost:3000', 'http://localhost:3000'],
   ['http://localhost:3000/', 'http://localhost:3000'],
 ] as const)('constructor removes trailing slash: %s -> %s', (baseUrl, expected) => {
-  const api = new DevupApi(baseUrl)
+  const api = new DevupApi(baseUrl, undefined, 'openapi.json')
   expect(api.getBaseUrl()).toBe(expected)
 })
 
@@ -36,7 +37,11 @@ test.each([
     { headers: { Authorization: 'Bearer token' } },
   ],
 ] as const)('constructor accepts defaultOptions: %s -> %s', (defaultOptions, expected) => {
-  const api = new DevupApi('https://api.example.com', defaultOptions)
+  const api = new DevupApi(
+    'https://api.example.com',
+    defaultOptions,
+    'openapi.json',
+  )
   expect(api.getDefaultOptions()).toEqual(expected)
 })
 
@@ -47,7 +52,7 @@ test.each([
     { headers: { 'Content-Type': 'application/json' } },
   ],
 ] as const)('setDefaultOptions updates defaultOptions: %s -> %s', (options, expected) => {
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   api.setDefaultOptions(options)
   expect(api.getDefaultOptions()).toEqual(expected)
 })
@@ -64,10 +69,10 @@ test.each([
   ['PATCH', 'patch'],
   ['PATCH', 'PATCH'],
 ] as const)('HTTP method %s calls request with correct method', async (expectedMethod, methodName) => {
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
 
-  await api[methodName]('/test' as never)
+  await (api as any)[methodName]('/test' as never)
 
   expect(mockFetch).toHaveBeenCalledTimes(1)
   const call = mockFetch.mock.calls[0]
@@ -79,7 +84,7 @@ test.each([
 })
 
 test('request serializes plain object body to JSON', async () => {
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
 
   await api.post(
@@ -100,7 +105,7 @@ test('request serializes plain object body to JSON', async () => {
 })
 
 test('request does not serialize non-plain object body', async () => {
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
   const formData = new FormData()
   formData.append('file', 'test')
@@ -127,9 +132,13 @@ test('request does not serialize non-plain object body', async () => {
 })
 
 test('request merges defaultOptions with request options', async () => {
-  const api = new DevupApi('https://api.example.com', {
-    headers: { 'X-Default': 'default-value' },
-  })
+  const api = new DevupApi(
+    'https://api.example.com',
+    {
+      headers: { 'X-Default': 'default-value' },
+    },
+    'openapi.json',
+  )
   const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
 
   await api.get(
@@ -151,7 +160,7 @@ test('request merges defaultOptions with request options', async () => {
 })
 
 test('request uses params to replace path parameters', async () => {
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
 
   await api.get(
@@ -180,7 +189,7 @@ test('request returns response with data on success', async () => {
     ),
   ) as unknown as typeof fetch
 
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const result = (await api.get('/test' as never)) as {
     data?: unknown
     error?: unknown
@@ -191,7 +200,7 @@ test('request returns response with data on success', async () => {
   if ('data' in result && result.data !== undefined) {
     expect(result.data).toEqual({ id: 1, name: 'test' })
   }
-  expect('error' in result).toBe(false)
+  expect(result.error).toBeUndefined()
   expect(result.response).toBeDefined()
   expect(result.response.ok).toBe(true)
 })
@@ -206,7 +215,7 @@ test('request returns response with error on failure', async () => {
     ),
   ) as unknown as typeof fetch
 
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const result = (await api.get('/test' as never)) as {
     data?: unknown
     error?: unknown
@@ -217,7 +226,7 @@ test('request returns response with error on failure', async () => {
   if ('error' in result && result.error !== undefined) {
     expect(result.error).toEqual({ message: 'Not found' })
   }
-  expect('data' in result).toBe(false)
+  expect(result.data).toBeUndefined()
   expect(result.response).toBeDefined()
   expect(result.response.ok).toBe(false)
 })
@@ -231,7 +240,7 @@ test('request handles 204 No Content response', async () => {
     ),
   ) as unknown as typeof fetch
 
-  const api = new DevupApi('https://api.example.com')
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const result = await api.delete('/test' as never)
 
   if ('data' in result) {

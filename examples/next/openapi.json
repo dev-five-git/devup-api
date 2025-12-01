@@ -65,6 +65,14 @@
             "schema": {
               "type": "integer"
             }
+          },
+          {
+            "name": "name",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {

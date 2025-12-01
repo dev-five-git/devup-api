@@ -1,5 +1,6 @@
 export * from './additional'
 export * from './api-struct'
+export * from './middleware'
 export * from './options'
 export * from './url-map'
 export * from './utils'

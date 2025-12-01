@@ -17,6 +17,7 @@ import type {
   DevupPutApiStruct,
   DevupPutApiStructKey,
   ExtractValue,
+  Middleware,
   RequiredOptions,
 } from '@devup-api/core'
 import { convertResponse } from './response-converter'
@@ -40,6 +41,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   private baseUrl: string
   private defaultOptions: DevupApiRequestInit
   private serverName: S
+  private middleware: Middleware[]
 
   constructor(
     baseUrl: string,
@@ -49,6 +51,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     this.baseUrl = baseUrl.replace(/\/$/, '')
     this.defaultOptions = defaultOptions
     this.serverName = serverName as S
+    this.middleware = []
   }
 
   get<
@@ -221,7 +224,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
-  request<
+  async request<
     T extends DevupApiStructKey<S>,
     O extends Additional<T, ConditionalScope<DevupApiStruct, S>>,
   >(
@@ -233,9 +236,10 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     const { method, url } = getApiEndpointInfo(path, this.serverName)
+    const { middleware = [], ...restOptions } = options[0] || {}
     const mergedOptions = {
       ...this.defaultOptions,
-      ...options[0],
+      ...restOptions,
     }
     const requestOptions = {
       ...mergedOptions,
@@ -244,7 +248,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     if (requestOptions.body && isPlainObject(requestOptions.body)) {
       requestOptions.body = JSON.stringify(requestOptions.body)
     }
-    const request = new Request(
+    let request = new Request(
       getApiEndpoint(
         this.baseUrl,
         url,
@@ -259,11 +263,88 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
       ),
       requestOptions as RequestInit,
     )
-    return fetch(request).then((response) =>
-      convertResponse(request, response),
-    ) as Promise<
-      DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
+
+    const finalMiddleware = [...this.middleware, ...middleware]
+
+    let tempResponse: Response | undefined
+
+    for (const middleware of finalMiddleware) {
+      if (middleware.onRequest) {
+        const result = await middleware.onRequest({
+          request,
+          schemaPath: path,
+          params: requestOptions.params,
+          query: requestOptions.query,
+          headers: requestOptions.headers,
+          body: requestOptions.body,
+        })
+        if (result) {
+          if (result instanceof Request) {
+            request = result
+          } else if (result instanceof Response) {
+            tempResponse = result
+            break
+          } else {
+            throw new Error(
+              'onRequest: must return new Request() or Response() when modifying the request',
+            )
+          }
+        }
+      }
+    }
+
+    const ret = (await (tempResponse
+      ? convertResponse(request, tempResponse)
+      : fetch(request).then((response) =>
+          convertResponse(request, response),
+        ))) as DevupApiResponse<
+      ExtractValue<O, 'response'>,
+      ExtractValue<O, 'error'>
     >
+
+    let response = ret.response
+    let error: unknown = ret.error
+
+    for (const middleware of finalMiddleware) {
+      if (response && middleware.onResponse) {
+        const result = await (response && middleware.onResponse
+          ? middleware.onResponse({
+              request,
+              schemaPath: path,
+              params: requestOptions.params,
+              query: requestOptions.query,
+              headers: requestOptions.headers,
+              body: requestOptions.body,
+              response: ret.response,
+            })
+          : error && middleware.onError
+            ? middleware.onError({
+                request,
+                schemaPath: path,
+                params: requestOptions.params,
+                query: requestOptions.query,
+                headers: requestOptions.headers,
+                body: requestOptions.body,
+                error: ret.error,
+              })
+            : undefined)
+        if (result) {
+          if (result instanceof Response) {
+            response = result
+            break
+          } else if (result instanceof Error) {
+            error = result
+            break
+          }
+        }
+      }
+    }
+
+    return {
+      data: ret.data,
+      error: error,
+      response,
+    } as DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   }
 
   setDefaultOptions(options: DevupApiRequestInit) {
@@ -276,5 +357,9 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   getDefaultOptions() {
     return this.defaultOptions
+  }
+
+  use(...middleware: Middleware[]) {
+    this.middleware.push(...middleware)
   }
 }
