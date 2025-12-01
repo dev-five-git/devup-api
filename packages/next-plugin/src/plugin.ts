@@ -1,7 +1,12 @@
 import { join } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import { createUrlMap, generateInterface } from '@devup-api/generator'
-import { createTmpDir, readOpenapi, writeInterface } from '@devup-api/utils'
+import {
+  createTmpDir,
+  normalizeOpenapiFiles,
+  readOpenapis,
+  writeInterface,
+} from '@devup-api/utils'
 import { devupApiWebpackPlugin } from '@devup-api/webpack-plugin'
 import type { NextConfig } from 'next'
 
@@ -13,18 +18,21 @@ export function devupApi(
     process.env.TURBOPACK === '1' || process.env.TURBOPACK === 'auto'
   if (isTurbo) {
     const tempDir = createTmpDir(options?.tempDir)
-    const schema = readOpenapi(options?.openapiFile)
+    const openapiFiles = normalizeOpenapiFiles(options?.openapiFiles)
+    const schemas = readOpenapis(openapiFiles)
 
     writeInterface(
       join(tempDir, 'api.d.ts'),
-      generateInterface(schema, options),
+      generateInterface(schemas, options),
     )
     // Create urlMap and set environment variable
-    const urlMap = createUrlMap(schema, options)
+    const urlMap = createUrlMap(schemas, options)
     config.env ??= {}
-    Object.assign(config.env, {
-      DEVUP_API_URL_MAP: JSON.stringify(urlMap),
-    })
+    if (urlMap && Object.keys(urlMap).length > 0) {
+      Object.assign(config.env, {
+        DEVUP_API_URL_MAP: JSON.stringify(urlMap),
+      })
+    }
     return config
   }
 

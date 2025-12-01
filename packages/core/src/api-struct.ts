@@ -1,4 +1,7 @@
-import type { Conditional } from './utils'
+import type { ConditionalKeys, ConditionalScope } from './utils'
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface
+export interface DevupApiServers {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: empty interface
 export interface DevupGetApiStruct {}
@@ -27,10 +30,22 @@ export type DevupApiStruct = DevupGetApiStruct &
   DevupDeleteApiStruct &
   DevupPatchApiStruct
 
-export type DevupGetApiStructKey = Conditional<DevupGetApiStruct>
-export type DevupPostApiStructKey = Conditional<DevupPostApiStruct>
-export type DevupPutApiStructKey = Conditional<DevupPutApiStruct>
-export type DevupDeleteApiStructKey = Conditional<DevupDeleteApiStruct>
-export type DevupPatchApiStructKey = Conditional<DevupPatchApiStruct>
+export type DevupGetApiStructKey<O extends string> = ConditionalKeys<
+  ConditionalScope<DevupGetApiStruct, O>
+>
+export type DevupPostApiStructKey<O extends string> = ConditionalKeys<
+  ConditionalScope<DevupPostApiStruct, O>
+>
+export type DevupPutApiStructKey<O extends string> = ConditionalKeys<
+  ConditionalScope<DevupPutApiStruct, O>
+>
+export type DevupDeleteApiStructKey<O extends string> = ConditionalKeys<
+  ConditionalScope<DevupDeleteApiStruct, O>
+>
+export type DevupPatchApiStructKey<O extends string> = ConditionalKeys<
+  ConditionalScope<DevupPatchApiStruct, O>
+>
 
-export type DevupApiStructKey = Conditional<DevupApiStruct>
+export type DevupApiStructKey<O extends string> = ConditionalKeys<
+  ConditionalScope<DevupApiStruct, O>
+>

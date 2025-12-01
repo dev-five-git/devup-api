@@ -1,8 +1,13 @@
+import type { ConditionalKeys, DevupApiServers } from '@devup-api/core'
 import { DevupApi } from './api'
 
-export function createApi(
+// Implementation
+export function createApi<
+  S extends ConditionalKeys<DevupApiServers, string> = 'openapi.json',
+>(
   baseUrl: string,
   defaultOptions?: RequestInit,
-): DevupApi {
-  return new DevupApi(baseUrl, defaultOptions)
+  serverName: S = 'openapi.json' as S,
+): DevupApi<S> {
+  return new DevupApi(baseUrl, defaultOptions, serverName)
 }

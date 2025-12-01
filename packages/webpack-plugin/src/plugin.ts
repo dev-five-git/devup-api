@@ -3,6 +3,7 @@ import type { DevupApiOptions } from '@devup-api/core'
 import { createUrlMap, generateInterface } from '@devup-api/generator'
 import {
   createTmpDirAsync,
+  normalizeOpenapiFiles,
   readOpenapiAsync,
   writeInterfaceAsync,
 } from '@devup-api/utils'
@@ -31,18 +32,19 @@ export class devupApiWebpackPlugin {
           this.initialized = true
 
           const tempDir = await createTmpDirAsync(this.options?.tempDir)
-          const schema = await readOpenapiAsync(this.options?.openapiFile)
+          const openapiFiles = normalizeOpenapiFiles(this.options?.openapiFiles)
+          const schemas = await readOpenapiAsync(openapiFiles)
 
           // Generate interface file
           await writeInterfaceAsync(
             join(tempDir, 'api.d.ts'),
-            generateInterface(schema, this.options),
+            generateInterface(schemas, this.options),
           )
 
           // Create urlMap and set environment variable
-          const urlMap = createUrlMap(schema, this.options)
+          const urlMap = createUrlMap(schemas, this.options)
           const define: Record<string, string> = {}
-          if (urlMap) {
+          if (urlMap && Object.keys(urlMap).length > 0) {
             define['process.env.DEVUP_API_URL_MAP'] = JSON.stringify(
               JSON.stringify(urlMap),
             )

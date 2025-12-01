@@ -1,6 +1,9 @@
 import type {
   Additional,
+  ConditionalKeys,
+  ConditionalScope,
   DevupApiRequestInit,
+  DevupApiServers,
   DevupApiStruct,
   DevupApiStructKey,
   DevupDeleteApiStruct,
@@ -33,18 +36,24 @@ type DevupApiResponse<T, E = any> =
       response: Response
     }
 
-export class DevupApi {
+export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   private baseUrl: string
   private defaultOptions: DevupApiRequestInit
+  private serverName: S
 
-  constructor(baseUrl: string, defaultOptions: DevupApiRequestInit = {}) {
+  constructor(
+    baseUrl: string,
+    defaultOptions: DevupApiRequestInit = {},
+    serverName: S,
+  ) {
     this.baseUrl = baseUrl.replace(/\/$/, '')
     this.defaultOptions = defaultOptions
+    this.serverName = serverName as S
   }
 
   get<
-    T extends DevupGetApiStructKey,
-    O extends Additional<T, DevupGetApiStruct>,
+    T extends DevupGetApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupGetApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
@@ -56,171 +65,174 @@ export class DevupApi {
     return this.request(path, {
       method: 'GET',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   GET<
-    T extends DevupGetApiStructKey,
-    O extends Additional<T, DevupGetApiStruct>,
+    T extends DevupGetApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupGetApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'GET',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   post<
-    T extends DevupPostApiStructKey,
-    O extends Additional<T, DevupPostApiStruct>,
+    T extends DevupPostApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupPostApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'POST',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   POST<
-    T extends DevupPostApiStructKey,
-    O extends Additional<T, DevupPostApiStruct>,
+    T extends DevupPostApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupPostApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'POST',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   put<
-    T extends DevupPutApiStructKey,
-    O extends Additional<T, DevupPutApiStruct>,
+    T extends DevupPutApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupPutApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'PUT',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   PUT<
-    T extends DevupPutApiStructKey,
-    O extends Additional<T, DevupPutApiStruct>,
+    T extends DevupPutApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupPutApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'PUT',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   delete<
-    T extends DevupDeleteApiStructKey,
-    O extends Additional<T, DevupDeleteApiStruct>,
+    T extends DevupDeleteApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupDeleteApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'DELETE',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   DELETE<
-    T extends DevupDeleteApiStructKey,
-    O extends Additional<T, DevupDeleteApiStruct>,
+    T extends DevupDeleteApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupDeleteApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'DELETE',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   patch<
-    T extends DevupPatchApiStructKey,
-    O extends Additional<T, DevupPatchApiStruct>,
+    T extends DevupPatchApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupPatchApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'PATCH',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
   PATCH<
-    T extends DevupPatchApiStructKey,
-    O extends Additional<T, DevupPatchApiStruct>,
+    T extends DevupPatchApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupPatchApiStruct, S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     return this.request(path, {
       method: 'PATCH',
       ...options[0],
-    } as DevupApiRequestInit & Omit<O, 'response'>)
+    } as DevupApiRequestInit & Omit<O, 'response' | 'error'>)
   }
 
-  request<T extends DevupApiStructKey, O extends Additional<T, DevupApiStruct>>(
+  request<
+    T extends DevupApiStructKey<S>,
+    O extends Additional<T, ConditionalScope<DevupApiStruct, S>>,
+  >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
       ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response'>]
+      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
-    const { method, url } = getApiEndpointInfo(path)
+    const { method, url } = getApiEndpointInfo(path, this.serverName)
     const mergedOptions = {
       ...this.defaultOptions,
       ...options[0],

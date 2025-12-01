@@ -8,7 +8,7 @@ import type { NextConfig } from 'next'
 import { devupApi } from '../plugin'
 
 let mockCreateTmpDir: ReturnType<typeof spyOn>
-let mockReadOpenapi: ReturnType<typeof spyOn>
+let mockReadOpenapis: ReturnType<typeof spyOn>
 let mockWriteInterface: ReturnType<typeof spyOn>
 let mockCreateTmpDirAsync: ReturnType<typeof spyOn>
 let mockReadOpenapiAsync: ReturnType<typeof spyOn>
@@ -54,18 +54,18 @@ const mockInterfaceContent = 'export interface Test {}'
 
 beforeEach(() => {
   mockCreateTmpDir = spyOn(utils, 'createTmpDir').mockReturnValue('df')
-  mockReadOpenapi = spyOn(utils, 'readOpenapi').mockReturnValue(
-    mockSchema as never,
-  )
+  mockReadOpenapis = spyOn(utils, 'readOpenapis').mockReturnValue({
+    'openapi.json': mockSchema,
+  } as never)
   mockWriteInterface = spyOn(utils, 'writeInterface').mockImplementation(
     () => {},
   )
   mockCreateTmpDirAsync = spyOn(utils, 'createTmpDirAsync').mockResolvedValue(
     'df',
   )
-  mockReadOpenapiAsync = spyOn(utils, 'readOpenapiAsync').mockResolvedValue(
-    mockSchema as never,
-  )
+  mockReadOpenapiAsync = spyOn(utils, 'readOpenapiAsync').mockResolvedValue({
+    'openapi.json': mockSchema,
+  } as never)
   mockWriteInterfaceAsync = spyOn(
     utils,
     'writeInterfaceAsync',
@@ -77,7 +77,7 @@ beforeEach(() => {
     mockInterfaceContent,
   )
   mockCreateTmpDir.mockClear()
-  mockReadOpenapi.mockClear()
+  mockReadOpenapis.mockClear()
   mockWriteInterface.mockClear()
   mockCreateTmpDirAsync.mockClear()
   mockReadOpenapiAsync.mockClear()
@@ -87,13 +87,17 @@ beforeEach(() => {
 })
 
 test.each([
-  [{}, undefined],
-  [{ env: {} }, undefined],
-  [{}, { tempDir: 'custom-dir' }],
-  [{ env: {} }, { openapiFile: 'custom-openapi.json' }],
+  [{}, undefined, ['openapi.json']],
+  [{ env: {} }, undefined, ['openapi.json']],
+  [{}, { tempDir: 'custom-dir' }, ['openapi.json']],
+  [
+    { env: {} },
+    { openapiFiles: 'custom-openapi.json' },
+    ['custom-openapi.json'],
+  ],
 ] as const)('devupApi handles turbo mode: config=%s, options=%s', (config: NextConfig, options:
   | DevupApiOptions
-  | undefined) => {
+  | undefined, expectedFiles: string[]) => {
   const originalEnv = process.env.TURBOPACK
   process.env.TURBOPACK = '1'
 
@@ -101,16 +105,19 @@ test.each([
     const result = devupApi(config, options)
 
     expect(mockCreateTmpDir).toHaveBeenCalledWith(options?.tempDir)
-    expect(mockReadOpenapi).toHaveBeenCalledWith(options?.openapiFile)
+    expect(mockReadOpenapis).toHaveBeenCalledWith(expectedFiles)
     expect(mockGenerateInterface).toHaveBeenCalledWith(
-      mockSchema,
+      { 'openapi.json': mockSchema },
       options || {},
     )
     expect(mockWriteInterface).toHaveBeenCalledWith(
       join('df', 'api.d.ts'),
       mockInterfaceContent,
     )
-    expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options || {})
+    expect(mockCreateUrlMap).toHaveBeenCalledWith(
+      { 'openapi.json': mockSchema },
+      options || {},
+    )
     expect(result.env).toEqual({
       DEVUP_API_URL_MAP: JSON.stringify(mockUrlMap),
     })
@@ -260,9 +267,8 @@ test('devupApi handles null urlMap in turbo mode', () => {
     const config: NextConfig = {}
     const result = devupApi(config)
 
-    expect(result.env).toEqual({
-      DEVUP_API_URL_MAP: JSON.stringify(null),
-    })
+    // null urlMap should not add DEVUP_API_URL_MAP (same as undefined/empty)
+    expect(result.env).toEqual({})
   } finally {
     process.env.TURBOPACK = originalEnv
   }
@@ -277,9 +283,24 @@ test('devupApi handles undefined urlMap in turbo mode', () => {
     const config: NextConfig = {}
     const result = devupApi(config)
 
-    expect(result.env).toEqual({
-      DEVUP_API_URL_MAP: JSON.stringify(undefined),
-    })
+    // undefined urlMap should not add DEVUP_API_URL_MAP (same as null/empty)
+    expect(result.env).toEqual({})
+  } finally {
+    process.env.TURBOPACK = originalEnv
+  }
+})
+
+test('devupApi handles empty urlMap object in turbo mode', () => {
+  const originalEnv = process.env.TURBOPACK
+  process.env.TURBOPACK = '1'
+  mockCreateUrlMap.mockReturnValueOnce({} as never)
+
+  try {
+    const config: NextConfig = {}
+    const result = devupApi(config)
+
+    // Empty object should not add DEVUP_API_URL_MAP
+    expect(result.env).toEqual({})
   } finally {
     process.env.TURBOPACK = originalEnv
   }

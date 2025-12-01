@@ -31,10 +31,26 @@ function extractSchemaNameFromRef(ref: string): string | null {
   }
   return null
 }
-export function generateInterface(
+
+// Helper function to normalize server name by removing ./ prefix
+function normalizeServerName(serverName: string): string {
+  return serverName.replace(/^\.\//, '')
+}
+
+// Generate interface for a single schema
+function generateSchemaInterface(
   schema: OpenAPIV3_1.Document,
+  serverName: string,
   options?: DevupApiTypeGeneratorOptions,
-): string {
+): {
+  endpoints: Record<
+    'get' | 'post' | 'put' | 'delete' | 'patch',
+    Record<string, EndpointDefinition>
+  >
+  requestComponents: Record<string, unknown>
+  responseComponents: Record<string, unknown>
+  errorComponents: Record<string, unknown>
+} {
   const endpoints: Record<
     'get' | 'post' | 'put' | 'delete' | 'patch',
     Record<string, EndpointDefinition>
@@ -300,7 +316,7 @@ export function generateInterface(
                     responseSchemaNames.has(schemaName)
                   ) {
                     // Use component reference
-                    responseType = `DevupResponseComponentStruct['${schemaName}']`
+                    responseType = `DevupResponseComponentStruct['${serverName}']['${schemaName}']`
                   } else {
                     // Extract schema type with response options
                     const responseDefaultNonNullable =
@@ -331,7 +347,7 @@ export function generateInterface(
                       responseSchemaNames.has(schemaName)
                     ) {
                       // Use component reference for array items
-                      responseType = `Array<DevupResponseComponentStruct['${schemaName}']>`
+                      responseType = `Array<DevupResponseComponentStruct['${serverName}']['${schemaName}']>`
                     } else {
                       // Extract schema type with response options
                       const responseDefaultNonNullable =
@@ -525,70 +541,167 @@ export function generateInterface(
     }
   }
 
-  // Generate TypeScript interface string
-  const interfaceContent = Object.entries(endpoints)
-    .flatMap(([method, value]) => {
-      const entries = Object.entries(value)
-      if (entries.length > 0) {
-        const interfaceEntries = entries
+  return {
+    endpoints,
+    requestComponents,
+    responseComponents,
+    errorComponents,
+  }
+}
+
+export function generateInterface(
+  schemas: Record<string, OpenAPIV3_1.Document>,
+  options?: DevupApiTypeGeneratorOptions,
+): string {
+  // Collect all server names for DevupApiServers (normalized without ./ prefix)
+  const serverNames: string[] = []
+  const serverNameMap = new Map<string, string>() // normalized -> original
+
+  // Collect endpoints, components for each server
+  const serverEndpoints: Record<
+    string,
+    Record<
+      'get' | 'post' | 'put' | 'delete' | 'patch',
+      Record<string, EndpointDefinition>
+    >
+  > = {}
+  const serverRequestComponents: Record<string, Record<string, unknown>> = {}
+  const serverResponseComponents: Record<string, Record<string, unknown>> = {}
+  const serverErrorComponents: Record<string, Record<string, unknown>> = {}
+
+  for (const [originalServerName, schema] of Object.entries(schemas)) {
+    const normalizedServerName = normalizeServerName(originalServerName)
+    serverNames.push(normalizedServerName)
+    serverNameMap.set(normalizedServerName, originalServerName)
+    const {
+      endpoints,
+      requestComponents,
+      responseComponents,
+      errorComponents,
+    } = generateSchemaInterface(schema, normalizedServerName, options)
+
+    serverEndpoints[normalizedServerName] = endpoints
+    serverRequestComponents[normalizedServerName] = requestComponents
+    serverResponseComponents[normalizedServerName] = responseComponents
+    serverErrorComponents[normalizedServerName] = errorComponents
+  }
+
+  // Generate DevupApiServers interface (just server names with never)
+  const serverKeys = serverNames
+    .map((name) => `    ${wrapInterfaceKeyGuard(name)}: never`)
+    .join(';\n')
+  const serversInterface = `  interface DevupApiServers {\n${serverKeys}\n  }`
+
+  // Generate HTTP method interfaces (each server as a key)
+  const methodInterfaces: string[] = []
+  const methods: Array<'get' | 'post' | 'put' | 'delete' | 'patch'> = [
+    'get',
+    'post',
+    'put',
+    'delete',
+    'patch',
+  ]
+
+  for (const method of methods) {
+    const methodEntries: string[] = []
+
+    for (const serverName of serverNames) {
+      const endpoints = serverEndpoints[serverName]?.[method]
+      if (endpoints && Object.keys(endpoints).length > 0) {
+        const endpointEntries = Object.entries(endpoints)
           .map(([key, endpointValue]) => {
-            const formattedValue = formatTypeValue(endpointValue, 2)
-            // Top-level keys in ApiStruct should never be optional
-            // Only params, query, body etc. can be optional if all their properties are optional
-            return `    ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
+            const formattedValue = formatTypeValue(endpointValue, 3)
+            return `      ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
           })
           .join(';\n')
 
-        return [
-          `  interface Devup${toPascal(method)}ApiStruct {\n${interfaceEntries};\n  }`,
-        ]
+        const serverKey = wrapInterfaceKeyGuard(serverName)
+        methodEntries.push(`    ${serverKey}: {\n${endpointEntries};\n    }`)
       }
-      return []
-    })
-    .join('\n')
+      // Skip empty endpoints - don't add empty objects
+    }
 
-  // Generate RequestComponentStruct interface
-  const requestComponentEntries = Object.entries(requestComponents)
-    .map(([key, value]) => {
-      const formattedValue = formatTypeValue(value, 2)
-      return `    ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
-    })
-    .join(';\n')
+    if (methodEntries.length > 0) {
+      const interfaceName = `Devup${toPascal(method)}ApiStruct`
+      methodInterfaces.push(
+        `  interface ${interfaceName} {\n${methodEntries.join(';\n')}\n  }`,
+      )
+    }
+  }
+
+  // Generate component interfaces (each server as a key)
+  const requestComponentEntries: string[] = []
+  const responseComponentEntries: string[] = []
+  const errorComponentEntries: string[] = []
+
+  for (const serverName of serverNames) {
+    const serverKey = wrapInterfaceKeyGuard(serverName)
+
+    // Request components
+    const reqComponents = serverRequestComponents[serverName] || {}
+    if (Object.keys(reqComponents).length > 0) {
+      const reqEntries = Object.entries(reqComponents)
+        .map(([key, value]) => {
+          const formattedValue = formatTypeValue(value, 3)
+          return `      ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
+        })
+        .join(';\n')
+      requestComponentEntries.push(`    ${serverKey}: {\n${reqEntries};\n    }`)
+    }
+    // Skip empty components - don't add empty objects
+
+    // Response components
+    const resComponents = serverResponseComponents[serverName] || {}
+    if (Object.keys(resComponents).length > 0) {
+      const resEntries = Object.entries(resComponents)
+        .map(([key, value]) => {
+          const formattedValue = formatTypeValue(value, 3)
+          return `      ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
+        })
+        .join(';\n')
+      responseComponentEntries.push(
+        `    ${serverKey}: {\n${resEntries};\n    }`,
+      )
+    }
+    // Skip empty components - don't add empty objects
+
+    // Error components
+    const errComponents = serverErrorComponents[serverName] || {}
+    if (Object.keys(errComponents).length > 0) {
+      const errEntries = Object.entries(errComponents)
+        .map(([key, value]) => {
+          const formattedValue = formatTypeValue(value, 2)
+          return `      ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
+        })
+        .join(';\n')
+      errorComponentEntries.push(`    ${serverKey}: {\n${errEntries};\n    }`)
+    }
+    // Skip empty components - don't add empty objects
+  }
 
   const requestComponentInterface =
     requestComponentEntries.length > 0
-      ? `  interface DevupRequestComponentStruct {\n${requestComponentEntries};\n  }`
+      ? `  interface DevupRequestComponentStruct {\n${requestComponentEntries.join(';\n')}\n  }`
       : '  interface DevupRequestComponentStruct {}'
-
-  // Generate ResponseComponentStruct interface
-  const responseComponentEntries = Object.entries(responseComponents)
-    .map(([key, value]) => {
-      const formattedValue = formatTypeValue(value, 2)
-      return `    ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
-    })
-    .join(';\n')
 
   const responseComponentInterface =
     responseComponentEntries.length > 0
-      ? `  interface DevupResponseComponentStruct {\n${responseComponentEntries};\n  }`
+      ? `  interface DevupResponseComponentStruct {\n${responseComponentEntries.join(';\n')}\n  }`
       : '  interface DevupResponseComponentStruct {}'
-
-  // Generate ErrorComponentStruct interface
-  const errorComponentEntries = Object.entries(errorComponents)
-    .map(([key, value]) => {
-      const formattedValue = formatTypeValue(value, 2)
-      return `    ${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
-    })
-    .join(';\n')
 
   const errorComponentInterface =
     errorComponentEntries.length > 0
-      ? `  interface DevupErrorComponentStruct {\n${errorComponentEntries};\n  }`
+      ? `  interface DevupErrorComponentStruct {\n${errorComponentEntries.join(';\n')}\n  }`
       : '  interface DevupErrorComponentStruct {}'
 
-  const allInterfaces = interfaceContent
-    ? `${interfaceContent}\n\n${requestComponentInterface}\n\n${responseComponentInterface}\n\n${errorComponentInterface}`
-    : `${requestComponentInterface}\n\n${responseComponentInterface}\n\n${errorComponentInterface}`
+  // Combine all interfaces
+  const allInterfaces = [
+    serversInterface,
+    ...methodInterfaces,
+    requestComponentInterface,
+    responseComponentInterface,
+    errorComponentInterface,
+  ].join('\n\n')
 
   return `import "@devup-api/fetch";\n\ndeclare module "@devup-api/fetch" {\n${allInterfaces}\n}`
 }

@@ -72,19 +72,20 @@ test('devupApi returns plugin with correct name', () => {
 })
 
 test.each([
-  [undefined],
-  [{ tempDir: 'custom-dir' }],
-  [{ openapiFile: 'custom-openapi.json' }],
+  [undefined, ['openapi.json']],
+  [{ tempDir: 'custom-dir' }, ['openapi.json']],
+  [{ openapiFiles: 'custom-openapi.json' }, ['custom-openapi.json']],
   [
     {
       tempDir: 'custom-dir',
-      openapiFile: 'custom-openapi.json',
+      openapiFiles: 'custom-openapi.json',
       convertCase: 'snake' as const,
     },
+    ['custom-openapi.json'],
   ],
 ] as const)('devupApi returns plugin with config hook: %s', async (options:
   | DevupApiOptions
-  | undefined) => {
+  | undefined, expectedFiles: string[]) => {
   const plugin = devupApi(options)
   expect(plugin.config).toBeDefined()
   expect(typeof plugin.config).toBe('function')
@@ -94,7 +95,7 @@ test.each([
       config?: () => Promise<{ define: Record<string, string> }>
     }
   ).config?.()
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(options?.openapiFile)
+  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
   expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
   expect(result).toEqual({
     define: {
@@ -131,20 +132,34 @@ test('devupApi config hook returns empty define when urlMap is undefined', async
   })
 })
 
+test('devupApi config hook returns empty define when urlMap is empty object', async () => {
+  mockCreateUrlMap.mockReturnValue({} as never)
+  const plugin = devupApi()
+  const result = await (
+    plugin as unknown as {
+      config?: () => Promise<{ define: Record<string, string> }>
+    }
+  ).config?.()
+  expect(result).toEqual({
+    define: {},
+  })
+})
+
 test.each([
-  [undefined],
-  [{ tempDir: 'custom-dir' }],
-  [{ openapiFile: 'custom-openapi.json' }],
+  [undefined, ['openapi.json']],
+  [{ tempDir: 'custom-dir' }, ['openapi.json']],
+  [{ openapiFiles: 'custom-openapi.json' }, ['custom-openapi.json']],
   [
     {
       tempDir: 'custom-dir',
-      openapiFile: 'custom-openapi.json',
+      openapiFiles: 'custom-openapi.json',
       convertCase: 'pascal' as const,
     },
+    ['custom-openapi.json'],
   ],
 ] as const)('devupApi returns plugin with configResolved hook: %s', async (options:
   | DevupApiOptions
-  | undefined) => {
+  | undefined, expectedFiles: string[]) => {
   const plugin = devupApi(options)
   expect(plugin.configResolved).toBeDefined()
   expect(typeof plugin.configResolved).toBe('function')
@@ -153,7 +168,7 @@ test.each([
     plugin as unknown as { configResolved?: () => Promise<void> }
   ).configResolved?.()
   expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(options?.openapiFile)
+  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
   expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),

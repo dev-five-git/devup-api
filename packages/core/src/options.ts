@@ -27,5 +27,5 @@ export interface DevupApiOptions extends DevupApiTypeGeneratorOptions {
    * OpenAPI file path
    * @default {'openapi.json'}
    */
-  openapiFile?: string
+  openapiFiles?: string[] | string
 }

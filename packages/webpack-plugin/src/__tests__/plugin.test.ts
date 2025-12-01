@@ -127,11 +127,11 @@ test('devupApiWebpackPlugin constructor initializes with default options', () =>
 
 test.each([
   [{ tempDir: 'custom-dir' }],
-  [{ openapiFile: 'custom-openapi.json' }],
+  [{ openapiFiles: 'custom-openapi.json' }],
   [
     {
       tempDir: 'custom-dir',
-      openapiFile: 'custom-openapi.json',
+      openapiFiles: 'custom-openapi.json',
       convertCase: 'snake' as const,
     },
   ],
@@ -153,19 +153,20 @@ test('devupApiWebpackPlugin apply method registers beforeCompile hook', () => {
 })
 
 test.each([
-  [undefined],
-  [{ tempDir: 'custom-dir' }],
-  [{ openapiFile: 'custom-openapi.json' }],
+  [undefined, ['openapi.json']],
+  [{ tempDir: 'custom-dir' }, ['openapi.json']],
+  [{ openapiFiles: 'custom-openapi.json' }, ['custom-openapi.json']],
   [
     {
       tempDir: 'custom-dir',
-      openapiFile: 'custom-openapi.json',
+      openapiFiles: 'custom-openapi.json',
       convertCase: 'pascal' as const,
     },
+    ['custom-openapi.json'],
   ],
 ] as const)('devupApiWebpackPlugin beforeCompile hook executes correctly: %s', async (options:
   | DevupApiOptions
-  | undefined) => {
+  | undefined, expectedFiles: string[]) => {
   const plugin = new devupApiWebpackPlugin(options)
   const compiler = createMockCompiler()
   const definePluginApplySpy = spyOn(
@@ -181,7 +182,7 @@ test.each([
   await callback?.(null, mockCallback)
 
   expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(options?.openapiFile)
+  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
   expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options || {})
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
@@ -216,6 +217,26 @@ test('devupApiWebpackPlugin beforeCompile hook does not add DefinePlugin when ur
 
 test('devupApiWebpackPlugin beforeCompile hook does not add DefinePlugin when urlMap is undefined', async () => {
   mockCreateUrlMap.mockReturnValueOnce(undefined as never)
+  const plugin = new devupApiWebpackPlugin()
+  const compiler = createMockCompiler()
+  const definePluginApplySpy = spyOn(
+    compiler.webpack.DefinePlugin.prototype,
+    'apply',
+  ).mockImplementation(() => {})
+  plugin.apply(compiler)
+
+  const callback = compiler._storedCallback
+
+  const mockCallback = mock(() => {})
+  await callback?.(null, mockCallback)
+
+  expect(definePluginApplySpy).not.toHaveBeenCalled()
+  expect(mockCallback).toHaveBeenCalled()
+  definePluginApplySpy.mockRestore()
+})
+
+test('devupApiWebpackPlugin beforeCompile hook does not add DefinePlugin when urlMap is empty object', async () => {
+  mockCreateUrlMap.mockReturnValueOnce({} as never)
   const plugin = new devupApiWebpackPlugin()
   const compiler = createMockCompiler()
   const definePluginApplySpy = spyOn(

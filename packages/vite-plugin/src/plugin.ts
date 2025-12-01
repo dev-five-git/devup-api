@@ -3,6 +3,7 @@ import type { DevupApiOptions } from '@devup-api/core'
 import { createUrlMap, generateInterface } from '@devup-api/generator'
 import {
   createTmpDirAsync,
+  normalizeOpenapiFiles,
   readOpenapiAsync,
   writeInterfaceAsync,
 } from '@devup-api/utils'
@@ -14,17 +15,19 @@ export function devupApi(options?: DevupApiOptions): Plugin {
     // Vite plugin implementation
     async configResolved() {
       const tempDir = await createTmpDirAsync(options?.tempDir)
-      const schema = await readOpenapiAsync(options?.openapiFile)
+      const openapiFiles = normalizeOpenapiFiles(options?.openapiFiles)
+      const schemas = await readOpenapiAsync(openapiFiles)
       await writeInterfaceAsync(
         join(tempDir, 'api.d.ts'),
-        generateInterface(schema, options),
+        generateInterface(schemas, options),
       )
     },
     async config() {
-      const schema = await readOpenapiAsync(options?.openapiFile)
-      const urlMap = createUrlMap(schema, options)
+      const openapiFiles = normalizeOpenapiFiles(options?.openapiFiles)
+      const schemas = await readOpenapiAsync(openapiFiles)
+      const urlMap = createUrlMap(schemas, options)
       const define: Record<string, string> = {}
-      if (urlMap) {
+      if (urlMap && Object.keys(urlMap).length > 0) {
         // json stringify twice to avoid JSON.parse error
         define['process.env.DEVUP_API_URL_MAP'] = JSON.stringify(
           JSON.stringify(urlMap),

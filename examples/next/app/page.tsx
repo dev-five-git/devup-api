@@ -5,9 +5,13 @@ import { Box, Text } from '@devup-ui/react'
 import { useEffect } from 'react'
 
 const api = createApi('https://api.example.com')
+const api2 = createApi('https://api.example2.com', undefined, 'openapi2.json')
 
 export default function Home() {
   useEffect(() => {
+    api2.get('getUsers2', {}).then((res) => {
+      console.log(res)
+    })
     api.get('getUsers', {}).then((res) => {
       console.log(res)
     })

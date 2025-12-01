@@ -581,6 +581,208 @@ exports[`formatTypeValue handles nested type object 1`] = `
 }"
 `;
 
+exports[`formatTypeValue handles ParameterDefinition with description and default 1`] = `
+"{
+  /**
+   * User ID
+   * @default {123}
+   */
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles ParameterDefinition with just default 1`] = `
+"{
+  /** @default {123} */
+  id?: string;
+}"
+`;
+
+exports[`formatTypeValue handles ParameterDefinition with description only 1`] = `
+"{
+  /**
+   * User ID
+   */
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with all optional properties 1`] = `
+"{
+  id: string;
+  name: string;
+}"
+`;
+
+exports[`formatTypeValue handles nested object with all optional properties 1`] = `
+"{
+  user: {
+    id: string;
+    name: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with string value (component reference) 1`] = `
+"{
+  user: User;
+}"
+`;
+
+exports[`formatTypeValue handles nested type object with object type 1`] = `
+"{
+  id: string;
+  name: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with mixed optional and required 1`] = `
+"{
+  required: string;
+  optional: string;
+}"
+`;
+
+exports[`formatTypeValue handles ParameterDefinition with required false 1`] = `
+"{
+  page?: number;
+}"
+`;
+
+exports[`formatTypeValue handles object with ParameterDefinition that has required true 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with type object that has non-object type 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with nested type object with object type 1`] = `
+"{
+  user: {
+    id: string;
+    name: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with nested regular object 1`] = `
+"{
+  user: {
+    id: string;
+    name: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with non-object value 1`] = `
+"{
+  count: 123;
+}"
+`;
+
+exports[`formatTypeValue handles object with keys ending with question mark 1`] = `
+"{
+  id?: string;
+  name?: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with ParameterDefinition required false in nested check 1`] = `
+"{
+  params?: {
+    page?: number;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing nested object type 1`] = `
+"{
+  user: {
+    profile: {
+      id: string;
+      name: string;
+    };
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing non-object type (string) 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with all optional properties (keys ending with ?) 1`] = `
+"{
+  params?: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with nested empty object 1`] = `
+"{
+  empty?: {};
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing nested object with all optional 1`] = `
+"{
+  user: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing nested object type that triggers recursive areAllPropertiesOptional 1`] = `
+"{
+  nested: {
+    inner: {
+      id?: string;
+      name?: string;
+    };
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with nested regular object that triggers areAllPropertiesOptional recursive call (line 230) 1`] = `
+"{
+  nested?: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles deeply nested regular objects that trigger areAllPropertiesOptional recursive calls 1`] = `
+"{
+  level1?: {
+    level2?: {
+      level3?: {
+        id?: string;
+        name?: string;
+      };
+    };
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object where type is object with optional properties 1`] = `
+"{
+  params: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
 exports[`extractParameters handles path parameters 1`] = `
 {
   "headerParams": {},
@@ -739,136 +941,6 @@ exports[`extractParameters handles $ref parameter with schema 1`] = `
 }
 `;
 
-exports[`extractParameters handles empty parameters 1`] = `
-{
-  "headerParams": {},
-  "pathParams": {},
-  "queryParams": {},
-}
-`;
-
-exports[`extractRequestBody handles requestBody with application/json 1`] = `
-{
-  "name?": {
-    "default": undefined,
-    "type": "string",
-  },
-}
-`;
-
-exports[`extractRequestBody handles requestBody $ref 1`] = `
-{
-  "name?": {
-    "default": undefined,
-    "type": "string",
-  },
-}
-`;
-
-exports[`formatTypeValue handles ParameterDefinition with description and default 1`] = `
-"{
-  /**
-   * User ID
-   * @default {123}
-   */
-  id: string;
-}"
-`;
-
-exports[`formatTypeValue handles ParameterDefinition with just default 1`] = `
-"{
-  /** @default {123} */
-  id?: string;
-}"
-`;
-
-exports[`formatTypeValue handles ParameterDefinition with description only 1`] = `
-"{
-  /**
-   * User ID
-   */
-  id: string;
-}"
-`;
-
-exports[`formatTypeValue handles object with all optional properties 1`] = `
-"{
-  id: string;
-  name: string;
-}"
-`;
-
-exports[`formatTypeValue handles nested object with all optional properties 1`] = `
-"{
-  user: {
-    id: string;
-    name: string;
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with string value (component reference) 1`] = `
-"{
-  user: User;
-}"
-`;
-
-exports[`formatTypeValue handles nested type object with object type 1`] = `
-"{
-  id: string;
-  name: string;
-}"
-`;
-
-exports[`formatTypeValue handles object with mixed optional and required 1`] = `
-"{
-  required: string;
-  optional: string;
-}"
-`;
-
-exports[`formatTypeValue handles ParameterDefinition with required false 1`] = `
-"{
-  page?: number;
-}"
-`;
-
-exports[`formatTypeValue handles object with ParameterDefinition that has required true 1`] = `
-"{
-  id: string;
-}"
-`;
-
-exports[`formatTypeValue handles object with type object that has non-object type 1`] = `
-"{
-  id: string;
-}"
-`;
-
-exports[`formatTypeValue handles object with nested type object with object type 1`] = `
-"{
-  user: {
-    id: string;
-    name: string;
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with nested regular object 1`] = `
-"{
-  user: {
-    id: string;
-    name: string;
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with non-object value 1`] = `
-"{
-  count: 123;
-}"
-`;
-
 exports[`extractParameters handles $ref query parameter 1`] = `
 {
   "headerParams": {},
@@ -907,100 +979,28 @@ exports[`extractParameters handles $ref header parameter 1`] = `
 }
 `;
 
-exports[`formatTypeValue handles object with keys ending with question mark 1`] = `
-"{
-  id?: string;
-  name?: string;
-}"
+exports[`extractParameters handles empty parameters 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {},
+  "queryParams": {},
+}
 `;
 
-exports[`formatTypeValue handles object with ParameterDefinition required false in nested check 1`] = `
-"{
-  params?: {
-    page?: number;
-  };
-}"
+exports[`extractRequestBody handles requestBody with application/json 1`] = `
+{
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
 `;
 
-exports[`formatTypeValue handles object with type object containing nested object type 1`] = `
-"{
-  user: {
-    profile: {
-      id: string;
-      name: string;
-    };
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with type object containing non-object type (string) 1`] = `
-"{
-  id: string;
-}"
-`;
-
-exports[`formatTypeValue handles object with all optional properties (keys ending with ?) 1`] = `
-"{
-  params?: {
-    id?: string;
-    name?: string;
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with nested empty object 1`] = `
-"{
-  empty?: {};
-}"
-`;
-
-exports[`formatTypeValue handles object with type object containing nested object with all optional 1`] = `
-"{
-  user: {
-    id?: string;
-    name?: string;
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with type object containing nested object type that triggers recursive areAllPropertiesOptional 1`] = `
-"{
-  nested: {
-    inner: {
-      id?: string;
-      name?: string;
-    };
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with type object where type is object with optional properties 1`] = `
-"{
-  params: {
-    id?: string;
-    name?: string;
-  };
-}"
-`;
-
-exports[`formatTypeValue handles object with nested regular object that triggers areAllPropertiesOptional recursive call (line 230) 1`] = `
-"{
-  nested?: {
-    id?: string;
-    name?: string;
-  };
-}"
-`;
-
-exports[`formatTypeValue handles deeply nested regular objects that trigger areAllPropertiesOptional recursive calls 1`] = `
-"{
-  level1?: {
-    level2?: {
-      level3?: {
-        id?: string;
-        name?: string;
-      };
-    };
-  };
-}"
+exports[`extractRequestBody handles requestBody $ref 1`] = `
+{
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
 `;

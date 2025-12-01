@@ -89,19 +89,20 @@ test('devupApiRsbuildPlugin returns plugin with correct name', () => {
 })
 
 test.each([
-  [undefined],
-  [{ tempDir: 'custom-dir' }],
-  [{ openapiFile: 'custom-openapi.json' }],
+  [undefined, ['openapi.json']],
+  [{ tempDir: 'custom-dir' }, ['openapi.json']],
+  [{ openapiFiles: 'custom-openapi.json' }, ['custom-openapi.json']],
   [
     {
       tempDir: 'custom-dir',
-      openapiFile: 'custom-openapi.json',
+      openapiFiles: 'custom-openapi.json',
       convertCase: 'snake' as const,
     },
+    ['custom-openapi.json'],
   ],
 ] as const)('devupApiRsbuildPlugin returns plugin with setup hook: %s', async (options:
   | DevupApiOptions
-  | undefined) => {
+  | undefined, expectedFiles: string[]) => {
   const plugin = devupApiRsbuildPlugin(options)
   expect(plugin.setup).toBeDefined()
   expect(typeof plugin.setup).toBe('function')
@@ -110,7 +111,7 @@ test.each([
   await plugin.setup?.(build as never)
 
   expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(options?.openapiFile)
+  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
   expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
@@ -209,6 +210,26 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is null',
 
 test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is undefined', async () => {
   mockCreateUrlMap.mockReturnValueOnce(undefined as never)
+  const plugin = devupApiRsbuildPlugin()
+  const build = createMockBuild()
+  await plugin.setup?.(build as never)
+
+  const configModifier = (build.modifyRsbuildConfig as ReturnType<typeof mock>)
+    .mock.calls[0]?.[0] as (config: {
+    source?: { define?: Record<string, string> }
+  }) => unknown
+  const config = { source: { define: {} } }
+  const result = configModifier(config)
+
+  expect(result).toEqual({
+    source: {
+      define: {},
+    },
+  })
+})
+
+test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is empty object', async () => {
+  mockCreateUrlMap.mockReturnValueOnce({} as never)
   const plugin = devupApiRsbuildPlugin()
   const build = createMockBuild()
   await plugin.setup?.(build as never)

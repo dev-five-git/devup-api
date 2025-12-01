@@ -3,6 +3,7 @@ import type { DevupApiOptions } from '@devup-api/core'
 import { createUrlMap, generateInterface } from '@devup-api/generator'
 import {
   createTmpDirAsync,
+  normalizeOpenapiFiles,
   readOpenapiAsync,
   writeInterfaceAsync,
 } from '@devup-api/utils'
@@ -15,21 +16,22 @@ export function devupApiRsbuildPlugin(
     name: 'devup-api',
     async setup(build) {
       const tempDir = await createTmpDirAsync(options?.tempDir)
-      const schema = await readOpenapiAsync(options?.openapiFile)
+      const openapiFiles = normalizeOpenapiFiles(options?.openapiFiles)
+      const schemas = await readOpenapiAsync(openapiFiles)
 
       // Generate interface file
       await writeInterfaceAsync(
         join(tempDir, 'api.d.ts'),
-        generateInterface(schema, options),
+        generateInterface(schemas, options),
       )
 
       // Create urlMap and set environment variable
-      const urlMap = createUrlMap(schema, options)
+      const urlMap = createUrlMap(schemas, options)
 
       build.modifyRsbuildConfig((config) => {
         config.source ??= {}
         config.source.define ??= {}
-        if (urlMap) {
+        if (urlMap && Object.keys(urlMap).length > 0) {
           config.source.define['process.env.DEVUP_API_URL_MAP'] =
             JSON.stringify(JSON.stringify(urlMap))
         }
