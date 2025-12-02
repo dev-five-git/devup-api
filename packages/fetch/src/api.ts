@@ -25,7 +25,7 @@ import { getApiEndpointInfo } from './url-map'
 import { getApiEndpoint, isPlainObject } from './utils'
 
 // biome-ignore lint/suspicious/noExplicitAny: any is used to allow for flexibility in the type
-type DevupApiResponse<T, E = any> =
+export type DevupApiResponse<T, E = any> =
   | {
       data: T
       error?: undefined

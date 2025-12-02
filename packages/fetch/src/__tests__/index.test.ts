@@ -5,6 +5,7 @@ import * as indexModule from '../index'
 
 test('index.ts exports', () => {
   expect({ ...indexModule }).toEqual({
+    DevupApi: expect.any(Function),
     createApi: expect.any(Function),
   })
 })
