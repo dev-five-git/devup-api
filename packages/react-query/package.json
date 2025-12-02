@@ -28,8 +28,10 @@
     "@tanstack/react-query": "*"
   },
   "devDependencies": {
+    "@testing-library/react-hooks": "^8.0.1",
     "@types/node": "^24.10",
     "@types/react": "^19.2",
+    "happy-dom": "^20.0.11",
     "typescript": "^5.9"
   }
 }

@@ -28,7 +28,7 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
-function getQueryKey<M, P, OP>(
+export function getQueryKey<M, P, OP>(
   method: M,
   path: P,
   options: OP,
