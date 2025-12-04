@@ -131,6 +131,28 @@ test('request does not serialize non-plain object body', async () => {
   }
 })
 
+test('request serializes plain object body to JSON with custom headers', async () => {
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
+  const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
+
+  await api.post(
+    '/test' as never,
+    {
+      body: { name: 'test', value: 123 },
+    } as never,
+  )
+
+  expect(mockFetch).toHaveBeenCalledTimes(1)
+  const call = mockFetch.mock.calls[0]
+  expect(call).toBeDefined()
+  if (call) {
+    const request = call[0] as Request
+    const body = await request.text()
+    expect(body).toBe(JSON.stringify({ name: 'test', value: 123 }))
+    expect(request.headers.get('Content-Type')).toBe('application/json')
+  }
+})
+
 test('request merges defaultOptions with request options', async () => {
   const api = new DevupApi(
     'https://api.example.com',

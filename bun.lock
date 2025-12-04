@@ -20,6 +20,7 @@
       "dependencies": {
         "@devup-api/fetch": "workspace:*",
         "@devup-api/next-plugin": "workspace:*",
+        "@devup-api/react-query": "workspace:*",
         "@devup-ui/react": "^1",
         "next": "^16.0.4",
         "react": "^19.2.0",
@@ -88,7 +89,7 @@
     },
     "packages/core": {
       "name": "@devup-api/core",
-      "version": "0.1.5",
+      "version": "0.1.6",
       "devDependencies": {
         "@types/node": "^24.10",
         "typescript": "^5.9",
@@ -96,7 +97,7 @@
     },
     "packages/fetch": {
       "name": "@devup-api/fetch",
-      "version": "0.1.5",
+      "version": "0.1.7",
       "dependencies": {
         "@devup-api/core": "workspace:*",
       },
@@ -139,7 +140,7 @@
     },
     "packages/react-query": {
       "name": "@devup-api/react-query",
-      "version": "0.0.0",
+      "version": "0.1.0",
       "dependencies": {
         "@devup-api/fetch": "workspace:*",
         "@tanstack/react-query": ">=5.90",

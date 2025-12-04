@@ -24,28 +24,48 @@ export interface DevupRequestComponentStruct {}
 // biome-ignore lint/suspicious/noEmptyInterface: empty interface
 export interface DevupResponseComponentStruct {}
 
-export type DevupApiStruct = DevupGetApiStruct &
-  DevupPostApiStruct &
-  DevupPutApiStruct &
-  DevupDeleteApiStruct &
-  DevupPatchApiStruct
+export type DevupGetApiStructScope<O extends string> = ConditionalScope<
+  DevupGetApiStruct,
+  O
+>
+export type DevupPostApiStructScope<O extends string> = ConditionalScope<
+  DevupPostApiStruct,
+  O
+>
+export type DevupPutApiStructScope<O extends string> = ConditionalScope<
+  DevupPutApiStruct,
+  O
+>
+export type DevupDeleteApiStructScope<O extends string> = ConditionalScope<
+  DevupDeleteApiStruct,
+  O
+>
+export type DevupPatchApiStructScope<O extends string> = ConditionalScope<
+  DevupPatchApiStruct,
+  O
+>
 
 export type DevupGetApiStructKey<O extends string> = ConditionalKeys<
-  ConditionalScope<DevupGetApiStruct, O>
+  DevupGetApiStructScope<O>
 >
 export type DevupPostApiStructKey<O extends string> = ConditionalKeys<
-  ConditionalScope<DevupPostApiStruct, O>
+  DevupPostApiStructScope<O>
 >
 export type DevupPutApiStructKey<O extends string> = ConditionalKeys<
-  ConditionalScope<DevupPutApiStruct, O>
+  DevupPutApiStructScope<O>
 >
 export type DevupDeleteApiStructKey<O extends string> = ConditionalKeys<
-  ConditionalScope<DevupDeleteApiStruct, O>
+  DevupDeleteApiStructScope<O>
 >
 export type DevupPatchApiStructKey<O extends string> = ConditionalKeys<
-  ConditionalScope<DevupPatchApiStruct, O>
+  DevupPatchApiStructScope<O>
 >
+export type DevupApiStructScope<O extends string> = DevupGetApiStructScope<O> &
+  DevupPostApiStructScope<O> &
+  DevupPutApiStructScope<O> &
+  DevupDeleteApiStructScope<O> &
+  DevupPatchApiStructScope<O>
 
 export type DevupApiStructKey<O extends string> = ConditionalKeys<
-  ConditionalScope<DevupApiStruct, O>
+  DevupApiStructScope<O>
 >

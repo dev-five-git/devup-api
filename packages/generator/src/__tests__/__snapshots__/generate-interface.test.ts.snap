@@ -560,11 +560,11 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        body: DevupRequestComponentStruct['User'];
+        body: DevupRequestComponentStruct['openapi.json']['User'];
         response?: {};
       };
       createUser: {
-        body: DevupRequestComponentStruct['User'];
+        body: DevupRequestComponentStruct['openapi.json']['User'];
         response?: {};
       };
     }
@@ -768,11 +768,11 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        body: DevupRequestComponentStruct['CreateUserRequest'];
+        body: DevupRequestComponentStruct['openapi.json']['CreateUserRequest'];
         response?: {};
       };
       createUser: {
-        body: DevupRequestComponentStruct['CreateUserRequest'];
+        body: DevupRequestComponentStruct['openapi.json']['CreateUserRequest'];
         response?: {};
       };
     }
@@ -1277,14 +1277,14 @@ declare module "@devup-api/fetch" {
         params: {
           userId: string;
         };
-        body: DevupRequestComponentStruct['UpdatePostRequest'];
+        body: DevupRequestComponentStruct['openapi.json']['UpdatePostRequest'];
         response: DevupResponseComponentStruct['openapi.json']['Post'];
       };
       updateUserPost: {
         params: {
           userId: string;
         };
-        body: DevupRequestComponentStruct['UpdatePostRequest'];
+        body: DevupRequestComponentStruct['openapi.json']['UpdatePostRequest'];
         response: DevupResponseComponentStruct['openapi.json']['Post'];
       };
     }

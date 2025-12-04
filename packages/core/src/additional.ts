@@ -1,3 +1,4 @@
+import type { DevupApiServers } from './api-struct'
 import type { Middleware } from './middleware'
 
 export type Additional<
@@ -7,7 +8,14 @@ export type Additional<
 
 export type RequiredOptions<T extends object> = keyof T extends undefined
   ? never
-  : T
+  : 'params' extends keyof T
+    ? T
+    : 'query' extends keyof T
+      ? T
+      : 'body' extends keyof T
+        ? T
+        : never
+export type IsCold = keyof DevupApiServers extends never ? true : false
 export type DevupApiRequestInit = Omit<RequestInit, 'body'> & {
   body?: object | RequestInit['body']
   params?: Record<string, string | number | boolean | null | undefined>

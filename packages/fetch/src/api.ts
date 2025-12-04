@@ -1,22 +1,22 @@
 import type {
   Additional,
   ConditionalKeys,
-  ConditionalScope,
   DevupApiRequestInit,
   DevupApiServers,
-  DevupApiStruct,
   DevupApiStructKey,
-  DevupDeleteApiStruct,
+  DevupApiStructScope,
   DevupDeleteApiStructKey,
-  DevupGetApiStruct,
+  DevupDeleteApiStructScope,
   DevupGetApiStructKey,
-  DevupPatchApiStruct,
+  DevupGetApiStructScope,
   DevupPatchApiStructKey,
-  DevupPostApiStruct,
+  DevupPatchApiStructScope,
   DevupPostApiStructKey,
-  DevupPutApiStruct,
+  DevupPostApiStructScope,
   DevupPutApiStructKey,
+  DevupPutApiStructScope,
   ExtractValue,
+  IsCold,
   Middleware,
   RequiredOptions,
 } from '@devup-api/core'
@@ -56,12 +56,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   get<
     T extends DevupGetApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupGetApiStruct, S>>,
+    O extends Additional<T, DevupGetApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -73,12 +81,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   GET<
     T extends DevupGetApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupGetApiStruct, S>>,
+    O extends Additional<T, DevupGetApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -90,12 +106,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   post<
     T extends DevupPostApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupPostApiStruct, S>>,
+    O extends Additional<T, DevupPostApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -107,12 +131,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   POST<
     T extends DevupPostApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupPostApiStruct, S>>,
+    O extends Additional<T, DevupPostApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -124,12 +156,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   put<
     T extends DevupPutApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupPutApiStruct, S>>,
+    O extends Additional<T, DevupPutApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -141,12 +181,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   PUT<
     T extends DevupPutApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupPutApiStruct, S>>,
+    O extends Additional<T, DevupPutApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -158,12 +206,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   delete<
     T extends DevupDeleteApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupDeleteApiStruct, S>>,
+    O extends Additional<T, DevupDeleteApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -175,12 +231,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   DELETE<
     T extends DevupDeleteApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupDeleteApiStruct, S>>,
+    O extends Additional<T, DevupDeleteApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -192,12 +256,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   patch<
     T extends DevupPatchApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupPatchApiStruct, S>>,
+    O extends Additional<T, DevupPatchApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -209,12 +281,20 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   PATCH<
     T extends DevupPatchApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupPatchApiStruct, S>>,
+    O extends Additional<T, DevupPatchApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -226,17 +306,33 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   async request<
     T extends DevupApiStructKey<S>,
-    O extends Additional<T, ConditionalScope<DevupApiStruct, S>>,
+    O extends Additional<T, DevupApiStructScope<S>>,
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     const { method, url } = getApiEndpointInfo(path, this.serverName)
-    const { middleware = [], query, ...restOptions } = options[0] || {}
+    const {
+      middleware = [],
+      query,
+      headers = {},
+      body,
+      params,
+      ...restOptions
+    }: DevupApiRequestInit = options[0] || {}
+    const mergedHeaders = new Headers(headers)
     const mergedOptions = {
       ...this.defaultOptions,
       ...restOptions,
@@ -244,24 +340,21 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     const requestOptions = {
       ...mergedOptions,
       method: mergedOptions.method || method,
+      headers: mergedHeaders,
     }
-    if (requestOptions.body && isPlainObject(requestOptions.body)) {
-      requestOptions.body = JSON.stringify(requestOptions.body)
+    if (body) {
+      if (isPlainObject(body)) {
+        requestOptions.body = JSON.stringify(body)
+        if (!requestOptions.headers.has('Content-Type')) {
+          requestOptions.headers.set('Content-Type', 'application/json')
+        }
+      } else {
+        requestOptions.body = body
+      }
     }
     const queryString = query ? `?${getQueryString(query).toString()}` : ''
     let request = new Request(
-      getApiEndpoint(
-        this.baseUrl,
-        url,
-        (
-          requestOptions as {
-            params?: Record<
-              string,
-              string | number | boolean | null | undefined
-            >
-          }
-        ).params,
-      ) + queryString,
+      getApiEndpoint(this.baseUrl, url, params) + queryString,
       requestOptions as RequestInit,
     )
 
@@ -271,14 +364,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
     for (const middleware of finalMiddleware) {
       if (middleware.onRequest) {
-        const result = await middleware.onRequest({
-          request,
-          schemaPath: url,
-          params: requestOptions.params,
-          query: requestOptions.query,
-          headers: requestOptions.headers,
-          body: requestOptions.body,
-        })
+        const result = await middleware.onRequest(
+          Object.freeze({
+            request,
+            schemaPath: url,
+            params,
+            query,
+            headers,
+            body,
+          }),
+        )
         if (result) {
           if (result instanceof Request) {
             request = result
@@ -348,19 +443,19 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     } as DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   }
 
-  setDefaultOptions(options: DevupApiRequestInit) {
+  setDefaultOptions(options: DevupApiRequestInit): void {
     this.defaultOptions = options
   }
 
-  getBaseUrl() {
+  getBaseUrl(): string {
     return this.baseUrl
   }
 
-  getDefaultOptions() {
+  getDefaultOptions(): DevupApiRequestInit {
     return this.defaultOptions
   }
 
-  use(...middleware: Middleware[]) {
+  use(...middleware: Middleware[]): void {
     this.middleware.push(...middleware)
   }
 }

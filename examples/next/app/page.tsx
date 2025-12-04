@@ -1,15 +1,46 @@
 'use client'
 
 import { createApi } from '@devup-api/fetch'
+import { createQueryClient } from '@devup-api/react-query'
 import { Box, Text } from '@devup-ui/react'
 import { useEffect } from 'react'
 
-const api = createApi('https://api.example.com')
-const api2 = createApi('https://api.example2.com', undefined, 'openapi2.json')
+const api = createApi({
+  baseUrl: 'https://api.example.com',
+})
+const api2 = createApi({
+  baseUrl: 'https://api.example2.com',
+  serverName: 'openapi2.json',
+})
+
+const queryClient = createQueryClient(api)
 
 export default function Home() {
+  const { data, isLoading, error } = queryClient.useQuery('GET', 'getUsers', {
+    // params: { id: 1 },
+    query: {
+      name: 'John Doe',
+    },
+  })
+
+  console.info(data, isLoading, error)
+
+  const {
+    data: data2,
+    error: error2,
+    mutateAsync,
+  } = queryClient.useMutation('GET', '/users/{id}', {})
+  mutateAsync({
+    params: { id: 1 },
+    query: {
+      name: 'John Doe',
+    },
+  })
+
+  console.info(data2, error2)
+
   useEffect(() => {
-    api2.get('getUsers2', {}).then((res) => {
+    api2.get('getUsers2').then((res) => {
       console.log(res)
     })
     api.get('getUsers', {}).then((res) => {
