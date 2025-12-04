@@ -2,5 +2,7 @@
   "ignore": ["**", "!packages/**"],
   "baseBranch": "main",
   "latestPackage": null,
-  "publish": {}
+  "publish": {
+    "node": "bun publish"
+  }
 }
