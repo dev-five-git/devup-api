@@ -11,7 +11,9 @@ export type RequiredOptions<T extends object> = keyof T extends undefined
 export type DevupApiRequestInit = Omit<RequestInit, 'body'> & {
   body?: object | RequestInit['body']
   params?: Record<string, string | number | boolean | null | undefined>
-  query?: Record<string, string | number | boolean | null | undefined>
+  query?:
+    | ConstructorParameters<typeof URLSearchParams>[0]
+    | Record<string, string | number | (number | string)[]>
   middleware?: Middleware[]
 }
 

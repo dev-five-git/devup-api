@@ -4,8 +4,8 @@ import type { PromiseOr } from './utils'
 export interface MiddlewareCallbackParams {
   request: Request
   schemaPath: string
-  params?: Record<string, unknown>
-  query?: Record<string, unknown>
+  params?: DevupApiRequestInit['params']
+  query?: DevupApiRequestInit['query']
   headers?: DevupApiRequestInit['headers']
   body?: DevupApiRequestInit['body']
 }
