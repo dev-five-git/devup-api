@@ -1,5 +1,7 @@
 import type {
   Additional,
+  ApiOption,
+  ConditionalApiOption,
   ConditionalKeys,
   DevupApi,
   DevupApiRequestInit,
@@ -11,9 +13,6 @@ import type {
   DevupPostApiStructScope,
   DevupPutApiStructScope,
   ExtractValue,
-  IsCold,
-  RequiredOptions,
-  // RequiredOptions,
 } from '@devup-api/fetch'
 import {
   useInfiniteQuery,
@@ -70,27 +69,16 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   >(
     method: M,
     path: T,
-    ...options: [RequiredOptions<O>] extends [never]
-      ? [
-          options?: IsCold extends true
-            ? DevupApiRequestInit
-            : Omit<DevupApiRequestInit, 'params'> &
-                Omit<O, 'response' | 'error'>,
-          queryOptions?: Omit<
-            Parameters<typeof useQuery<D, E>>[0],
-            'queryFn' | 'queryKey'
-          >,
-          queryClient?: Parameters<typeof useQuery<D, E>>[1],
-        ]
-      : [
-          options: Omit<DevupApiRequestInit, 'params'> &
-            Omit<O, 'response' | 'error'>,
-          queryOptions?: Omit<
-            Parameters<typeof useQuery<D, E>>[0],
-            'queryFn' | 'queryKey'
-          >,
-          queryClient?: Parameters<typeof useQuery<D, E>>[1],
-        ]
+    ...options: ApiOption<
+      O,
+      [
+        queryOptions?: Omit<
+          Parameters<typeof useQuery<D, E>>[0],
+          'queryFn' | 'queryKey'
+        >,
+        queryClient?: Parameters<typeof useQuery<D, E>>[1],
+      ]
+    >
   ): ReturnType<typeof useQuery<D, E>> {
     return useQuery<D, E>(
       {
@@ -143,14 +131,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
     O extends Additional<T, ST>,
     D extends ExtractValue<O, 'response'>,
     E extends ExtractValue<O, 'error'>,
-    V extends [RequiredOptions<O>] extends [never]
-      ?
-          | (IsCold extends true
-              ? DevupApiRequestInit
-              : Omit<DevupApiRequestInit, 'params'> &
-                  Omit<O, 'response' | 'error'>)
-          | undefined
-      : Omit<DevupApiRequestInit, 'params'> & Omit<O, 'response' | 'error'>,
+    V extends ApiOption<O>[0],
   >(
     method: M,
     path: T,
@@ -208,27 +189,16 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   >(
     method: M,
     path: T,
-    ...options: [RequiredOptions<O>] extends [never]
-      ? [
-          options?: IsCold extends true
-            ? DevupApiRequestInit
-            : Omit<DevupApiRequestInit, 'params'> &
-                Omit<O, 'response' | 'error'>,
-          queryOptions?: Omit<
-            Parameters<typeof useSuspenseQuery<D, E>>[0],
-            'queryFn' | 'queryKey'
-          >,
-          queryClient?: Parameters<typeof useSuspenseQuery<D, E>>[1],
-        ]
-      : [
-          options: Omit<DevupApiRequestInit, 'params'> &
-            Omit<O, 'response' | 'error'>,
-          queryOptions?: Omit<
-            Parameters<typeof useSuspenseQuery<D, E>>[0],
-            'queryFn' | 'queryKey'
-          >,
-          queryClient?: Parameters<typeof useSuspenseQuery<D, E>>[1],
-        ]
+    ...options: ApiOption<
+      O,
+      [
+        queryOptions?: Omit<
+          Parameters<typeof useSuspenseQuery<D, E>>[0],
+          'queryFn' | 'queryKey'
+        >,
+        queryClient?: Parameters<typeof useSuspenseQuery<D, E>>[1],
+      ]
+    >
   ): ReturnType<typeof useSuspenseQuery<D, E>> {
     return useSuspenseQuery<D, E, D>(
       {
@@ -285,9 +255,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
     method: M,
     path: T,
     ...options: [
-      options: (IsCold extends true
-        ? DevupApiRequestInit
-        : Omit<DevupApiRequestInit, 'params'> & Omit<O, 'response' | 'error'>) &
+      options: ConditionalApiOption<O> &
         Pick<
           Parameters<typeof useInfiniteQuery<D, E>>[0],
           'getNextPageParam' | 'initialPageParam'
