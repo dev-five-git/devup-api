@@ -1,0 +1,1006 @@
+// Bun Snapshot v1, https://bun.sh/docs/test/snapshots
+
+exports[`getTypeFromSchema returns interface for schema: %s 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "id?": {
+      "default": undefined,
+      "type": "string",
+    },
+    "name?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 2`] = `
+{
+  "default": undefined,
+  "type": {
+    "id?": {
+      "default": undefined,
+      "type": "string",
+    },
+    "name?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 3`] = `
+{
+  "default": undefined,
+  "type": {
+    "id": {
+      "default": undefined,
+      "type": "string",
+    },
+    "name": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 4`] = `
+{
+  "default": undefined,
+  "type": {
+    "id": {
+      "default": undefined,
+      "type": "string",
+    },
+    "name": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 5`] = `
+{
+  "default": undefined,
+  "type": {
+    "id?": {
+      "default": "123",
+      "type": "string",
+    },
+    "name?": {
+      "default": "John Doe",
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 6`] = `
+{
+  "default": undefined,
+  "type": {
+    "id": {
+      "default": "123",
+      "type": "string",
+    },
+    "name": {
+      "default": "John Doe",
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 7`] = `
+{
+  "default": undefined,
+  "type": {
+    "id?": {
+      "default": "123",
+      "type": "string",
+    },
+    "name?": {
+      "default": "John Doe",
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 8`] = `
+{
+  "default": undefined,
+  "type": {
+    "id": {
+      "default": "123",
+      "type": "string",
+    },
+    "name": {
+      "default": "John Doe",
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 9`] = `
+{
+  "default": undefined,
+  "type": 
+"Array<{
+  id?: string;
+  name?: string;
+}>"
+,
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 10`] = `
+{
+  "default": undefined,
+  "type": 
+"Array<{
+  id?: string;
+  name?: string;
+}>"
+,
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 11`] = `
+{
+  "default": undefined,
+  "type": "Array<string>",
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 12`] = `
+{
+  "default": undefined,
+  "type": "Array<string>",
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 13`] = `
+{
+  "default": undefined,
+  "type": 
+"Array<{
+  id?: string;
+  name?: string;
+}>"
+,
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 14`] = `
+{
+  "default": undefined,
+  "type": 
+"Array<{
+  id?: string;
+  name?: string;
+}>"
+,
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 15`] = `
+{
+  "default": undefined,
+  "type": 
+"Array<{
+  id?: string;
+  name?: string;
+}>"
+,
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 16`] = `
+{
+  "default": undefined,
+  "type": 
+"Array<{
+  id: string;
+  name: string;
+}>"
+,
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 17`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 18`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 19`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema returns interface for schema: %s 20`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema handles allOf 1`] = `
+{
+  "default": undefined,
+  "type": 
+"{
+  id?: string;
+} & {
+  name?: string;
+}"
+,
+}
+`;
+
+exports[`getTypeFromSchema handles empty allOf 1`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema handles allOf with default 1`] = `
+{
+  "default": {
+    "id": "123",
+  },
+  "type": 
+"{
+  id?: string;
+}"
+,
+}
+`;
+
+exports[`getTypeFromSchema handles anyOf 1`] = `
+{
+  "default": undefined,
+  "type": "(string | number)",
+}
+`;
+
+exports[`getTypeFromSchema handles empty anyOf 1`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema handles anyOf with default 1`] = `
+{
+  "default": "test",
+  "type": "(string)",
+}
+`;
+
+exports[`getTypeFromSchema handles oneOf 1`] = `
+{
+  "default": undefined,
+  "type": "(string | number)",
+}
+`;
+
+exports[`getTypeFromSchema handles empty oneOf 1`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema handles enum 1`] = `
+{
+  "default": undefined,
+  "type": ""red" | "green" | "blue"",
+}
+`;
+
+exports[`getTypeFromSchema handles enum with default 1`] = `
+{
+  "default": "red",
+  "type": ""red" | "green" | "blue"",
+}
+`;
+
+exports[`getTypeFromSchema handles enum with number values 1`] = `
+{
+  "default": undefined,
+  "type": ""1" | "2" | "3"",
+}
+`;
+
+exports[`getTypeFromSchema handles number type 1`] = `
+{
+  "default": undefined,
+  "type": "number",
+}
+`;
+
+exports[`getTypeFromSchema handles number type with default 1`] = `
+{
+  "default": 42,
+  "type": "number",
+}
+`;
+
+exports[`getTypeFromSchema handles integer type 1`] = `
+{
+  "default": undefined,
+  "type": "number",
+}
+`;
+
+exports[`getTypeFromSchema handles integer type with default 1`] = `
+{
+  "default": 10,
+  "type": "number",
+}
+`;
+
+exports[`getTypeFromSchema handles boolean type 1`] = `
+{
+  "default": undefined,
+  "type": "boolean",
+}
+`;
+
+exports[`getTypeFromSchema handles boolean type with default 1`] = `
+{
+  "default": true,
+  "type": "boolean",
+}
+`;
+
+exports[`getTypeFromSchema handles string with date format 1`] = `
+{
+  "default": undefined,
+  "type": "string",
+}
+`;
+
+exports[`getTypeFromSchema handles string with date-time format 1`] = `
+{
+  "default": undefined,
+  "type": "string",
+}
+`;
+
+exports[`getTypeFromSchema handles string with default 1`] = `
+{
+  "default": "test",
+  "type": "string",
+}
+`;
+
+exports[`getTypeFromSchema handles array without items 1`] = `
+{
+  "default": undefined,
+  "type": "unknown[]",
+}
+`;
+
+exports[`getTypeFromSchema handles array without items with default 1`] = `
+{
+  "default": [],
+  "type": "unknown[]",
+}
+`;
+
+exports[`getTypeFromSchema handles object with additionalProperties true 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "[key: string]": {
+      "default": undefined,
+      "type": "unknown",
+    },
+    "id?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object with additionalProperties schema 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "[key: string]": {
+      "default": undefined,
+      "type": "string",
+    },
+    "id?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object with additionalProperties schema with default 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "[key: string]": {
+      "default": "default",
+      "type": "string",
+    },
+    "id?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object without properties but with type object 1`] = `
+{
+  "default": undefined,
+  "type": {},
+}
+`;
+
+exports[`getTypeFromSchema handles properties without type object 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "id?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object with property $ref that has default 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "user?": {
+      "default": {
+        "id": "123",
+      },
+      "type": {
+        "id?": {
+          "default": undefined,
+          "type": "string",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object with required property that has default 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "id": {
+      "default": "123",
+      "type": "string",
+    },
+    "name?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object with required property that has default 2`] = `
+{
+  "default": undefined,
+  "type": {
+    "id": {
+      "default": "123",
+      "type": "string",
+    },
+    "name?": {
+      "default": undefined,
+      "type": "string",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object with property $ref without default 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "user?": {
+      "default": undefined,
+      "type": {
+        "id?": {
+          "default": undefined,
+          "type": "string",
+        },
+      },
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles object with property $ref that cannot be resolved 1`] = `
+{
+  "default": undefined,
+  "type": {
+    "user?": {
+      "default": undefined,
+      "type": "unknown",
+    },
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles fallback to unknown 1`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`getTypeFromSchema handles $ref that resolves to schema with $ref 1`] = `
+{
+  "default": undefined,
+  "type": "unknown",
+}
+`;
+
+exports[`formatTypeValue handles object 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles nested type object 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles ParameterDefinition with description and default 1`] = `
+"{
+  /**
+   * User ID
+   * @default {123}
+   */
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles ParameterDefinition with just default 1`] = `
+"{
+  /** @default {123} */
+  id?: string;
+}"
+`;
+
+exports[`formatTypeValue handles ParameterDefinition with description only 1`] = `
+"{
+  /**
+   * User ID
+   */
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with all optional properties 1`] = `
+"{
+  id: string;
+  name: string;
+}"
+`;
+
+exports[`formatTypeValue handles nested object with all optional properties 1`] = `
+"{
+  user: {
+    id: string;
+    name: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with string value (component reference) 1`] = `
+"{
+  user: User;
+}"
+`;
+
+exports[`formatTypeValue handles nested type object with object type 1`] = `
+"{
+  id: string;
+  name: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with mixed optional and required 1`] = `
+"{
+  required: string;
+  optional: string;
+}"
+`;
+
+exports[`formatTypeValue handles ParameterDefinition with required false 1`] = `
+"{
+  page?: number;
+}"
+`;
+
+exports[`formatTypeValue handles object with ParameterDefinition that has required true 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with type object that has non-object type 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with nested type object with object type 1`] = `
+"{
+  user: {
+    id: string;
+    name: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with nested regular object 1`] = `
+"{
+  user: {
+    id: string;
+    name: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with non-object value 1`] = `
+"{
+  count: 123;
+}"
+`;
+
+exports[`formatTypeValue handles object with keys ending with question mark 1`] = `
+"{
+  id?: string;
+  name?: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with ParameterDefinition required false in nested check 1`] = `
+"{
+  params?: {
+    page?: number;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing nested object type 1`] = `
+"{
+  user: {
+    profile: {
+      id: string;
+      name: string;
+    };
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing non-object type (string) 1`] = `
+"{
+  id: string;
+}"
+`;
+
+exports[`formatTypeValue handles object with all optional properties (keys ending with ?) 1`] = `
+"{
+  params?: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with nested empty object 1`] = `
+"{
+  empty?: {};
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing nested object with all optional 1`] = `
+"{
+  user: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object containing nested object type that triggers recursive areAllPropertiesOptional 1`] = `
+"{
+  nested: {
+    inner: {
+      id?: string;
+      name?: string;
+    };
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with nested regular object that triggers areAllPropertiesOptional recursive call (line 230) 1`] = `
+"{
+  nested?: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
+exports[`formatTypeValue handles deeply nested regular objects that trigger areAllPropertiesOptional recursive calls 1`] = `
+"{
+  level1?: {
+    level2?: {
+      level3?: {
+        id?: string;
+        name?: string;
+      };
+    };
+  };
+}"
+`;
+
+exports[`formatTypeValue handles object with type object where type is object with optional properties 1`] = `
+"{
+  params: {
+    id?: string;
+    name?: string;
+  };
+}"
+`;
+
+exports[`extractParameters handles path parameters 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {
+    "id": {
+      "default": undefined,
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "type": "string",
+      },
+      "type": "string",
+    },
+  },
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles query parameters 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {},
+  "queryParams": {
+    "page": {
+      "default": undefined,
+      "in": "query",
+      "name": "page",
+      "required": false,
+      "schema": {
+        "type": "number",
+      },
+      "type": "number",
+    },
+  },
+}
+`;
+
+exports[`extractParameters handles header parameters 1`] = `
+{
+  "headerParams": {
+    "Authorization": {
+      "default": undefined,
+      "in": "header",
+      "name": "Authorization",
+      "required": true,
+      "schema": {
+        "type": "string",
+      },
+      "type": "string",
+    },
+  },
+  "pathParams": {},
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles parameters from both pathItem and operation 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {
+    "id": {
+      "default": undefined,
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "type": "string",
+      },
+      "type": "string",
+    },
+  },
+  "queryParams": {
+    "page": {
+      "default": undefined,
+      "in": "query",
+      "name": "page",
+      "required": false,
+      "schema": {
+        "type": "number",
+      },
+      "type": "number",
+    },
+  },
+}
+`;
+
+exports[`extractParameters handles $ref parameters 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {
+    "id": {
+      "default": undefined,
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "type": "string",
+      },
+      "type": "string",
+    },
+  },
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles $ref parameter that cannot be resolved 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {},
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles parameter without schema 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {
+    "id": {
+      "default": undefined,
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "type": "unknown",
+    },
+  },
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles $ref parameter without required fields 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {},
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles $ref parameter with schema 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {
+    "id": {
+      "default": "default",
+      "in": "path",
+      "name": "id",
+      "required": true,
+      "schema": {
+        "default": "default",
+        "type": "string",
+      },
+      "type": "string",
+    },
+  },
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles $ref query parameter 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {},
+  "queryParams": {
+    "page": {
+      "default": undefined,
+      "in": "query",
+      "name": "page",
+      "required": false,
+      "schema": {
+        "type": "number",
+      },
+      "type": "number",
+    },
+  },
+}
+`;
+
+exports[`extractParameters handles $ref header parameter 1`] = `
+{
+  "headerParams": {
+    "Authorization": {
+      "default": undefined,
+      "in": "header",
+      "name": "Authorization",
+      "required": true,
+      "schema": {
+        "type": "string",
+      },
+      "type": "string",
+    },
+  },
+  "pathParams": {},
+  "queryParams": {},
+}
+`;
+
+exports[`extractParameters handles empty parameters 1`] = `
+{
+  "headerParams": {},
+  "pathParams": {},
+  "queryParams": {},
+}
+`;
+
+exports[`extractRequestBody handles requestBody with application/json 1`] = `
+{
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
+`;
+
+exports[`extractRequestBody handles requestBody $ref 1`] = `
+{
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
+`;
