@@ -256,7 +256,7 @@ function generateSchemaInterface(
                   requestSchemaNames.has(schemaName)
                 ) {
                   // Use component reference
-                  requestBodyType = `DevupRequestComponentStruct['${schemaName}']`
+                  requestBodyType = `DevupRequestComponentStruct['${serverName}']['${schemaName}']`
                 } else {
                   const requestBody = extractRequestBody(
                     operation.requestBody,

@@ -7,7 +7,13 @@ export type Additional<
 
 export type RequiredOptions<T extends object> = keyof T extends undefined
   ? never
-  : T
+  : 'params' extends keyof T
+    ? T
+    : 'query' extends keyof T
+      ? T
+      : 'body' extends keyof T
+        ? T
+        : never
 export type DevupApiRequestInit = Omit<RequestInit, 'body'> & {
   body?: object | RequestInit['body']
   params?: Record<string, string | number | boolean | null | undefined>

@@ -11,13 +11,13 @@ export interface MiddlewareCallbackParams {
 }
 
 type MiddlewareOnRequest = (
-  params: MiddlewareCallbackParams,
+  params: Readonly<MiddlewareCallbackParams>,
 ) => PromiseOr<undefined | Request | Response>
 type MiddlewareOnResponse = (
-  params: MiddlewareCallbackParams & { response: Response },
+  params: Readonly<MiddlewareCallbackParams & { response: Response }>,
 ) => PromiseOr<undefined | Error | Response>
 type MiddlewareOnError = (
-  params: MiddlewareCallbackParams & { error: unknown },
+  params: Readonly<MiddlewareCallbackParams & { error: unknown }>,
 ) => PromiseOr<undefined | Error | Response>
 
 export type Middleware =
