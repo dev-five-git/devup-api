@@ -206,7 +206,7 @@ test('DevupQueryClient useInfiniteQuery with GET method', async () => {
 
   const { result } = renderHook(
     () =>
-      queryClient.useInfiniteQuery('get', '/test' as any, undefined, {
+      queryClient.useInfiniteQuery('get', '/test' as any, {
         initialPageParam: 1,
         getNextPageParam: () => undefined,
       }),
@@ -232,17 +232,11 @@ test('DevupQueryClient useInfiniteQuery with options', async () => {
 
   const { result } = renderHook(
     () =>
-      queryClient.useInfiniteQuery(
-        'get',
-        '/test' as any,
-        {
-          query: { page: 1 },
-        },
-        {
-          initialPageParam: 1,
-          getNextPageParam: () => undefined,
-        },
-      ),
+      queryClient.useInfiniteQuery('get', '/test' as any, {
+        initialPageParam: 1,
+        getNextPageParam: () => undefined,
+        query: { page: 1 },
+      }),
     { wrapper: createWrapper() },
   )
 
@@ -267,7 +261,7 @@ test('DevupQueryClient useQuery with different HTTP methods', async () => {
 
   for (const method of methods) {
     const { result } = renderHook(
-      () => queryClient.useQuery(method as any, '/test' as any),
+      () => queryClient.useQuery(method as any, '/test' as any, {}),
       { wrapper: createWrapper() },
     )
 
@@ -317,7 +311,7 @@ test('DevupQueryClient useSuspenseQuery with different HTTP methods', async () =
 
   for (const method of methods) {
     const { result } = renderHook(
-      () => queryClient.useSuspenseQuery(method as any, '/test' as any),
+      () => queryClient.useSuspenseQuery(method as any, '/test' as any, {}),
       { wrapper: createWrapper() },
     )
 
@@ -341,7 +335,7 @@ test('DevupQueryClient useInfiniteQuery with different HTTP methods', async () =
   for (const method of methods) {
     const { result } = renderHook(
       () =>
-        queryClient.useInfiniteQuery(method as any, '/test' as any, undefined, {
+        queryClient.useInfiniteQuery(method as any, '/test' as any, {
           initialPageParam: 1,
           getNextPageParam: () => undefined,
         }),

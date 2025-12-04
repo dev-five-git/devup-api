@@ -16,34 +16,34 @@ const api2 = createApi({
 const queryClient = createQueryClient(api)
 
 export default function Home() {
-  const { data, isLoading, error } = queryClient.useQuery(
-    'GET',
-    'getUserById',
-    {
-      params: { id: 1 },
-      query: {
-        name: 'John Doe',
-      },
+  const { data, isLoading, error } = queryClient.useQuery('GET', 'getUsers', {
+    // params: { id: 1 },
+    query: {
+      name: 'John Doe',
     },
-  )
+  })
 
   console.info(data, isLoading, error)
 
   const {
     data: data2,
-    isLoading: isLoading2,
     error: error2,
-  } = queryClient.useQuery('GET', '/users', {
+    mutateAsync,
+  } = queryClient.useMutation('GET', '/users/{id}', {})
+  mutateAsync({
     params: { id: 1 },
+    query: {
+      name: 'John Doe',
+    },
   })
 
-  console.info(data2, isLoading2, error2)
+  console.info(data2, error2)
 
   useEffect(() => {
     api2.get('getUsers2').then((res) => {
       console.log(res)
     })
-    api.get('getUsers').then((res) => {
+    api.get('getUsers', {}).then((res) => {
       console.log(res)
     })
 

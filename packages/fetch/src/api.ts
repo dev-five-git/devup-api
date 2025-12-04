@@ -16,6 +16,7 @@ import type {
   DevupPutApiStructKey,
   DevupPutApiStructScope,
   ExtractValue,
+  IsCold,
   Middleware,
   RequiredOptions,
 } from '@devup-api/core'
@@ -59,8 +60,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -76,8 +85,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -93,8 +110,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -110,8 +135,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -127,8 +160,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -144,8 +185,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -161,8 +210,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -178,8 +235,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -195,8 +260,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -212,8 +285,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -229,8 +310,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   >(
     path: T,
     ...options: [RequiredOptions<O>] extends [never]
-      ? [options?: DevupApiRequestInit]
-      : [options: DevupApiRequestInit & Omit<O, 'response' | 'error'>]
+      ? [
+          options?: IsCold extends true
+            ? DevupApiRequestInit
+            : Omit<DevupApiRequestInit, 'params'> &
+                Omit<O, 'response' | 'error'>,
+        ]
+      : [
+          options: Omit<DevupApiRequestInit, 'params'> &
+            Omit<O, 'response' | 'error'>,
+        ]
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
@@ -242,7 +331,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
       body,
       params,
       ...restOptions
-    } = options[0] || {}
+    }: DevupApiRequestInit = options[0] || {}
     const mergedHeaders = new Headers(headers)
     const mergedOptions = {
       ...this.defaultOptions,
@@ -354,19 +443,19 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     } as DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   }
 
-  setDefaultOptions(options: DevupApiRequestInit) {
+  setDefaultOptions(options: DevupApiRequestInit): void {
     this.defaultOptions = options
   }
 
-  getBaseUrl() {
+  getBaseUrl(): string {
     return this.baseUrl
   }
 
-  getDefaultOptions() {
+  getDefaultOptions(): DevupApiRequestInit {
     return this.defaultOptions
   }
 
-  use(...middleware: Middleware[]) {
+  use(...middleware: Middleware[]): void {
     this.middleware.push(...middleware)
   }
 }
