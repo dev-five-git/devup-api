@@ -1,5 +1,5 @@
 import { expect, test } from 'bun:test'
-import { getApiEndpoint, isPlainObject } from '../utils'
+import { getApiEndpoint, getQueryString, isPlainObject } from '../utils'
 
 test.each([
   [{}, true],
@@ -105,4 +105,58 @@ test.each([
   ],
 ])('getApiEndpoint: baseUrl=%s, path=%s, params=%s -> %s', (baseUrl, path, params, expected) => {
   expect(getApiEndpoint(baseUrl, path, params)).toBe(expected)
+})
+
+test.each([
+  ['a=1&b=2', 'a=1&b=2'],
+  ['', ''],
+  ['key=value&test=123', 'key=value&test=123'],
+  ['x=1&y=2&z=3', 'x=1&y=2&z=3'],
+  [{ a: '1', b: '2' }, 'a=1&b=2'],
+  [{}, ''],
+  [{ key: 'value', test: '123' }, 'key=value&test=123'],
+  [{ x: '1', y: '2', z: '3' }, 'x=1&y=2&z=3'],
+  [{ a: 1, b: 2 }, 'a=1&b=2'],
+  [{ a: '1', b: 2, c: 'test' }, 'a=1&b=2&c=test'],
+  [{ a: ['1', '2', '3'] }, 'a=1&a=2&a=3'],
+  [{ a: [1, 2, 3] }, 'a=1&a=2&a=3'],
+  [{ a: [1, '2', 3] }, 'a=1&a=2&a=3'],
+  [new URLSearchParams('a=1&b=2'), 'a=1&b=2'],
+  [new URLSearchParams(''), ''],
+  [new URLSearchParams('key=value&test=123'), 'key=value&test=123'],
+  [
+    [
+      ['a', '1'],
+      ['b', '2'],
+    ] as [string, string][],
+    'a=1&b=2',
+  ],
+  [
+    [
+      ['key', 'value'],
+      ['test', '123'],
+    ] as [string, string][],
+    'key=value&test=123',
+  ],
+  [
+    [
+      ['x', '1'],
+      ['y', '2'],
+      ['z', '3'],
+    ] as [string, string][],
+    'x=1&y=2&z=3',
+  ],
+  [
+    [
+      ['x', '1'],
+      ['x', '2'],
+      ['x', '3'],
+    ] as [string, string][],
+    'x=1&x=2&x=3',
+  ],
+])('getQueryString: %s query -> "%s"', (query, expected) => {
+  const result = getQueryString(
+    query as NonNullable<Parameters<typeof getQueryString>[0]>,
+  )
+  expect(result.toString()).toBe(expected)
 })

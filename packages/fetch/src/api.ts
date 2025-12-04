@@ -22,7 +22,7 @@ import type {
 } from '@devup-api/core'
 import { convertResponse } from './response-converter'
 import { getApiEndpointInfo } from './url-map'
-import { getApiEndpoint, isPlainObject } from './utils'
+import { getApiEndpoint, getQueryString, isPlainObject } from './utils'
 
 // biome-ignore lint/suspicious/noExplicitAny: any is used to allow for flexibility in the type
 export type DevupApiResponse<T, E = any> =
@@ -236,7 +236,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
     const { method, url } = getApiEndpointInfo(path, this.serverName)
-    const { middleware = [], ...restOptions } = options[0] || {}
+    const { middleware = [], query, ...restOptions } = options[0] || {}
     const mergedOptions = {
       ...this.defaultOptions,
       ...restOptions,
@@ -248,6 +248,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     if (requestOptions.body && isPlainObject(requestOptions.body)) {
       requestOptions.body = JSON.stringify(requestOptions.body)
     }
+    const queryString = query ? `?${getQueryString(query).toString()}` : ''
     let request = new Request(
       getApiEndpoint(
         this.baseUrl,
@@ -260,7 +261,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
             >
           }
         ).params,
-      ),
+      ) + queryString,
       requestOptions as RequestInit,
     )
 
