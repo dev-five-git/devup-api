@@ -29,3 +29,15 @@ export type DevupApiRequestInit = Omit<RequestInit, 'body'> & {
 export type ExtractValue<T, V extends string, F = any> = V extends keyof T
   ? T[V]
   : F
+
+export type BoildApiOption<O> = Omit<DevupApiRequestInit, 'params'> &
+  Omit<O, 'response' | 'error'>
+export type ConditionalApiOption<O> = IsCold extends true
+  ? DevupApiRequestInit
+  : BoildApiOption<O>
+
+export type ApiOption<O extends object, R extends unknown[] = []> = [
+  RequiredOptions<O>,
+] extends [never]
+  ? [options?: ConditionalApiOption<O>, ...R]
+  : [options: BoildApiOption<O>, ...R]
