@@ -40,3 +40,18 @@ test.each([
 ] as const)('wrapInterfaceKeyGuard wraps key with multiple slashes: %s -> %s', (key, expected) => {
   expect(wrapInterfaceKeyGuard(key)).toBe(expected)
 })
+
+test.each([
+  ['field"name', '[`field"name`]'],
+  ["field'name", "[`field'name`]"],
+  ['field`name', '[`field`name`]'],
+  ['field-name', '[`field-name`]'],
+  ['field name', '[`field name`]'],
+  ['field@name', '[`field@name`]'],
+  ['field#name', '[`field#name`]'],
+  ['field$name', 'field$name'], // $ is valid in identifiers
+  ['field_name', 'field_name'], // _ is valid in identifiers
+  ['123field', '[`123field`]'], // cannot start with number
+] as const)('wrapInterfaceKeyGuard wraps key with forbidden characters: %s -> %s', (key, expected) => {
+  expect(wrapInterfaceKeyGuard(key)).toBe(expected)
+})
