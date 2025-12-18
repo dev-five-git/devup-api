@@ -131,86 +131,134 @@ exports[`getTypeFromSchema returns interface for schema: %s 8`] = `
 exports[`getTypeFromSchema returns interface for schema: %s 9`] = `
 {
   "default": undefined,
-  "type": 
-"Array<{
-  id?: string;
-  name?: string;
-}>"
-,
+  "type": {
+    "__isArray": true,
+    "items": {
+      "id?": {
+        "default": undefined,
+        "type": "string",
+      },
+      "name?": {
+        "default": undefined,
+        "type": "string",
+      },
+    },
+  },
 }
 `;
 
 exports[`getTypeFromSchema returns interface for schema: %s 10`] = `
 {
   "default": undefined,
-  "type": 
-"Array<{
-  id?: string;
-  name?: string;
-}>"
-,
+  "type": {
+    "__isArray": true,
+    "items": {
+      "id?": {
+        "default": undefined,
+        "type": "string",
+      },
+      "name?": {
+        "default": undefined,
+        "type": "string",
+      },
+    },
+  },
 }
 `;
 
 exports[`getTypeFromSchema returns interface for schema: %s 11`] = `
 {
   "default": undefined,
-  "type": "Array<string>",
+  "type": {
+    "__isArray": true,
+    "items": "string",
+  },
 }
 `;
 
 exports[`getTypeFromSchema returns interface for schema: %s 12`] = `
 {
   "default": undefined,
-  "type": "Array<string>",
+  "type": {
+    "__isArray": true,
+    "items": "string",
+  },
 }
 `;
 
 exports[`getTypeFromSchema returns interface for schema: %s 13`] = `
 {
   "default": undefined,
-  "type": 
-"Array<{
-  id?: string;
-  name?: string;
-}>"
-,
+  "type": {
+    "__isArray": true,
+    "items": {
+      "id?": {
+        "default": undefined,
+        "type": "string",
+      },
+      "name?": {
+        "default": undefined,
+        "type": "string",
+      },
+    },
+  },
 }
 `;
 
 exports[`getTypeFromSchema returns interface for schema: %s 14`] = `
 {
   "default": undefined,
-  "type": 
-"Array<{
-  id?: string;
-  name?: string;
-}>"
-,
+  "type": {
+    "__isArray": true,
+    "items": {
+      "id?": {
+        "default": undefined,
+        "type": "string",
+      },
+      "name?": {
+        "default": undefined,
+        "type": "string",
+      },
+    },
+  },
 }
 `;
 
 exports[`getTypeFromSchema returns interface for schema: %s 15`] = `
 {
   "default": undefined,
-  "type": 
-"Array<{
-  id?: string;
-  name?: string;
-}>"
-,
+  "type": {
+    "__isArray": true,
+    "items": {
+      "id?": {
+        "default": "123",
+        "type": "string",
+      },
+      "name?": {
+        "default": "John Doe",
+        "type": "string",
+      },
+    },
+  },
 }
 `;
 
 exports[`getTypeFromSchema returns interface for schema: %s 16`] = `
 {
   "default": undefined,
-  "type": 
-"Array<{
-  id: string;
-  name: string;
-}>"
-,
+  "type": {
+    "__isArray": true,
+    "items": {
+      "id": {
+        "default": "123",
+        "type": "string",
+      },
+      "name": {
+        "default": "John Doe",
+        "type": "string",
+      },
+    },
+  },
 }
 `;
 

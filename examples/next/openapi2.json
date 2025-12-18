@@ -100,6 +100,21 @@
           "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "array": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "integer"
+                },
+                "name": {
+                  "type": "string"
+                }
+              },
+              "required": ["id", "name"]
+            }
           }
         },
         "required": ["id", "name", "email"]
