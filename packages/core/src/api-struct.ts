@@ -29,8 +29,8 @@ export interface DevupResponseComponentStruct {}
 export interface DevupErrorComponentStruct {}
 
 export type DevupObject<
-  T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
   R extends 'response' | 'request' | 'error' = 'response',
+  T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
 > = ExtractValue<
   {
     response: ExtractValue<DevupResponseComponentStruct, T>

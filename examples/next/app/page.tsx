@@ -23,7 +23,8 @@ export default function Home() {
     },
   })
   const _object: DevupObject['User'] | undefined = data?.[0]
-  const _object2: DevupObject<'openapi2.json'>['User'] | undefined = data?.[0]
+  const _object2: DevupObject<'response', 'openapi2.json'>['User'] | undefined =
+    data?.[0]
 
   console.info(data, isLoading, error)
 
