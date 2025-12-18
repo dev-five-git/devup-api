@@ -2,6 +2,7 @@
 
 exports[`generateInterface returns interface for schema: %s 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -25,6 +26,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 2`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -48,6 +50,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 3`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -71,6 +74,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 4`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -94,6 +98,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 5`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -117,6 +122,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 6`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -126,10 +132,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
       getUsers: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
     }
   }
@@ -137,10 +143,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
       createUser: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
     }
   }
@@ -162,6 +168,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 7`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -171,10 +178,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
       GetUsers: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
     }
   }
@@ -182,10 +189,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
       CreateUser: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
     }
   }
@@ -207,6 +214,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 8`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -216,10 +224,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
       get_users: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
     }
   }
@@ -227,10 +235,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
       create_user: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
     }
   }
@@ -252,6 +260,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 9`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -261,10 +270,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
       getUsers: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
     }
   }
@@ -272,10 +281,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
       createUser: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
     }
   }
@@ -297,6 +306,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface returns interface for schema: %s 10`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -306,10 +316,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
       getUsers: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
     }
   }
@@ -317,10 +327,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
       createUser: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
     }
   }
@@ -342,6 +352,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles all HTTP methods 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -409,6 +420,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles path parameters 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -442,6 +454,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles query parameters 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -477,6 +490,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles path and query parameters together 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -516,6 +530,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles request body 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -551,6 +566,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles request body with $ref 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -560,11 +576,11 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        body: DevupRequestComponentStruct['openapi.json']['User'];
+        body: DevupObject<'openapi.json', 'request'>['User'];
         response?: {};
       };
       createUser: {
-        body: DevupRequestComponentStruct['openapi.json']['User'];
+        body: DevupObject<'openapi.json', 'request'>['User'];
         response?: {};
       };
     }
@@ -587,6 +603,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles 200 response 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -596,10 +613,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
       getUsers: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
     }
   }
@@ -621,6 +638,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles 201 response 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -630,10 +648,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
       createUser: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
     }
   }
@@ -655,6 +673,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles response with other status codes 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -686,6 +705,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles error responses 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -726,6 +746,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles default error response 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -759,6 +780,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles component schemas for request 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -768,11 +790,11 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        body: DevupRequestComponentStruct['openapi.json']['CreateUserRequest'];
+        body: DevupObject<'openapi.json', 'request'>['CreateUserRequest'];
         response?: {};
       };
       createUser: {
-        body: DevupRequestComponentStruct['openapi.json']['CreateUserRequest'];
+        body: DevupObject<'openapi.json', 'request'>['CreateUserRequest'];
         response?: {};
       };
     }
@@ -795,6 +817,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles component schemas for response 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -804,10 +827,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
       getUsers: {
-        response: DevupResponseComponentStruct['openapi.json']['User'];
+        response: DevupObject<'openapi.json', 'response'>['User'];
       };
     }
   }
@@ -829,6 +852,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles component schemas for error 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -839,11 +863,11 @@ declare module "@devup-api/fetch" {
     [\`openapi.json\`]: {
       [\`/users\`]: {
         response?: {};
-        error: DevupErrorComponentStruct['Error'];
+        error: DevupObject<'openapi.json', 'error'>['Error'];
       };
       getUsers: {
         response?: {};
-        error: DevupErrorComponentStruct['Error'];
+        error: DevupObject<'openapi.json', 'error'>['Error'];
       };
     }
   }
@@ -865,6 +889,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles array response with component schema 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -874,10 +899,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
       getUsers: {
-        response: Array<DevupResponseComponentStruct['openapi.json']['User']>;
+        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
       };
     }
   }
@@ -899,6 +924,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface creates both operationId and path keys 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -932,6 +958,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles endpoints without operationId 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -956,6 +983,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles requestDefaultNonNullable option 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -991,6 +1019,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles requestDefaultNonNullable option 2`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1026,6 +1055,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles responseDefaultNonNullable option 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1059,6 +1089,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles responseDefaultNonNullable option 2`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1092,6 +1123,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles nested schemas in allOf 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1133,6 +1165,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles empty paths 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1149,6 +1182,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles pathItem parameters 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1182,6 +1216,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles requestBody $ref 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1215,6 +1250,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles response $ref 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1238,6 +1274,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles complex scenario with all features 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1254,8 +1291,8 @@ declare module "@devup-api/fetch" {
         query?: {
           include?: string;
         };
-        response: DevupResponseComponentStruct['openapi.json']['Post'];
-        error: DevupErrorComponentStruct['Error'];
+        response: DevupObject<'openapi.json', 'response'>['Post'];
+        error: DevupObject<'openapi.json', 'error'>['Error'];
       };
       getUserPost: {
         params: {
@@ -1265,8 +1302,8 @@ declare module "@devup-api/fetch" {
         query?: {
           include?: string;
         };
-        response: DevupResponseComponentStruct['openapi.json']['Post'];
-        error: DevupErrorComponentStruct['Error'];
+        response: DevupObject<'openapi.json', 'response'>['Post'];
+        error: DevupObject<'openapi.json', 'error'>['Error'];
       };
     }
   }
@@ -1277,15 +1314,15 @@ declare module "@devup-api/fetch" {
         params: {
           userId: string;
         };
-        body: DevupRequestComponentStruct['openapi.json']['UpdatePostRequest'];
-        response: DevupResponseComponentStruct['openapi.json']['Post'];
+        body: DevupObject<'openapi.json', 'request'>['UpdatePostRequest'];
+        response: DevupObject<'openapi.json', 'response'>['Post'];
       };
       updateUserPost: {
         params: {
           userId: string;
         };
-        body: DevupRequestComponentStruct['openapi.json']['UpdatePostRequest'];
-        response: DevupResponseComponentStruct['openapi.json']['Post'];
+        body: DevupObject<'openapi.json', 'request'>['UpdatePostRequest'];
+        response: DevupObject<'openapi.json', 'response'>['Post'];
       };
     }
   }
@@ -1322,6 +1359,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles anyOf in schema collection 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1369,6 +1407,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles oneOf in schema collection 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1413,6 +1452,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles requestBody $ref that extracts schema name 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1448,6 +1488,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles response $ref that extracts schema name 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1477,6 +1518,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles requestBody with $ref that is not a component schema 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1506,6 +1548,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles response with $ref that is not a component schema 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1533,6 +1576,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles error response with $ref that is not a component schema 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1562,6 +1606,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles array response with $ref that is not a component schema 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1589,6 +1634,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles error array response with $ref that is not a component schema 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1618,6 +1664,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles error array response with component schema 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1628,11 +1675,11 @@ declare module "@devup-api/fetch" {
     [\`openapi.json\`]: {
       [\`/users\`]: {
         response?: {};
-        error: Array<DevupErrorComponentStruct['Error']>;
+        error: Array<DevupObject<'openapi.json', 'error'>['Error']>;
       };
       getUsers: {
         response?: {};
-        error: Array<DevupErrorComponentStruct['Error']>;
+        error: Array<DevupObject<'openapi.json', 'error'>['Error']>;
       };
     }
   }
@@ -1654,6 +1701,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles error response with $ref to response object 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {
@@ -1681,6 +1729,7 @@ declare module "@devup-api/fetch" {
 
 exports[`generateInterface handles error response $ref that extracts schema name 1`] = `
 "import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
   interface DevupApiServers {

@@ -5,12 +5,12 @@
   "private": true,
   "devDependencies": {
     "@biomejs/biome": "^2.3",
-    "@testing-library/react": "^16.3.0",
+    "@testing-library/react": "^16.3.1",
     "@testing-library/react-hooks": "^8.0.1",
     "@types/bun": "latest",
     "husky": "^9",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "author": "JeongMin Oh",
   "license": "Apache-2.0",

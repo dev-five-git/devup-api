@@ -220,6 +220,7 @@ This is a monorepo containing multiple packages:
 - **`@devup-api/utils`** - Utility functions for OpenAPI processing
 - **`@devup-api/generator`** - TypeScript interface generator from OpenAPI schemas
 - **`@devup-api/fetch`** - Type-safe API client
+- **`@devup-api/react-query`** - TanStack React Query integration
 - **`@devup-api/vite-plugin`** - Vite plugin
 - **`@devup-api/next-plugin`** - Next.js plugin
 - **`@devup-api/webpack-plugin`** - Webpack plugin
@@ -273,6 +274,151 @@ if (result.data) {
 } else if (result.error) {
   // Error response
   console.error(result.error.message)
+}
+```
+
+### **Using DevupObject for Type References**
+
+`DevupObject` allows you to reference generated schema types directly, which is useful for typing variables, function parameters, or component props.
+
+```ts
+import { createApi, type DevupObject } from '@devup-api/fetch'
+
+// Access response types from the default OpenAPI schema
+type User = DevupObject['User']
+type Product = DevupObject['Product']
+
+// Use in your code
+const user: User = {
+  id: '123',
+  name: 'John Doe',
+  email: 'john@example.com'
+}
+
+// For request/error types, specify the type category
+type CreateUserRequest = DevupObject<'request'>['CreateUserBody']
+type ApiError = DevupObject<'error'>['ErrorResponse']
+```
+
+---
+
+## 🌐 Multiple API Servers
+
+devup-api supports multiple OpenAPI schemas for working with different API servers.
+
+### **Configuration**
+
+Place multiple OpenAPI files in your project (e.g., `openapi.json`, `openapi2.json`) and the plugin will generate types for each.
+
+### **Usage**
+
+```ts
+import { createApi, type DevupObject } from '@devup-api/fetch'
+
+// Default server (uses openapi.json)
+const api = createApi({
+  baseUrl: 'https://api.example.com',
+})
+
+// Second server (uses openapi2.json)
+const api2 = createApi({
+  baseUrl: 'https://api.another-service.com',
+  serverName: 'openapi2.json',
+})
+
+// Make requests to different servers
+const users = await api.get('getUsers', {})
+const products = await api2.get('getProducts', {})
+
+// Access types from different schemas
+type User = DevupObject['User']  // From openapi.json
+type Product = DevupObject<'response', 'openapi2.json'>['Product']  // From openapi2.json
+```
+
+---
+
+## 🔄 React Query Integration
+
+devup-api provides first-class support for TanStack React Query through the `@devup-api/react-query` package.
+
+### **Installation**
+
+```bash
+npm install @devup-api/react-query @tanstack/react-query
+```
+
+### **Setup**
+
+```ts
+import { createApi } from '@devup-api/fetch'
+import { createQueryClient } from '@devup-api/react-query'
+
+const api = createApi('https://api.example.com')
+const queryClient = createQueryClient(api)
+```
+
+### **useQuery**
+
+```ts
+function UserProfile({ userId }: { userId: string }) {
+  const { data, isLoading, error } = queryClient.useQuery(
+    'get',
+    '/users/{id}',
+    { params: { id: userId } }
+  )
+
+  if (isLoading) return <div>Loading...</div>
+  if (error) return <div>Error: {error.message}</div>
+  return <div>{data.name}</div>
+}
+```
+
+### **useMutation**
+
+```ts
+function CreateUser() {
+  const mutation = queryClient.useMutation('post', 'createUser')
+
+  return (
+    <button onClick={() => mutation.mutate({
+      body: { name: 'John', email: 'john@example.com' }
+    })}>
+      Create User
+    </button>
+  )
+}
+```
+
+### **useSuspenseQuery**
+
+```ts
+function UserList() {
+  const { data } = queryClient.useSuspenseQuery('get', 'getUsers', {})
+  return <ul>{data.map(user => <li key={user.id}>{user.name}</li>)}</ul>
+}
+```
+
+### **useInfiniteQuery**
+
+```ts
+function InfiniteUserList() {
+  const { data, fetchNextPage, hasNextPage } = queryClient.useInfiniteQuery(
+    'get',
+    'getUsers',
+    {
+      initialPageParam: 1,
+      getNextPageParam: (lastPage) => lastPage.nextPage,
+    }
+  )
+
+  return (
+    <>
+      {data?.pages.map(page =>
+        page.users.map(user => <div key={user.id}>{user.name}</div>)
+      )}
+      {hasNextPage && <button onClick={() => fetchNextPage()}>Load More</button>}
+    </>
+  )
 }
 ```
 

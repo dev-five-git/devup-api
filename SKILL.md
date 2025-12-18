@@ -13,6 +13,8 @@ This skill helps you invoke the `devup-api` library to generate and use fully ty
 - **Fetch-compatible:** Ergonomic API similar to standard `fetch`.
 - **Zero Generics:** No complex generic types to manage manually.
 - **Build Tool Integration:** Plugins for Vite, Next.js, Webpack, and Rsbuild.
+- **React Query Integration:** First-class support for TanStack React Query with `@devup-api/react-query`.
+- **Multiple API Servers:** Support for multiple OpenAPI schemas with `serverName` and `DevupObject` type access.
 - **Two-phase Typing:** "Cold Typing" (relaxed types for initial setup) and "Bold Typing" (strict types after generation).
 
 ## Usage Instructions
@@ -96,6 +98,76 @@ if (response.data) {
 } else if (response.error) {
   console.error('Error:', response.error.message)
 }
+```
+
+## Using DevupObject for Type References
+
+`DevupObject` provides direct access to generated schema types:
+
+```ts
+import { createApi, type DevupObject } from '@devup-api/fetch'
+
+// Access response types
+type User = DevupObject['User']
+
+// Access request/error types
+type CreateUserRequest = DevupObject<'request'>['CreateUserBody']
+type ApiError = DevupObject<'error'>['ErrorResponse']
+
+// For multiple OpenAPI schemas, specify the server name
+type Product = DevupObject<'response', 'openapi2.json'>['Product']
+```
+
+## Multiple API Servers
+
+Support multiple OpenAPI schemas with `serverName`:
+
+```ts
+import { createApi, type DevupObject } from '@devup-api/fetch'
+
+// Default server
+const api = createApi({ baseUrl: 'https://api.example.com' })
+
+// Second server
+const api2 = createApi({
+  baseUrl: 'https://api.another-service.com',
+  serverName: 'openapi2.json',
+})
+
+// Types from different schemas
+type User = DevupObject['User']  // openapi.json
+type Product = DevupObject<'response', 'openapi2.json'>['Product']  // openapi2.json
+```
+
+## React Query Integration
+
+For React applications using TanStack React Query, use `@devup-api/react-query`:
+
+```bash
+npm install @devup-api/react-query @tanstack/react-query
+```
+
+```ts
+import { createApi } from '@devup-api/fetch'
+import { createQueryClient } from '@devup-api/react-query'
+
+const api = createApi('https://api.example.com')
+const queryClient = createQueryClient(api)
+
+// useQuery
+const { data } = queryClient.useQuery('get', '/users/{id}', { params: { id: '123' } })
+
+// useMutation
+const mutation = queryClient.useMutation('post', 'createUser')
+
+// useSuspenseQuery
+const { data } = queryClient.useSuspenseQuery('get', 'getUsers', {})
+
+// useInfiniteQuery
+const { data, fetchNextPage } = queryClient.useInfiniteQuery('get', 'getUsers', {
+  initialPageParam: 1,
+  getNextPageParam: (lastPage) => lastPage.nextPage,
+})
 ```
 
 ## Guidelines

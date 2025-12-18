@@ -111,7 +111,7 @@ export function getTypeFromSchema(
     if (items) {
       const itemType = getTypeFromSchema(items, document, options)
       return {
-        type: `Array<${formatTypeValue(itemType.type)}>`,
+        type: { __isArray: true, items: itemType.type },
         default: schemaObj.default,
       }
     }
@@ -312,11 +312,31 @@ function isTypeObject(
 }
 
 /**
+ * Check if a value is an array type marker
+ */
+function isArrayType(
+  value: unknown,
+): value is { __isArray: true; items: unknown } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    '__isArray' in value &&
+    (value as Record<string, unknown>).__isArray === true
+  )
+}
+
+/**
  * Format a type value to TypeScript type string
  */
 export function formatTypeValue(value: unknown, indent: number = 0): string {
   if (typeof value === 'string') {
     return value
+  }
+
+  // Handle array type marker
+  if (isArrayType(value)) {
+    const itemsFormatted = formatTypeValue(value.items, indent)
+    return `Array<${itemsFormatted}>`
   }
 
   // Handle { type: unknown, default?: unknown } structure
