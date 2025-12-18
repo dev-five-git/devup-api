@@ -1,6 +1,6 @@
 'use client'
 
-import { createApi } from '@devup-api/fetch'
+import { createApi, type DevupObject } from '@devup-api/fetch'
 import { createQueryClient } from '@devup-api/react-query'
 import { Box, Text } from '@devup-ui/react'
 import { useEffect } from 'react'
@@ -22,6 +22,8 @@ export default function Home() {
       name: 'John Doe',
     },
   })
+  const _object: DevupObject['User'] | undefined = data?.[0]
+  const _object2: DevupObject<'openapi2.json'>['User'] | undefined = data?.[0]
 
   console.info(data, isLoading, error)
 

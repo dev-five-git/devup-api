@@ -1,3 +1,4 @@
+import type { ExtractValue } from './additional'
 import type { ConditionalKeys, ConditionalScope } from './utils'
 
 // biome-ignore lint/suspicious/noEmptyInterface: empty interface
@@ -23,6 +24,21 @@ export interface DevupRequestComponentStruct {}
 
 // biome-ignore lint/suspicious/noEmptyInterface: empty interface
 export interface DevupResponseComponentStruct {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface
+export interface DevupErrorComponentStruct {}
+
+export type DevupObject<
+  T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
+  R extends 'response' | 'request' | 'error' = 'response',
+> = ExtractValue<
+  {
+    response: ExtractValue<DevupResponseComponentStruct, T>
+    request: ExtractValue<DevupRequestComponentStruct, T>
+    error: ExtractValue<DevupErrorComponentStruct, T>
+  },
+  R
+>
 
 export type DevupGetApiStructScope<O extends string> = ConditionalScope<
   DevupGetApiStruct,
