@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Box, Container, Flex } from '@devup-ui/react'
 
 export default function Hero() {
@@ -78,7 +79,7 @@ export default function Hero() {
           flexWrap="wrap"
         >
           <Box
-            as="a"
+            as={Link}
             href="https://github.com/dev-five-git/devup-api#-quick-start"
             target="_blank"
             rel="noopener noreferrer"
@@ -98,7 +99,7 @@ export default function Hero() {
             Get Started
           </Box>
           <Box
-            as="a"
+            as={Link}
             href="https://github.com/dev-five-git/devup-api"
             target="_blank"
             rel="noopener noreferrer"

@@ -1,5 +1,6 @@
 'use client'
 
+import Link from 'next/link'
 import { Box, Container, Grid, Flex } from '@devup-ui/react'
 
 export default function Footer() {
@@ -42,7 +43,7 @@ export default function Footer() {
             </Box>
             <Flex direction="column" gap="sm">
               <Box
-                as="a"
+                as={Link}
                 href="https://github.com/dev-five-git/devup-api#readme"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -54,7 +55,7 @@ export default function Footer() {
                 Documentation
               </Box>
               <Box
-                as="a"
+                as={Link}
                 href="https://github.com/dev-five-git/devup-api#-quick-start"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -66,7 +67,7 @@ export default function Footer() {
                 Quick Start
               </Box>
               <Box
-                as="a"
+                as={Link}
                 href="https://github.com/dev-five-git/devup-api/tree/main/examples"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -78,7 +79,7 @@ export default function Footer() {
                 Examples
               </Box>
               <Box
-                as="a"
+                as={Link}
                 href="https://github.com/dev-five-git/devup-api#-packages"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -103,7 +104,7 @@ export default function Footer() {
             </Box>
             <Flex direction="column" gap="sm">
               <Box
-                as="a"
+                as={Link}
                 href="https://github.com/dev-five-git/devup-api"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -115,7 +116,7 @@ export default function Footer() {
                 GitHub
               </Box>
               <Box
-                as="a"
+                as={Link}
                 href="https://github.com/dev-five-git/devup-api/issues"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -127,7 +128,7 @@ export default function Footer() {
                 Issues
               </Box>
               <Box
-                as="a"
+                as={Link}
                 href="https://github.com/dev-five-git/devup-api/pulls"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -139,7 +140,7 @@ export default function Footer() {
                 Pull Requests
               </Box>
               <Box
-                as="a"
+                as={Link}
                 href="https://www.npmjs.com/package/@devup-api/fetch"
                 target="_blank"
                 rel="noopener noreferrer"
@@ -183,7 +184,7 @@ export default function Footer() {
           <Box>
             Licensed under Apache 2.0 | Inspired by{' '}
             <Box
-              as="a"
+              as={Link}
               href="https://github.com/drwpow/openapi-typescript"
               target="_blank"
               rel="noopener noreferrer"
