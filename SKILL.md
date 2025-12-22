@@ -15,7 +15,7 @@ This skill helps you invoke the `devup-api` library to generate and use fully ty
 - **Build Tool Integration:** Plugins for Vite, Next.js, Webpack, and Rsbuild.
 - **React Query Integration:** First-class support for TanStack React Query with `@devup-api/react-query`.
 - **Multiple API Servers:** Support for multiple OpenAPI schemas with `serverName` and `DevupObject` type access.
-- **Two-phase Typing:** "Cold Typing" (relaxed types for initial setup) and "Bold Typing" (strict types after generation).
+- **Two-phase Typing:** "Cold Typing" (relaxed types for initial setup) and "Boild Typing" (strict types after generation - named after "boiled" and inspired by "boilerplate").
 
 ## Usage Instructions
 
@@ -172,7 +172,8 @@ const { data, fetchNextPage } = queryClient.useInfiniteQuery('get', 'getUsers', 
 
 ## Guidelines
 
--   **"Cold" vs "Bold" Typing:** When you first start, types might be `any` (Cold Typing). Run your build command (`dev` or `build`) to generate the types and enable strict checking (Bold Typing).
+-   **"Cold" vs "Boild" Typing:** When you first start, types might be `any` (Cold Typing ❄️). Run your build command (`dev` or `build`) to generate the types and enable strict checking (Boild Typing 🔥 - the warm opposite of cold, with zero boilerplate needed!).
 -   **Operation IDs vs Paths:** You can use either the OpenAPI `operationId` (e.g., `getUsers`) or the URL path (e.g., `/users`). `operationId` is often more concise.
 -   **Generated Files:** Do not manually edit the files in the `df` (or configured temp) directory. They are auto-generated.
 -   **Verification:** If types seem missing, ensure `tsconfig.json` includes the generated folder and that the build script has run at least once.
+-   **Advanced Features:** devup-api supports authentication, file uploads, request interceptors, retry logic, caching, and more through custom fetch implementations.
