@@ -576,35 +576,67 @@ api.use({
 })
 ```
 
-#### Timeout Middleware
+#### Request Timeout
+
+devup-api supports `signal` option from `RequestInit`, allowing you to implement timeouts easily:
 
 ```ts
 import { createApi } from '@devup-api/fetch'
 
 const api = createApi({ baseUrl: 'https://api.example.com' })
 
-api.use({
-  onRequest: async ({ request }) => {
-    const controller = new AbortController()
-    const timeout = setTimeout(() => controller.abort(), 5000) // 5 second timeout
+// Simple timeout wrapper
+async function getWithTimeout<T>(
+  api: ReturnType<typeof createApi>,
+  path: string,
+  options: any = {},
+  timeoutMs = 5000
+) {
+  const controller = new AbortController()
+  const timeout = setTimeout(() => controller.abort(), timeoutMs)
 
-    // Create new request with abort signal
-    const modifiedRequest = new Request(request, { signal: controller.signal })
-
-    // Store timeout ID for cleanup
-    ;(modifiedRequest as any).__timeoutId = timeout
-
-    return modifiedRequest
+  try {
+    const result = await api.get(path, {
+      ...options,
+      signal: controller.signal
+    })
+    clearTimeout(timeout)
+    return result
+  } catch (error) {
+    clearTimeout(timeout)
+    throw error
   }
-})
+}
 
 // Usage
 try {
-  const result = await api.get('getUsers', {})
+  const result = await getWithTimeout(api, 'getUsers', {}, 5000)
   if (result.data) {
     console.log(result.data)
   }
 } catch (error) {
+  if (error.name === 'AbortError') {
+    console.error('Request timed out')
+  } else {
+    console.error('Request failed:', error)
+  }
+}
+
+// Or use signal directly
+const controller = new AbortController()
+const timeout = setTimeout(() => controller.abort(), 5000)
+
+try {
+  const result = await api.get('getUsers', {
+    signal: controller.signal
+  })
+  clearTimeout(timeout)
+
+  if (result.data) {
+    console.log(result.data)
+  }
+} catch (error) {
+  clearTimeout(timeout)
   if (error.name === 'AbortError') {
     console.error('Request timed out')
   }
