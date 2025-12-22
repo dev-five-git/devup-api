@@ -551,60 +551,50 @@ function UserCard({ user, onUpdate }: UserCardProps) {
 }
 ```
 
-### **Request Interceptors**
+### **Middleware Examples**
+
+Middleware allows you to intercept and modify requests and responses globally.
+
+#### Request Logging Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
 
-// Create API with custom fetch implementation
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: async (url, init) => {
-    // Add custom logic before request
-    console.log('Requesting:', url)
+const api = createApi({ baseUrl: 'https://api.example.com' })
 
-    // Add authentication token
-    const headers = new Headers(init?.headers)
-    const token = localStorage.getItem('authToken')
-    if (token) {
-      headers.set('Authorization', `Bearer ${token}`)
-    }
-
-    // Make the request
-    const response = await fetch(url, {
-      ...init,
-      headers,
-    })
-
-    // Add custom logic after request
-    console.log('Response status:', response.status)
-
-    return response
+api.use({
+  onRequest: async ({ request, schemaPath, params, query }) => {
+    console.log(`🌐 API Request: ${request.method} ${schemaPath}`)
+    console.log('Params:', params)
+    console.log('Query:', query)
+    return undefined // No modification
+  },
+  onResponse: async ({ response, schemaPath }) => {
+    console.log(`✅ Response: ${response.status} ${schemaPath}`)
+    return undefined // No modification
   }
 })
 ```
 
-### **Timeout Configuration**
+#### Timeout Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
 
-// Create API with timeout
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: async (url, init) => {
+const api = createApi({ baseUrl: 'https://api.example.com' })
+
+api.use({
+  onRequest: async ({ request }) => {
     const controller = new AbortController()
     const timeout = setTimeout(() => controller.abort(), 5000) // 5 second timeout
 
-    try {
-      const response = await fetch(url, {
-        ...init,
-        signal: controller.signal,
-      })
-      return response
-    } finally {
-      clearTimeout(timeout)
-    }
+    // Create new request with abort signal
+    const modifiedRequest = new Request(request, { signal: controller.signal })
+
+    // Store timeout ID for cleanup
+    ;(modifiedRequest as any).__timeoutId = timeout
+
+    return modifiedRequest
   }
 })
 
@@ -621,35 +611,37 @@ try {
 }
 ```
 
-### **Retry Logic**
+#### Retry Logic Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
 
-async function fetchWithRetry(
-  url: string,
-  init?: RequestInit,
-  retries = 3
-): Promise<Response> {
-  for (let i = 0; i < retries; i++) {
-    try {
-      const response = await fetch(url, init)
-      if (response.ok || i === retries - 1) {
-        return response
-      }
-      // Wait before retry (exponential backoff)
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000))
-    } catch (error) {
-      if (i === retries - 1) throw error
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000))
-    }
-  }
-  throw new Error('Max retries exceeded')
-}
+const api = createApi({ baseUrl: 'https://api.example.com' })
 
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: fetchWithRetry
+api.use({
+  onResponse: async ({ request, response }) => {
+    const maxRetries = 3
+    const retryDelay = 1000 // 1 second
+
+    // Retry on server errors (5xx)
+    if (response.status >= 500 && response.status < 600) {
+      for (let i = 0; i < maxRetries; i++) {
+        await new Promise(resolve => setTimeout(resolve, retryDelay * Math.pow(2, i)))
+
+        const retryResponse = await fetch(request)
+        if (retryResponse.ok) {
+          return retryResponse
+        }
+
+        // Last retry failed
+        if (i === maxRetries - 1) {
+          return retryResponse
+        }
+      }
+    }
+
+    return undefined // No modification
+  }
 })
 ```
 
@@ -1037,46 +1029,36 @@ function UserPosts({ userId }: { userId: string }) {
 
 ### **Authentication & Authorization**
 
-#### JWT Authentication
+#### JWT Authentication with Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
 
-// Option 1: Custom fetch with automatic token injection
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: async (url, init) => {
+const api = createApi({ baseUrl: 'https://api.example.com' })
+
+// Add authentication middleware
+api.use({
+  onRequest: async ({ request }) => {
     const token = localStorage.getItem('accessToken')
 
-    const headers = new Headers(init?.headers)
     if (token) {
+      const headers = new Headers(request.headers)
       headers.set('Authorization', `Bearer ${token}`)
+
+      return new Request(request, { headers })
     }
 
-    return fetch(url, { ...init, headers })
+    return undefined // No modification
   }
-})
-
-// Option 2: Wrapper function for token refresh
-async function authenticatedFetch(url: string, init?: RequestInit): Promise<Response> {
-  const token = await getValidToken() // Refresh if expired
-
-  const headers = new Headers(init?.headers)
-  headers.set('Authorization', `Bearer ${token}`)
-
-  return fetch(url, { ...init, headers })
-}
-
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: authenticatedFetch
 })
 ```
 
-#### Token Refresh Flow
+#### Token Refresh Flow with Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
+
+const api = createApi({ baseUrl: 'https://api.example.com' })
 
 let accessToken = localStorage.getItem('accessToken')
 let refreshToken = localStorage.getItem('refreshToken')
@@ -1089,7 +1071,6 @@ async function refreshAccessToken(): Promise<string> {
   })
 
   if (!response.ok) {
-    // Redirect to login
     window.location.href = '/login'
     throw new Error('Failed to refresh token')
   }
@@ -1104,23 +1085,28 @@ async function refreshAccessToken(): Promise<string> {
   return accessToken
 }
 
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: async (url, init) => {
-    const headers = new Headers(init?.headers)
-
+// Add authentication and token refresh middleware
+api.use({
+  onRequest: async ({ request }) => {
+    // Add current access token
+    const headers = new Headers(request.headers)
     if (accessToken) {
       headers.set('Authorization', `Bearer ${accessToken}`)
     }
-
-    let response = await fetch(url, { ...init, headers })
-
+    return new Request(request, { headers })
+  },
+  onResponse: async ({ request, response }) => {
     // If unauthorized, try to refresh token and retry
     if (response.status === 401) {
       try {
         const newToken = await refreshAccessToken()
+
+        // Retry the original request with new token
+        const headers = new Headers(request.headers)
         headers.set('Authorization', `Bearer ${newToken}`)
-        response = await fetch(url, { ...init, headers })
+
+        const retryResponse = await fetch(new Request(request, { headers }))
+        return retryResponse
       } catch (error) {
         // Refresh failed, redirect to login
         window.location.href = '/login'
@@ -1128,7 +1114,7 @@ const api = createApi({
       }
     }
 
-    return response
+    return undefined // No modification
   }
 })
 ```
@@ -1238,7 +1224,6 @@ function FileUploader() {
 ```ts
 import { createApi } from '@devup-api/fetch'
 
-// Create API with support for AbortController
 const api = createApi('https://api.example.com')
 
 function SearchComponent() {
@@ -1255,13 +1240,15 @@ function SearchComponent() {
     setController(newController)
 
     try {
-      // Custom fetch with abort signal
-      const response = await fetch(`https://api.example.com/search?q=${query}`, {
+      // Use devup-api with abort signal
+      const result = await api.get('searchUsers', {
+        query: { q: query },
         signal: newController.signal
       })
 
-      const data = await response.json()
-      console.log('Search results:', data)
+      if (result.data) {
+        console.log('Search results:', result.data)
+      }
     } catch (error) {
       if (error.name === 'AbortError') {
         console.log('Search cancelled')
@@ -1290,63 +1277,63 @@ function SearchComponent() {
 }
 ```
 
-### **Logging & Debugging**
+#### Logging & Debugging Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
 
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: async (url, init) => {
+const api = createApi({ baseUrl: 'https://api.example.com' })
+
+api.use({
+  onRequest: async ({ request, schemaPath, params, query, body }) => {
     const startTime = performance.now()
+    ;(request as any).__startTime = startTime
 
-    console.group(`🌐 API Request: ${init?.method || 'GET'} ${url}`)
-    console.log('Headers:', init?.headers)
-    console.log('Body:', init?.body)
+    console.group(`🌐 API Request: ${request.method} ${schemaPath}`)
+    console.log('URL:', request.url)
+    console.log('Params:', params)
+    console.log('Query:', query)
+    console.log('Body:', body)
+    console.groupEnd()
 
-    try {
-      const response = await fetch(url, init)
-      const endTime = performance.now()
-      const duration = (endTime - startTime).toFixed(2)
+    return undefined // No modification
+  },
+  onResponse: async ({ request, response, schemaPath }) => {
+    const startTime = (request as any).__startTime || 0
+    const duration = (performance.now() - startTime).toFixed(2)
 
-      console.log(`✅ Response: ${response.status} (${duration}ms)`)
-      console.groupEnd()
-
-      return response
-    } catch (error) {
-      const endTime = performance.now()
-      const duration = (endTime - startTime).toFixed(2)
-
-      console.error(`❌ Request failed (${duration}ms):`, error)
-      console.groupEnd()
-
-      throw error
+    if (response.ok) {
+      console.log(`✅ Success: ${response.status} ${schemaPath} (${duration}ms)`)
+    } else {
+      console.error(`❌ Error: ${response.status} ${schemaPath} (${duration}ms)`)
     }
+
+    return undefined // No modification
   }
 })
 ```
 
-### **Caching Strategy**
+#### Caching Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
+
+const api = createApi({ baseUrl: 'https://api.example.com' })
 
 // Simple in-memory cache
 const cache = new Map<string, { data: any; timestamp: number }>()
 const CACHE_TTL = 5 * 60 * 1000 // 5 minutes
 
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: async (url, init) => {
-    const cacheKey = `${init?.method || 'GET'}:${url}`
-
+api.use({
+  onRequest: async ({ request, schemaPath }) => {
     // Only cache GET requests
-    if (!init?.method || init.method === 'GET') {
+    if (request.method === 'GET') {
+      const cacheKey = `${schemaPath}:${request.url}`
       const cached = cache.get(cacheKey)
 
       if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
         console.log('Cache hit:', cacheKey)
-        // Return cached response
+        // Return cached response directly (skip fetch)
         return new Response(JSON.stringify(cached.data), {
           status: 200,
           headers: { 'Content-Type': 'application/json' }
@@ -1354,20 +1341,26 @@ const api = createApi({
       }
     }
 
-    const response = await fetch(url, init)
-
+    return undefined // Proceed with fetch
+  },
+  onResponse: async ({ request, response, schemaPath }) => {
     // Cache successful GET responses
-    if (response.ok && (!init?.method || init.method === 'GET')) {
+    if (request.method === 'GET' && response.ok) {
+      const cacheKey = `${schemaPath}:${request.url}`
       const clone = response.clone()
-      const data = await clone.json()
 
-      cache.set(cacheKey, {
-        data,
-        timestamp: Date.now()
-      })
+      try {
+        const data = await clone.json()
+        cache.set(cacheKey, {
+          data,
+          timestamp: Date.now()
+        })
+      } catch (error) {
+        // Not JSON, skip caching
+      }
     }
 
-    return response
+    return undefined // No modification
   }
 })
 
@@ -1377,10 +1370,12 @@ export function clearCache() {
 }
 ```
 
-### **Rate Limiting**
+#### Rate Limiting Middleware
 
 ```ts
 import { createApi } from '@devup-api/fetch'
+
+const api = createApi({ baseUrl: 'https://api.example.com' })
 
 class RateLimiter {
   private queue: Array<() => void> = []
@@ -1435,11 +1430,10 @@ class RateLimiter {
 // 10 requests per second
 const rateLimiter = new RateLimiter(10, 1000)
 
-const api = createApi({
-  baseUrl: 'https://api.example.com',
-  fetch: async (url, init) => {
+api.use({
+  onRequest: async () => {
     await rateLimiter.throttle()
-    return fetch(url, init)
+    return undefined // No modification
   }
 })
 ```
