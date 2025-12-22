@@ -121,9 +121,9 @@ export default defineConfig({
   plugins: [
     devupApi({
       // Optional: customize configuration
-      openapiFile: 'openapi.json', // default
-      tempDir: 'df',               // default
-      convertCase: 'camel',        // default
+      openapiFiles: 'openapi.json', // default
+      tempDir: 'df',                // default
+      convertCase: 'camel',         // default
     }),
   ],
 })
@@ -152,7 +152,7 @@ const { devupApiWebpackPlugin } = require('@devup-api/webpack-plugin')
 module.exports = {
   plugins: [
     new devupApiWebpackPlugin({
-      openapiFile: 'openapi.json',
+      openapiFiles: 'openapi.json',
       tempDir: 'df',
     }),
   ],
@@ -170,7 +170,7 @@ import { devupApiRsbuildPlugin } from '@devup-api/rsbuild-plugin'
 export default defineConfig({
   plugins: [
     devupApiRsbuildPlugin({
-      openapiFile: 'openapi.json',
+      openapiFiles: 'openapi.json',
       tempDir: 'df',
     }),
   ],
@@ -190,7 +190,7 @@ your-project/
 └── vite.config.ts (or next.config.ts, etc.)
 ```
 
-> **Tip:** You can specify a custom path using the `openapiFile` option in plugin configuration.
+> **Tip:** You can specify a custom path using the `openapiFiles` option in plugin configuration.
 
 ### **Step 4: Configure TypeScript**
 
@@ -1470,10 +1470,11 @@ All plugins accept the following options:
 ```ts
 interface DevupApiOptions {
   /**
-   * OpenAPI file path
+   * OpenAPI file path(s)
+   * Can be a single file path or an array of file paths for multiple API schemas
    * @default 'openapi.json'
    */
-  openapiFile?: string
+  openapiFiles?: string | string[]
 
   /**
    * Temporary directory for storing generated files
@@ -1488,13 +1489,13 @@ interface DevupApiOptions {
   convertCase?: 'snake' | 'camel' | 'pascal' | 'maintain'
 
   /**
-   * Whether to make all properties non-nullable by default
+   * Whether to make all request properties non-nullable by default
    * @default false
    */
   requestDefaultNonNullable?: boolean
 
   /**
-   * Whether to make all request properties non-nullable by default
+   * Whether to make all response properties non-nullable by default
    * @default true
    */
   responseDefaultNonNullable?: boolean
