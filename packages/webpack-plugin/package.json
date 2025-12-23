@@ -20,9 +20,9 @@
     "access": "public"
   },
   "dependencies": {
-    "@devup-api/utils": "workspace:*",
-    "@devup-api/core": "workspace:*",
-    "@devup-api/generator": "workspace:*"
+    "@devup-api/utils": "^workspace:*",
+    "@devup-api/core": "^workspace:*",
+    "@devup-api/generator": "^workspace:*"
   },
   "peerDependencies": {
     "@devup-api/core": "*"

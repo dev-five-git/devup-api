@@ -20,10 +20,10 @@
     "access": "public"
   },
   "dependencies": {
-    "@devup-api/utils": "workspace:*",
-    "@devup-api/core": "workspace:*",
-    "@devup-api/generator": "workspace:*",
-    "@devup-api/webpack-plugin": "workspace:*"
+    "@devup-api/utils": "^workspace:*",
+    "@devup-api/core": "^workspace:*",
+    "@devup-api/generator": "^workspace:*",
+    "@devup-api/webpack-plugin": "^workspace:*"
   },
   "peerDependencies": {
     "next": "*",
