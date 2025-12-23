@@ -20,7 +20,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@devup-api/fetch": "^workspace:*",
+    "@devup-api/fetch": "workspace:^",
     "@tanstack/react-query": ">=5.90"
   },
   "peerDependencies": {
