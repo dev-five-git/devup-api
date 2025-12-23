@@ -20,7 +20,7 @@
     "access": "public"
   },
   "dependencies": {
-    "@devup-api/core": "workspace:*"
+    "@devup-api/core": "^workspace:*"
   },
   "devDependencies": {
     "@types/node": "^25.0",
