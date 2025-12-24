@@ -1,5 +1,5 @@
+import { DevupUI } from '@devup-ui/next-plugin'
 import type { NextConfig } from 'next'
-import DevupUI from '@devup-ui/next-plugin'
 
 const nextConfig: NextConfig = {
   pageExtensions: ['js', 'jsx', 'ts', 'tsx'],
@@ -7,4 +7,4 @@ const nextConfig: NextConfig = {
   reactCompiler: true,
 }
 
-export default DevupUI(nextConfig)
+export default DevupUI({}, nextConfig)

@@ -1,0 +1,140 @@
+{
+  "theme": {
+    "colors": {
+      "light": {
+        "primary": "#5A44FF",
+        "primaryHover": "#4836D9",
+        "secondary": "#85A5F2",
+        "accent": "#006BFF",
+        "text": "#212121",
+        "textLight": "#7F7F7F",
+        "textMuted": "#9ca3af",
+        "title": "#212121",
+        "bg": "#ffffff",
+        "bgSecondary": "#F7F7F8",
+        "bgTertiary": "#f3f4f6",
+        "border": "#E4E4E4",
+        "containerBackground": "#FBFBFB",
+        "success": "#10b981",
+        "warning": "#f59e0b",
+        "error": "#ef4444",
+        "codeBg": "#1E1E1E",
+        "codeText": "#e5e7eb",
+        "link": "#006BFF"
+      },
+      "dark": {
+        "primary": "#9086FF",
+        "primaryHover": "#7A70E6",
+        "secondary": "#2A4586",
+        "accent": "#60a5fa",
+        "text": "#f3f4f6",
+        "textLight": "#d1d5db",
+        "textMuted": "#9ca3af",
+        "title": "#ffffff",
+        "bg": "#121212",
+        "bgSecondary": "#1E1E1E",
+        "bgTertiary": "#2A2A2A",
+        "border": "#333333",
+        "containerBackground": "#1A1A1A",
+        "success": "#34d399",
+        "warning": "#fbbf24",
+        "error": "#f87171",
+        "codeBg": "#0f172a",
+        "codeText": "#e2e8f0",
+        "link": "#60a5fa"
+      }
+    },
+    "typography": {
+      "h1": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "32px",
+        "fontWeight": 800,
+        "lineHeight": 1.2,
+        "letterSpacing": "-0.03em"
+      },
+      "h2": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "24px",
+        "fontWeight": 700,
+        "lineHeight": 1.3,
+        "letterSpacing": "-0.03em"
+      },
+      "h3": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "18px",
+        "fontWeight": 700,
+        "lineHeight": 1.4,
+        "letterSpacing": "-0.03em"
+      },
+      "h4": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "20px",
+        "fontWeight": 700,
+        "lineHeight": 1.4,
+        "letterSpacing": "-0.03em"
+      },
+      "h5": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 600,
+        "lineHeight": 1.4,
+        "letterSpacing": "-0.03em"
+      },
+      "h6": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 600,
+        "lineHeight": 1.5,
+        "letterSpacing": "-0.03em"
+      },
+      "body": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 400,
+        "lineHeight": 1.6,
+        "letterSpacing": "-0.03em"
+      },
+      "bodyLarge": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.6,
+        "letterSpacing": "-0.03em"
+      },
+      "textL": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 400,
+        "lineHeight": 1.6,
+        "letterSpacing": "-0.03em"
+      },
+      "button": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "16px",
+        "fontWeight": 600,
+        "lineHeight": 1,
+        "letterSpacing": "-0.03em"
+      },
+      "buttonM": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "14px",
+        "fontWeight": 600,
+        "lineHeight": 1,
+        "letterSpacing": "-0.03em"
+      },
+      "code": {
+        "fontFamily": "D2Coding, Monaco, 'Courier New', monospace",
+        "fontSize": "14px",
+        "lineHeight": 1.6,
+        "letterSpacing": "0"
+      },
+      "caption": {
+        "fontFamily": "Pretendard Variable, -apple-system, BlinkMacSystemFont, system-ui, sans-serif",
+        "fontSize": "12px",
+        "fontWeight": 400,
+        "lineHeight": 1.5,
+        "letterSpacing": "-0.03em"
+      }
+    }
+  }
+}

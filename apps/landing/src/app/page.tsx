@@ -1,17 +1,15 @@
-import Hero from './Hero'
-import Features from './Features'
 import CodeExamples from './CodeExamples'
+import Features from './Features'
 import Packages from './Packages'
-import Footer from './Footer'
+import TopBanner from './TopBanner'
 
 export default function HomePage() {
   return (
     <>
-      <Hero />
+      <TopBanner />
       <Features />
       <CodeExamples />
       <Packages />
-      <Footer />
     </>
   )
 }
