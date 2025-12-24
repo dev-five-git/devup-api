@@ -256,7 +256,7 @@ function generateSchemaInterface(
                   requestSchemaNames.has(schemaName)
                 ) {
                   // Use component reference
-                  requestBodyType = `DevupObject<'${serverName}', 'request'>['${schemaName}']`
+                  requestBodyType = `DevupObject<'request', '${serverName}'>['${schemaName}']`
                 } else {
                   const requestBody = extractRequestBody(
                     operation.requestBody,
@@ -316,7 +316,7 @@ function generateSchemaInterface(
                     responseSchemaNames.has(schemaName)
                   ) {
                     // Use component reference
-                    responseType = `DevupObject<'${serverName}', 'response'>['${schemaName}']`
+                    responseType = `DevupObject<'response', '${serverName}'>['${schemaName}']`
                   } else {
                     // Extract schema type with response options
                     const responseDefaultNonNullable =
@@ -347,7 +347,7 @@ function generateSchemaInterface(
                       responseSchemaNames.has(schemaName)
                     ) {
                       // Use component reference for array items
-                      responseType = `Array<DevupObject<'${serverName}', 'response'>['${schemaName}']>`
+                      responseType = `Array<DevupObject<'response', '${serverName}'>['${schemaName}']>`
                     } else {
                       // Extract schema type with response options
                       const responseDefaultNonNullable =
@@ -420,7 +420,7 @@ function generateSchemaInterface(
                     errorSchemaNames.has(schemaName)
                   ) {
                     // Use component reference
-                    errorType = `DevupObject<'${serverName}', 'error'>['${schemaName}']`
+                    errorType = `DevupObject<'error', '${serverName}'>['${schemaName}']`
                   } else {
                     // Extract schema type with response options
                     const responseDefaultNonNullable =
@@ -451,7 +451,7 @@ function generateSchemaInterface(
                       errorSchemaNames.has(schemaName)
                     ) {
                       // Use component reference for array items
-                      errorType = `Array<DevupObject<'${serverName}', 'error'>['${schemaName}']>`
+                      errorType = `Array<DevupObject<'error', '${serverName}'>['${schemaName}']>`
                     } else {
                       // Extract schema type with response options
                       const responseDefaultNonNullable =

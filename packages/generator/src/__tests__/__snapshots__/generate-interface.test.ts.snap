@@ -132,10 +132,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
       getUsers: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
     }
   }
@@ -143,10 +143,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
       createUser: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
     }
   }
@@ -178,10 +178,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
       GetUsers: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
     }
   }
@@ -189,10 +189,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
       CreateUser: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
     }
   }
@@ -224,10 +224,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
       get_users: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
     }
   }
@@ -235,10 +235,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
       create_user: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
     }
   }
@@ -270,10 +270,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
       getUsers: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
     }
   }
@@ -281,10 +281,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
       createUser: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
     }
   }
@@ -316,10 +316,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
       getUsers: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
     }
   }
@@ -327,10 +327,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
       createUser: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
     }
   }
@@ -576,11 +576,11 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        body: DevupObject<'openapi.json', 'request'>['User'];
+        body: DevupObject<'request', 'openapi.json'>['User'];
         response?: {};
       };
       createUser: {
-        body: DevupObject<'openapi.json', 'request'>['User'];
+        body: DevupObject<'request', 'openapi.json'>['User'];
         response?: {};
       };
     }
@@ -613,10 +613,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
       getUsers: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
     }
   }
@@ -648,10 +648,10 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
       createUser: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
     }
   }
@@ -790,11 +790,11 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        body: DevupObject<'openapi.json', 'request'>['CreateUserRequest'];
+        body: DevupObject<'request', 'openapi.json'>['CreateUserRequest'];
         response?: {};
       };
       createUser: {
-        body: DevupObject<'openapi.json', 'request'>['CreateUserRequest'];
+        body: DevupObject<'request', 'openapi.json'>['CreateUserRequest'];
         response?: {};
       };
     }
@@ -827,10 +827,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
       getUsers: {
-        response: DevupObject<'openapi.json', 'response'>['User'];
+        response: DevupObject<'response', 'openapi.json'>['User'];
       };
     }
   }
@@ -863,11 +863,11 @@ declare module "@devup-api/fetch" {
     [\`openapi.json\`]: {
       [\`/users\`]: {
         response?: {};
-        error: DevupObject<'openapi.json', 'error'>['Error'];
+        error: DevupObject<'error', 'openapi.json'>['Error'];
       };
       getUsers: {
         response?: {};
-        error: DevupObject<'openapi.json', 'error'>['Error'];
+        error: DevupObject<'error', 'openapi.json'>['Error'];
       };
     }
   }
@@ -899,10 +899,10 @@ declare module "@devup-api/fetch" {
   interface DevupGetApiStruct {
     [\`openapi.json\`]: {
       [\`/users\`]: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
       getUsers: {
-        response: Array<DevupObject<'openapi.json', 'response'>['User']>;
+        response: Array<DevupObject<'response', 'openapi.json'>['User']>;
       };
     }
   }
@@ -1291,8 +1291,8 @@ declare module "@devup-api/fetch" {
         query?: {
           include?: string;
         };
-        response: DevupObject<'openapi.json', 'response'>['Post'];
-        error: DevupObject<'openapi.json', 'error'>['Error'];
+        response: DevupObject<'response', 'openapi.json'>['Post'];
+        error: DevupObject<'error', 'openapi.json'>['Error'];
       };
       getUserPost: {
         params: {
@@ -1302,8 +1302,8 @@ declare module "@devup-api/fetch" {
         query?: {
           include?: string;
         };
-        response: DevupObject<'openapi.json', 'response'>['Post'];
-        error: DevupObject<'openapi.json', 'error'>['Error'];
+        response: DevupObject<'response', 'openapi.json'>['Post'];
+        error: DevupObject<'error', 'openapi.json'>['Error'];
       };
     }
   }
@@ -1314,15 +1314,15 @@ declare module "@devup-api/fetch" {
         params: {
           userId: string;
         };
-        body: DevupObject<'openapi.json', 'request'>['UpdatePostRequest'];
-        response: DevupObject<'openapi.json', 'response'>['Post'];
+        body: DevupObject<'request', 'openapi.json'>['UpdatePostRequest'];
+        response: DevupObject<'response', 'openapi.json'>['Post'];
       };
       updateUserPost: {
         params: {
           userId: string;
         };
-        body: DevupObject<'openapi.json', 'request'>['UpdatePostRequest'];
-        response: DevupObject<'openapi.json', 'response'>['Post'];
+        body: DevupObject<'request', 'openapi.json'>['UpdatePostRequest'];
+        response: DevupObject<'response', 'openapi.json'>['Post'];
       };
     }
   }
@@ -1675,11 +1675,11 @@ declare module "@devup-api/fetch" {
     [\`openapi.json\`]: {
       [\`/users\`]: {
         response?: {};
-        error: Array<DevupObject<'openapi.json', 'error'>['Error']>;
+        error: Array<DevupObject<'error', 'openapi.json'>['Error']>;
       };
       getUsers: {
         response?: {};
-        error: Array<DevupObject<'openapi.json', 'error'>['Error']>;
+        error: Array<DevupObject<'error', 'openapi.json'>['Error']>;
       };
     }
   }

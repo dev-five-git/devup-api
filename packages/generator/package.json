@@ -1,6 +1,6 @@
 {
   "name": "@devup-api/generator",
-  "version": "0.1.9",
+  "version": "0.1.12",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
@@ -20,8 +20,8 @@
     "access": "public"
   },
   "dependencies": {
-    "@devup-api/core": "workspace:*",
-    "@devup-api/utils": "workspace:*"
+    "@devup-api/core": "workspace:^",
+    "@devup-api/utils": "workspace:^"
   },
   "devDependencies": {
     "@types/node": "^25.0",
