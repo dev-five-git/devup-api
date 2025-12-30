@@ -69,6 +69,8 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           fail_ci_if_error: true
           files: ./coverage/lcov.info
-      - run: bunx @changepacks/cli publish --yes
+      - uses: changepacks/action@main
+        with:
+          publish: true
         env:
           NPM_CONFIG_TOKEN: ${{ secrets.NPM_TOKEN }}
