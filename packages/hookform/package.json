@@ -1,0 +1,51 @@
+{
+  "name": "@devup-api/hookform",
+  "version": "0.0.1",
+  "license": "Apache-2.0",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc && vite build",
+    "test": "bun test",
+    "test:coverage": "bun test --coverage"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "dependencies": {
+    "@devup-api/fetch": "workspace:^",
+    "@devup-api/zod": "workspace:^",
+    "@hookform/resolvers": ">=3.0.0",
+    "react-hook-form": ">=7.0.0"
+  },
+  "peerDependencies": {
+    "@tanstack/react-query": ">=5.0.0",
+    "react": "*",
+    "react-hook-form": "*",
+    "zod": "*"
+  },
+  "devDependencies": {
+    "@tanstack/react-query": "^5.90.16",
+    "@testing-library/react": "^16.0.0",
+    "@types/node": "^25.0",
+    "@types/react": "^19.2",
+    "bun-test-env-dom": "^1.0.3",
+    "happy-dom": "^20.0.11",
+    "react": "^19.1.0",
+    "react-dom": "^19.1.0",
+    "typescript": "^5.9",
+    "zod": "^3.25",
+    "rollup-plugin-preserve-directives": "^0.4",
+    "vite": "^7.3",
+    "vite-plugin-dts": "^4.5"
+  }
+}

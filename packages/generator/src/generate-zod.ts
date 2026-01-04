@@ -1,5 +1,6 @@
 import type { DevupApiTypeGeneratorOptions } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
+import { convertCase } from './convert-case'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 // =============================================================================
@@ -454,23 +455,51 @@ interface SchemaInfo {
   type: string // TypeScript Zod type
 }
 
+interface PathSchemaMapping {
+  schemaName: string | null
+  operationId: string | null
+}
+
 interface CollectedSchemas {
   requestSchemas: Record<string, SchemaInfo>
   responseSchemas: Record<string, SchemaInfo>
   errorSchemas: Record<string, SchemaInfo>
+  pathMappings: Record<
+    'get' | 'post' | 'put' | 'delete' | 'patch',
+    Record<string, PathSchemaMapping>
+  >
 }
 
 /**
  * Collect schema names used in request, response, and error positions
+ * Also collects path to schema mappings for hookform integration
  */
-function collectSchemaUsage(schema: OpenAPIV3_1.Document): {
+function collectSchemaUsage(
+  schema: OpenAPIV3_1.Document,
+  options?: DevupApiTypeGeneratorOptions,
+): {
   requestSchemaNames: Set<string>
   responseSchemaNames: Set<string>
   errorSchemaNames: Set<string>
+  pathMappings: Record<
+    'get' | 'post' | 'put' | 'delete' | 'patch',
+    Record<string, PathSchemaMapping>
+  >
 } {
   const requestSchemaNames = new Set<string>()
   const responseSchemaNames = new Set<string>()
   const errorSchemaNames = new Set<string>()
+  const pathMappings: Record<
+    'get' | 'post' | 'put' | 'delete' | 'patch',
+    Record<string, PathSchemaMapping>
+  > = {
+    get: {},
+    post: {},
+    put: {},
+    delete: {},
+    patch: {},
+  }
+  const convertCaseType = options?.convertCase ?? 'camel'
 
   const collectSchemaNames = (
     schemaObj: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
@@ -508,8 +537,23 @@ function collectSchemaUsage(schema: OpenAPIV3_1.Document): {
     }
   }
 
+  // Helper to get direct schema name from request body
+  const getRequestBodySchemaName = (
+    requestBody: OpenAPIV3_1.RequestBodyObject | OpenAPIV3_1.ReferenceObject,
+  ): string | null => {
+    if ('$ref' in requestBody) {
+      return extractSchemaNameFromRef(requestBody.$ref)
+    }
+    const content = requestBody.content
+    const jsonContent = content?.['application/json']
+    if (jsonContent?.schema && '$ref' in jsonContent.schema) {
+      return extractSchemaNameFromRef(jsonContent.schema.$ref)
+    }
+    return null
+  }
+
   if (schema.paths) {
-    for (const pathItem of Object.values(schema.paths)) {
+    for (const [path, pathItem] of Object.entries(schema.paths)) {
       if (!pathItem) continue
 
       const methods = ['get', 'post', 'put', 'delete', 'patch'] as const
@@ -517,8 +561,21 @@ function collectSchemaUsage(schema: OpenAPIV3_1.Document): {
         const operation = pathItem[method]
         if (!operation) continue
 
-        // Collect request body schemas
+        // Normalize path for case conversion
+        const normalizedPath = path.replace(/\{([^}]+)\}/g, (_, param) => {
+          return `{${convertCase(param, convertCaseType)}}`
+        })
+
+        // Get operationId if exists
+        const operationId = operation.operationId
+          ? convertCase(operation.operationId, convertCaseType)
+          : null
+
+        // Collect request body schemas and path mappings
+        let requestSchemaName: string | null = null
         if (operation.requestBody) {
+          requestSchemaName = getRequestBodySchemaName(operation.requestBody)
+
           if ('$ref' in operation.requestBody) {
             const schemaName = extractSchemaNameFromRef(
               operation.requestBody.$ref,
@@ -533,6 +590,16 @@ function collectSchemaUsage(schema: OpenAPIV3_1.Document): {
               collectSchemaNames(jsonContent.schema, requestSchemaNames)
             }
           }
+        }
+
+        // Store path mapping
+        const mapping: PathSchemaMapping = {
+          schemaName: requestSchemaName,
+          operationId,
+        }
+        pathMappings[method][normalizedPath] = mapping
+        if (operationId) {
+          pathMappings[method][operationId] = mapping
         }
 
         // Collect response and error schemas
@@ -567,7 +634,12 @@ function collectSchemaUsage(schema: OpenAPIV3_1.Document): {
     }
   }
 
-  return { requestSchemaNames, responseSchemaNames, errorSchemaNames }
+  return {
+    requestSchemaNames,
+    responseSchemaNames,
+    errorSchemaNames,
+    pathMappings,
+  }
 }
 
 /**
@@ -578,8 +650,12 @@ function generateSchemasForDocument(
   _serverName: string,
   options?: DevupApiTypeGeneratorOptions,
 ): CollectedSchemas {
-  const { requestSchemaNames, responseSchemaNames, errorSchemaNames } =
-    collectSchemaUsage(schema)
+  const {
+    requestSchemaNames,
+    responseSchemaNames,
+    errorSchemaNames,
+    pathMappings,
+  } = collectSchemaUsage(schema, options)
 
   const requestSchemas: Record<string, SchemaInfo> = {}
   const responseSchemas: Record<string, SchemaInfo> = {}
@@ -647,7 +723,7 @@ function generateSchemasForDocument(
     }
   }
 
-  return { requestSchemas, responseSchemas, errorSchemas }
+  return { requestSchemas, responseSchemas, errorSchemas, pathMappings }
 }
 
 // =============================================================================
@@ -763,6 +839,34 @@ export function generateZodSchemas(
     lines.push(errorEntries || '')
     lines.push('};')
     lines.push('')
+
+    // Path schemas object (maps path/operationId to request schema)
+    const methods = ['post', 'put', 'patch', 'delete'] as const
+    for (const method of methods) {
+      const pathEntries: string[] = []
+      const methodMappings = collected.pathMappings[method]
+
+      for (const [pathKey, mapping] of Object.entries(methodMappings)) {
+        if (
+          mapping.schemaName &&
+          collected.requestSchemas[mapping.schemaName]
+        ) {
+          pathEntries.push(
+            `  ${wrapInterfaceKeyGuard(pathKey)}: ${safeServerName}_request_${mapping.schemaName}`,
+          )
+        }
+      }
+
+      if (pathEntries.length > 0) {
+        lines.push(`export const ${safeServerName}_${method}PathSchemas = {`)
+        lines.push(pathEntries.join(',\n'))
+        lines.push('};')
+        lines.push('')
+      } else {
+        lines.push(`export const ${safeServerName}_${method}PathSchemas = {};`)
+        lines.push('')
+      }
+    }
   }
 
   // Generate combined schemas export
@@ -786,6 +890,27 @@ export function generateZodSchemas(
       `export const responseSchemas = ${safeServerName}_responseSchemas;`,
     )
     lines.push(`export const errorSchemas = ${safeServerName}_errorSchemas;`)
+    lines.push('')
+    lines.push('// Path to schema mappings')
+    lines.push(
+      `export const postPathSchemas = ${safeServerName}_postPathSchemas;`,
+    )
+    lines.push(
+      `export const putPathSchemas = ${safeServerName}_putPathSchemas;`,
+    )
+    lines.push(
+      `export const patchPathSchemas = ${safeServerName}_patchPathSchemas;`,
+    )
+    lines.push(
+      `export const deletePathSchemas = ${safeServerName}_deletePathSchemas;`,
+    )
+    lines.push('')
+    lines.push('export const pathSchemas = {')
+    lines.push('  post: postPathSchemas,')
+    lines.push('  put: putPathSchemas,')
+    lines.push('  patch: patchPathSchemas,')
+    lines.push('  delete: deletePathSchemas,')
+    lines.push('};')
   } else {
     // Multiple servers - export as nested object
     lines.push('export const schemas = {')
@@ -814,6 +939,27 @@ export function generateZodSchemas(
       lines.push(
         `export const errorSchemas = ${safeDefaultServer}_errorSchemas;`,
       )
+      lines.push('')
+      lines.push('// Path to schema mappings (first server)')
+      lines.push(
+        `export const postPathSchemas = ${safeDefaultServer}_postPathSchemas;`,
+      )
+      lines.push(
+        `export const putPathSchemas = ${safeDefaultServer}_putPathSchemas;`,
+      )
+      lines.push(
+        `export const patchPathSchemas = ${safeDefaultServer}_patchPathSchemas;`,
+      )
+      lines.push(
+        `export const deletePathSchemas = ${safeDefaultServer}_deletePathSchemas;`,
+      )
+      lines.push('')
+      lines.push('export const pathSchemas = {')
+      lines.push('  post: postPathSchemas,')
+      lines.push('  put: putPathSchemas,')
+      lines.push('  patch: patchPathSchemas,')
+      lines.push('  delete: deletePathSchemas,')
+      lines.push('};')
     }
   }
 

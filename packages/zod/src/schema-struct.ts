@@ -108,6 +108,35 @@ export type DevupZodSchemaTypes<
 }
 
 // =============================================================================
+// Path Schema Types (for hookform integration)
+// =============================================================================
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface for augmentation
+export interface DevupZodPostPathSchemas {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface for augmentation
+export interface DevupZodPutPathSchemas {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface for augmentation
+export interface DevupZodPatchPathSchemas {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface for augmentation
+export interface DevupZodDeletePathSchemas {}
+
+/**
+ * Path schemas organized by HTTP method
+ * Maps path/operationId to request body Zod schema
+ */
+export type DevupZodPathSchemas<
+  T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
+> = {
+  post: ExtractValue<DevupZodPostPathSchemas, T, Record<string, z.ZodType>>
+  put: ExtractValue<DevupZodPutPathSchemas, T, Record<string, z.ZodType>>
+  patch: ExtractValue<DevupZodPatchPathSchemas, T, Record<string, z.ZodType>>
+  delete: ExtractValue<DevupZodDeletePathSchemas, T, Record<string, z.ZodType>>
+}
+
+// =============================================================================
 // Cold Typing Support
 // =============================================================================
 

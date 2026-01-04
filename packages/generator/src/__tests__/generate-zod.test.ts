@@ -2923,3 +2923,970 @@ describe('generateZodTypeDeclarations - $ref resolution', () => {
     expect(result).toContain('z.ZodNumber')
   })
 })
+
+// =============================================================================
+// Inline Request Body Schema (non-$ref)
+// =============================================================================
+
+describe('generateZodSchemas - inline request body schema', () => {
+  test('handles requestBody with inline schema (no $ref)', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/users': {
+            post: {
+              operationId: 'createUser',
+              requestBody: {
+                content: {
+                  'application/json': {
+                    // Inline schema, not a $ref
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        name: { type: 'string' },
+                        age: { type: 'integer' },
+                      },
+                      required: ['name'],
+                    },
+                  },
+                },
+              },
+              responses: { '201': { description: 'Created' } },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should still generate pathSchemas even without $ref
+    expect(result).toContain('pathSchemas')
+    expect(result).toContain('post')
+  })
+
+  test('handles requestBody with no application/json content', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/upload': {
+            post: {
+              operationId: 'uploadFile',
+              requestBody: {
+                content: {
+                  'multipart/form-data': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        file: { type: 'string', format: 'binary' },
+                      },
+                    },
+                  },
+                },
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should handle gracefully when no application/json content
+    expect(result).toContain('pathSchemas')
+  })
+
+  test('handles requestBody with empty content', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            post: {
+              operationId: 'testEmpty',
+              requestBody: {
+                content: {},
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('pathSchemas')
+  })
+})
+
+// =============================================================================
+// generateZodTypeDeclarations - Edge Cases for schemaToZodType
+// =============================================================================
+
+describe('generateZodTypeDeclarations - schemaToZodType edge cases', () => {
+  test('handles empty allOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: { allOf: [] },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodUnknown')
+  })
+
+  test('handles single allOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              allOf: [{ type: 'string' }],
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodString')
+    expect(result).not.toContain('z.ZodIntersection')
+  })
+
+  test('handles empty oneOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: { oneOf: [] },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodUnknown')
+  })
+
+  test('handles single oneOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              oneOf: [{ type: 'number' }],
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodNumber')
+    expect(result).not.toContain('z.ZodUnion')
+  })
+
+  test('handles empty anyOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: { anyOf: [] },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodUnknown')
+  })
+
+  test('handles single anyOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              anyOf: [{ type: 'boolean' }],
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodBoolean')
+    expect(result).not.toContain('z.ZodUnion')
+  })
+
+  test('handles $ref that fails to resolve in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'object',
+              properties: {
+                // External ref that can't be resolved
+                external: { $ref: 'external.json#/schemas/Foo' },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodUnknown')
+  })
+
+  test('handles nullable allOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              allOf: [{ type: 'string' }, { type: 'object' }],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodNullable<z.ZodIntersection')
+  })
+
+  test('handles nullable oneOf in type declaration', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              oneOf: [{ type: 'string' }, { type: 'number' }],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodNullable<z.ZodUnion')
+  })
+})
+
+// =============================================================================
+// Additional Edge Cases for Full Coverage
+// =============================================================================
+
+describe('generateZodSchemas - additional coverage', () => {
+  test('handles $ref to non-existent schema (schemaName exists but not in schemaRefs)', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'object',
+              properties: {
+                // References a schema that doesn't exist in components
+                missing: { $ref: '#/components/schemas/NonExistent' },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should fall back to z.unknown() when schema not found
+    expect(result).toContain('z.unknown()')
+  })
+
+  test('handles object property with $ref that has default value', () => {
+    const result = generateZodSchemas(
+      {
+        'openapi.json': createDocument({
+          paths: {
+            '/test': {
+              post: {
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+                responses: { '200': { description: 'Success' } },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              WithDefault: {
+                type: 'string',
+                default: 'defaultValue',
+              },
+              Test: {
+                type: 'object',
+                properties: {
+                  refWithDefault: { $ref: '#/components/schemas/WithDefault' },
+                },
+              },
+            },
+          },
+        }),
+      },
+      { requestDefaultNonNullable: true },
+    )
+
+    // With requestDefaultNonNullable: true and default value, should not be optional
+    expect(result).toContain('requestSchemas')
+  })
+
+  test('handles nested nullable allOf in schemaToZod', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              allOf: [{ type: 'string' }, { type: 'object' }],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.intersection')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable oneOf in schemaToZod', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              oneOf: [{ type: 'string' }, { type: 'number' }],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.union')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable single allOf', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              allOf: [{ type: 'string' }],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.string()')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable single oneOf', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              oneOf: [{ type: 'number' }],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.number()')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable enum', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'string',
+              enum: ['a', 'b'],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.enum')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable single enum (literal)', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'string',
+              enum: ['only'],
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.literal')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable array', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'array',
+              items: { type: 'string' },
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.array')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable array without items', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'array',
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.array(z.unknown())')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable object', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'object',
+              properties: { id: { type: 'string' } },
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.object')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable boolean', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'boolean',
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.boolean()')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable number', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'number',
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.number()')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles nullable integer', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'integer',
+              nullable: true,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.number().int()')
+    expect(result).toContain('.nullable()')
+  })
+
+  test('handles path with parameters', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/users/{userId}/posts/{postId}': {
+            get: {
+              operationId: 'getUserPost',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Post' },
+                    },
+                  },
+                },
+              },
+            },
+            put: {
+              operationId: 'updateUserPost',
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: { $ref: '#/components/schemas/UpdatePost' },
+                  },
+                },
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Post: { type: 'object', properties: { title: { type: 'string' } } },
+            UpdatePost: {
+              type: 'object',
+              properties: { title: { type: 'string' } },
+            },
+          },
+        },
+      }),
+    })
+
+    // Path with parameters should be normalized with case conversion
+    expect(result).toContain('pathSchemas')
+    expect(result).toContain('Post')
+    expect(result).toContain('UpdatePost')
+  })
+
+  test('handles path parameters with snake_case conversion', () => {
+    const result = generateZodSchemas(
+      {
+        'openapi.json': createDocument({
+          paths: {
+            '/users/{user_id}': {
+              post: {
+                operationId: 'create_user_item',
+                requestBody: {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Item' },
+                    },
+                  },
+                },
+                responses: { '200': { description: 'Success' } },
+              },
+            },
+          },
+          components: {
+            schemas: {
+              Item: {
+                type: 'object',
+                properties: { name: { type: 'string' } },
+              },
+            },
+          },
+        }),
+      },
+      { convertCase: 'snake' },
+    )
+
+    expect(result).toContain('requestSchemas')
+  })
+})
