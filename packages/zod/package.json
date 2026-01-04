@@ -1,6 +1,6 @@
 {
-  "name": "@devup-api/vite-plugin",
-  "version": "0.1.8",
+  "name": "@devup-api/zod",
+  "version": "0.0.1",
   "license": "Apache-2.0",
   "type": "module",
   "exports": {
@@ -20,17 +20,15 @@
     "access": "public"
   },
   "dependencies": {
-    "@devup-api/utils": "workspace:^",
-    "@devup-api/core": "workspace:^",
-    "@devup-api/generator": "workspace:^"
+    "@devup-api/fetch": "workspace:^",
+    "zod": ">=4"
   },
   "peerDependencies": {
-    "vite": "*",
-    "@devup-api/core": "*"
+    "zod": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^25.0",
-    "openapi-types": "^12.1",
-    "typescript": "^5.9"
+    "typescript": "^5.9",
+    "zod": "^4.3.5"
   }
 }

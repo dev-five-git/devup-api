@@ -10,6 +10,8 @@ let mockReadOpenapiAsync: ReturnType<typeof spyOn>
 let mockWriteInterfaceAsync: ReturnType<typeof spyOn>
 let mockCreateUrlMap: ReturnType<typeof spyOn>
 let mockGenerateInterface: ReturnType<typeof spyOn>
+let mockGenerateZodSchemas: ReturnType<typeof spyOn>
+let mockGenerateZodTypeDeclarations: ReturnType<typeof spyOn>
 
 const mockSchema = {
   openapi: '3.1.0',
@@ -47,6 +49,9 @@ const mockUrlMap = {
 
 const mockInterfaceContent = 'export interface Test {}'
 
+const mockZodSchemasContent = 'export const schemas = {}'
+const mockZodTypeDeclarationsContent = 'declare module "@devup-api/zod" {}'
+
 beforeEach(() => {
   mockCreateTmpDirAsync = spyOn(utils, 'createTmpDirAsync').mockResolvedValue(
     'df',
@@ -64,6 +69,14 @@ beforeEach(() => {
   mockGenerateInterface = spyOn(generator, 'generateInterface').mockReturnValue(
     mockInterfaceContent,
   )
+  mockGenerateZodSchemas = spyOn(
+    generator,
+    'generateZodSchemas',
+  ).mockReturnValue(mockZodSchemasContent)
+  mockGenerateZodTypeDeclarations = spyOn(
+    generator,
+    'generateZodTypeDeclarations',
+  ).mockReturnValue(mockZodTypeDeclarationsContent)
 })
 
 test('devupApi returns plugin with correct name', () => {
@@ -182,4 +195,71 @@ test('devupApi plugin has both config and configResolved hooks', () => {
   expect(plugin.configResolved).toBeDefined()
   expect(typeof plugin.config).toBe('function')
   expect(typeof plugin.configResolved).toBe('function')
+})
+
+test('devupApi resolveId returns resolved virtual module for @devup-api/zod', () => {
+  const plugin = devupApi()
+  const resolveId = plugin.resolveId as (id: string) => string | null
+  expect(resolveId).toBeDefined()
+
+  const result = resolveId('@devup-api/zod')
+  expect(result).toBe('\0@devup-api/zod')
+})
+
+test('devupApi resolveId returns null for other modules', () => {
+  const plugin = devupApi()
+  const resolveId = plugin.resolveId as (id: string) => string | null
+
+  expect(resolveId('other-module')).toBeNull()
+  expect(resolveId('@devup-api/fetch')).toBeNull()
+  expect(resolveId('zod')).toBeNull()
+})
+
+test('devupApi load returns zod schemas code for virtual module', async () => {
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  const result = await load('\0@devup-api/zod')
+  expect(result).toBe(mockZodSchemasContent)
+  expect(mockGenerateZodSchemas).toHaveBeenCalled()
+})
+
+test('devupApi load returns null for other modules', async () => {
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  expect(await load('other-module')).toBeNull()
+  expect(await load('@devup-api/zod')).toBeNull() // Not the resolved virtual module
+})
+
+test('devupApi load caches zod schemas code', async () => {
+  // Clear mocks for this specific test
+  mockGenerateZodSchemas.mockClear()
+
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  // First call
+  await load('\0@devup-api/zod')
+  expect(mockGenerateZodSchemas).toHaveBeenCalledTimes(1)
+
+  // Second call should use cached value
+  await load('\0@devup-api/zod')
+  expect(mockGenerateZodSchemas).toHaveBeenCalledTimes(1)
+})
+
+test('devupApi configResolved writes zod type declarations', async () => {
+  const plugin = devupApi()
+  await (
+    plugin as unknown as { configResolved?: () => Promise<void> }
+  ).configResolved?.()
+
+  expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledWith(
+    mockSchema,
+    undefined,
+  )
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'zod.d.ts'),
+    mockZodTypeDeclarationsContent,
+  )
 })

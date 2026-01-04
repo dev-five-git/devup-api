@@ -1,6 +1,11 @@
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
-import { createUrlMap, generateInterface } from '@devup-api/generator'
+import {
+  createUrlMap,
+  generateInterface,
+  generateZodSchemas,
+  generateZodTypeDeclarations,
+} from '@devup-api/generator'
 import {
   createTmpDirAsync,
   normalizeOpenapiFiles,
@@ -41,6 +46,18 @@ export class devupApiWebpackPlugin {
             generateInterface(schemas, this.options),
           )
 
+          // Generate Zod schemas file
+          await writeInterfaceAsync(
+            join(tempDir, 'zod-schemas.js'),
+            generateZodSchemas(schemas, this.options),
+          )
+
+          // Generate Zod type declarations
+          await writeInterfaceAsync(
+            join(tempDir, 'zod.d.ts'),
+            generateZodTypeDeclarations(schemas, this.options),
+          )
+
           // Create urlMap and set environment variable
           const urlMap = createUrlMap(schemas, this.options)
           const define: Record<string, string> = {}
@@ -54,6 +71,13 @@ export class devupApiWebpackPlugin {
           if (Object.keys(define).length > 0) {
             new compiler.webpack.DefinePlugin(define).apply(compiler)
           }
+
+          // Add alias for @devup-api/zod to resolve to the generated file
+          const zodSchemasPath = resolve(tempDir, 'zod-schemas.js')
+          new compiler.webpack.NormalModuleReplacementPlugin(
+            /^@devup-api\/zod$/,
+            zodSchemasPath,
+          ).apply(compiler)
 
           callback()
         } catch (error) {

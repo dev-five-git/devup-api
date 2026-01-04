@@ -11,6 +11,8 @@ let mockReadOpenapiAsync: ReturnType<typeof spyOn>
 let mockWriteInterfaceAsync: ReturnType<typeof spyOn>
 let mockCreateUrlMap: ReturnType<typeof spyOn>
 let mockGenerateInterface: ReturnType<typeof spyOn>
+let mockGenerateZodSchemas: ReturnType<typeof spyOn>
+let mockGenerateZodTypeDeclarations: ReturnType<typeof spyOn>
 
 const mockSchema = {
   openapi: '3.1.0',
@@ -77,10 +79,23 @@ const createMockCompiler = (): Compiler & {
   ) => { apply: (compiler: Compiler) => void }
   DefinePlugin.prototype.apply = mock(() => {})
 
+  const NormalModuleReplacementPlugin = function (
+    this: unknown,
+    _pattern: RegExp,
+    _newResource: string,
+  ) {
+    // Constructor
+  } as unknown as new (
+    pattern: RegExp,
+    newResource: string,
+  ) => { apply: (compiler: Compiler) => void }
+  NormalModuleReplacementPlugin.prototype.apply = mock(() => {})
+
   const compiler = {
     hooks,
     webpack: {
       DefinePlugin,
+      NormalModuleReplacementPlugin,
     },
   } as unknown as Compiler & {
     _storedCallback?: (params: unknown, cb: (error?: Error) => void) => void
@@ -94,6 +109,9 @@ const createMockCompiler = (): Compiler & {
   })
   return compiler
 }
+
+const mockZodSchemasContent = 'export const schemas = {}'
+const mockZodTypeDeclarationsContent = 'declare module "@devup-api/zod" {}'
 
 beforeEach(() => {
   mockCreateTmpDirAsync = spyOn(utils, 'createTmpDirAsync').mockResolvedValue(
@@ -112,11 +130,21 @@ beforeEach(() => {
   mockGenerateInterface = spyOn(generator, 'generateInterface').mockReturnValue(
     mockInterfaceContent,
   )
+  mockGenerateZodSchemas = spyOn(
+    generator,
+    'generateZodSchemas',
+  ).mockReturnValue(mockZodSchemasContent)
+  mockGenerateZodTypeDeclarations = spyOn(
+    generator,
+    'generateZodTypeDeclarations',
+  ).mockReturnValue(mockZodTypeDeclarationsContent)
   mockCreateTmpDirAsync.mockClear()
   mockReadOpenapiAsync.mockClear()
   mockWriteInterfaceAsync.mockClear()
   mockCreateUrlMap.mockClear()
   mockGenerateInterface.mockClear()
+  mockGenerateZodSchemas.mockClear()
+  mockGenerateZodTypeDeclarations.mockClear()
 })
 
 test('devupApiWebpackPlugin constructor initializes with default options', () => {
@@ -173,6 +201,10 @@ test.each([
     compiler.webpack.DefinePlugin.prototype,
     'apply',
   ).mockImplementation(() => {})
+  const normalModuleReplacementPluginApplySpy = spyOn(
+    compiler.webpack.NormalModuleReplacementPlugin.prototype,
+    'apply',
+  ).mockImplementation(() => {})
   plugin.apply(compiler)
 
   const callback = compiler._storedCallback
@@ -184,15 +216,31 @@ test.each([
   expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
   expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
   expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options || {})
+  expect(mockGenerateZodSchemas).toHaveBeenCalledWith(mockSchema, options || {})
+  expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledWith(
+    mockSchema,
+    options || {},
+  )
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
     mockInterfaceContent,
   )
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'zod-schemas.js'),
+    mockZodSchemasContent,
+  )
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'zod.d.ts'),
+    mockZodTypeDeclarationsContent,
+  )
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(3)
   expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options || {})
   expect(definePluginApplySpy).toHaveBeenCalled()
+  expect(normalModuleReplacementPluginApplySpy).toHaveBeenCalled()
   expect(mockCallback).toHaveBeenCalled()
   expect(plugin.initialized).toBe(true)
   definePluginApplySpy.mockRestore()
+  normalModuleReplacementPluginApplySpy.mockRestore()
 })
 
 test('devupApiWebpackPlugin beforeCompile hook does not add DefinePlugin when urlMap is null', async () => {
@@ -273,7 +321,9 @@ test('devupApiWebpackPlugin beforeCompile hook only runs once when called multip
   expect(mockCreateTmpDirAsync).toHaveBeenCalledTimes(1)
   expect(mockReadOpenapiAsync).toHaveBeenCalledTimes(1)
   expect(mockGenerateInterface).toHaveBeenCalledTimes(1)
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(1)
+  expect(mockGenerateZodSchemas).toHaveBeenCalledTimes(1)
+  expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledTimes(1)
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(3)
   expect(mockCreateUrlMap).toHaveBeenCalledTimes(1)
   expect(mockCallback1).toHaveBeenCalled()
   expect(mockCallback2).toHaveBeenCalled()

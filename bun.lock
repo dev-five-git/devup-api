@@ -22,6 +22,7 @@
         "@devup-api/fetch": "workspace:*",
         "@devup-api/next-plugin": "workspace:*",
         "@devup-api/react-query": "workspace:*",
+        "@devup-api/zod": "workspace:*",
         "@devup-ui/react": "^1",
         "next": "^16.1.0",
         "react": "^19.2.3",
@@ -100,7 +101,7 @@
       "name": "@devup-api/fetch",
       "version": "0.1.13",
       "dependencies": {
-        "@devup-api/core": "workspace:*",
+        "@devup-api/core": "workspace:^",
       },
       "devDependencies": {
         "@types/node": "^25.0",
@@ -143,7 +144,7 @@
       "name": "@devup-api/react-query",
       "version": "0.1.5",
       "dependencies": {
-        "@devup-api/fetch": "workspace:*",
+        "@devup-api/fetch": "workspace:^",
         "@tanstack/react-query": ">=5.90",
       },
       "devDependencies": {
@@ -194,6 +195,7 @@
       },
       "devDependencies": {
         "@types/node": "^25.0",
+        "openapi-types": "^12.1",
         "typescript": "^5.9",
       },
       "peerDependencies": {
@@ -216,6 +218,22 @@
       },
       "peerDependencies": {
         "@devup-api/core": "*",
+      },
+    },
+    "packages/zod": {
+      "name": "@devup-api/zod",
+      "version": "0.1.13",
+      "dependencies": {
+        "@devup-api/fetch": "workspace:^",
+        "zod": ">=4",
+      },
+      "devDependencies": {
+        "@types/node": "^25.0",
+        "typescript": "^5.9",
+        "zod": "^4.3.5",
+      },
+      "peerDependencies": {
+        "zod": "^3.0.0",
       },
     },
   },
@@ -297,6 +315,8 @@
     "@devup-api/vite-plugin": ["@devup-api/vite-plugin@workspace:packages/vite-plugin"],
 
     "@devup-api/webpack-plugin": ["@devup-api/webpack-plugin@workspace:packages/webpack-plugin"],
+
+    "@devup-api/zod": ["@devup-api/zod@workspace:packages/zod"],
 
     "@devup-ui/next-plugin": ["@devup-ui/next-plugin@1.0.59", "", { "dependencies": { "@devup-ui/wasm": "1.0.51", "@devup-ui/webpack-plugin": "1.0.49", "glob": "^13.0", "next": "^16.0" } }, "sha512-u44tjZZROuWkny/b5ZRvmiNSRvpgvrs+91npGejTx3w7dp+9y17B3GajrNkEytglT5c/45ItAaOR3fwRYwWnbA=="],
 
@@ -858,11 +878,15 @@
 
     "yallist": ["yallist@3.1.1", "", {}, "sha512-a4UGQaWPH59mOXUYnAG2ewncQS4i4F43Tv3JoAM+s2VDAmS9NsK8GpDMLrCHPksFT7h3K6TOoUNn2pb7RoXx4g=="],
 
+    "zod": ["zod@4.3.5", "", {}, "sha512-k7Nwx6vuWx1IJ9Bjuf4Zt1PEllcwe7cls3VNzm4CQ1/hgtFUK2bRNG3rvnpPUhFjmqJKAKtjV576KnUkHocg/g=="],
+
     "@babel/core/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
 
     "@babel/helper-compilation-targets/lru-cache": ["lru-cache@5.1.1", "", { "dependencies": { "yallist": "^3.0.2" } }, "sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w=="],
 
     "@babel/helper-compilation-targets/semver": ["semver@6.3.1", "", { "bin": { "semver": "bin/semver.js" } }, "sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA=="],
+
+    "@devup-api/zod/zod": ["zod@3.25.76", "", {}, "sha512-gzUt/qt81nXsFGKIFcC3YnfEAx5NkunCfnDlvuBSSFS02bcXu4Lmea0AFIUwbLWxWPx3d9p8S5QoaujKcNQxcQ=="],
 
     "@devup-ui/next-plugin/next": ["next@16.0.10", "", { "dependencies": { "@next/env": "16.0.10", "@swc/helpers": "0.5.15", "caniuse-lite": "^1.0.30001579", "postcss": "8.4.31", "styled-jsx": "5.1.6" }, "optionalDependencies": { "@next/swc-darwin-arm64": "16.0.10", "@next/swc-darwin-x64": "16.0.10", "@next/swc-linux-arm64-gnu": "16.0.10", "@next/swc-linux-arm64-musl": "16.0.10", "@next/swc-linux-x64-gnu": "16.0.10", "@next/swc-linux-x64-musl": "16.0.10", "@next/swc-win32-arm64-msvc": "16.0.10", "@next/swc-win32-x64-msvc": "16.0.10", "sharp": "^0.34.4" }, "peerDependencies": { "@opentelemetry/api": "^1.1.0", "@playwright/test": "^1.51.1", "babel-plugin-react-compiler": "*", "react": "^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0", "react-dom": "^18.2.0 || 19.0.0-rc-de68d2f4-20241204 || ^19.0.0", "sass": "^1.3.0" }, "optionalPeers": ["@opentelemetry/api", "@playwright/test", "babel-plugin-react-compiler", "sass"], "bin": { "next": "dist/bin/next" } }, "sha512-RtWh5PUgI+vxlV3HdR+IfWA1UUHu0+Ram/JBO4vWB54cVPentCD0e+lxyAYEsDTqGGMg7qpjhKh6dc6aW7W/sA=="],
 
