@@ -1,6 +1,11 @@
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
-import { createUrlMap, generateInterface } from '@devup-api/generator'
+import {
+  createUrlMap,
+  generateInterface,
+  generateZodSchemas,
+  generateZodTypeDeclarations,
+} from '@devup-api/generator'
 import {
   createTmpDirAsync,
   normalizeOpenapiFiles,
@@ -25,16 +30,39 @@ export function devupApiRsbuildPlugin(
         generateInterface(schemas, options),
       )
 
+      // Generate Zod schemas file
+      await writeInterfaceAsync(
+        join(tempDir, 'zod-schemas.js'),
+        generateZodSchemas(schemas, options),
+      )
+
+      // Generate Zod type declarations
+      await writeInterfaceAsync(
+        join(tempDir, 'zod.d.ts'),
+        generateZodTypeDeclarations(schemas, options),
+      )
+
       // Create urlMap and set environment variable
       const urlMap = createUrlMap(schemas, options)
 
+      // Get absolute path for Zod schemas
+      const zodSchemasPath = resolve(tempDir, 'zod-schemas.js')
+
       build.modifyRsbuildConfig((config) => {
         config.source ??= {}
+        config.resolve ??= {}
         config.source.define ??= {}
+        config.resolve.alias ??= {}
+
+        // Set URL map environment variable
         if (urlMap && Object.keys(urlMap).length > 0) {
           config.source.define['process.env.DEVUP_API_URL_MAP'] =
             JSON.stringify(JSON.stringify(urlMap))
         }
+        // Add alias for @devup-api/zod
+        ;(config.resolve.alias as Record<string, string>)['@devup-api/zod'] =
+          zodSchemasPath
+
         return config
       })
     },

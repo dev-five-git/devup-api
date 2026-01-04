@@ -1,5 +1,5 @@
 import { beforeEach, expect, mock, spyOn, test } from 'bun:test'
-import { join } from 'node:path'
+import { join, resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import * as generator from '@devup-api/generator'
 import * as utils from '@devup-api/utils'
@@ -10,6 +10,8 @@ let mockReadOpenapiAsync: ReturnType<typeof spyOn>
 let mockWriteInterfaceAsync: ReturnType<typeof spyOn>
 let mockCreateUrlMap: ReturnType<typeof spyOn>
 let mockGenerateInterface: ReturnType<typeof spyOn>
+let mockGenerateZodSchemas: ReturnType<typeof spyOn>
+let mockGenerateZodTypeDeclarations: ReturnType<typeof spyOn>
 
 const mockSchema = {
   openapi: '3.1.0',
@@ -46,6 +48,8 @@ const mockUrlMap = {
 }
 
 const mockInterfaceContent = 'export interface Test {}'
+const mockZodSchemasContent = 'export const schemas = {}'
+const mockZodTypeDeclarationsContent = 'declare module "@devup-api/zod" {}'
 
 const createMockBuild = () => {
   const modifyRsbuildConfigMock = mock(
@@ -76,11 +80,21 @@ beforeEach(() => {
   mockGenerateInterface = spyOn(generator, 'generateInterface').mockReturnValue(
     mockInterfaceContent,
   )
+  mockGenerateZodSchemas = spyOn(
+    generator,
+    'generateZodSchemas',
+  ).mockReturnValue(mockZodSchemasContent)
+  mockGenerateZodTypeDeclarations = spyOn(
+    generator,
+    'generateZodTypeDeclarations',
+  ).mockReturnValue(mockZodTypeDeclarationsContent)
   mockCreateTmpDirAsync.mockClear()
   mockReadOpenapiAsync.mockClear()
   mockWriteInterfaceAsync.mockClear()
   mockCreateUrlMap.mockClear()
   mockGenerateInterface.mockClear()
+  mockGenerateZodSchemas.mockClear()
+  mockGenerateZodTypeDeclarations.mockClear()
 })
 
 test('devupApiRsbuildPlugin returns plugin with correct name', () => {
@@ -113,15 +127,30 @@ test.each([
   expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
   expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
   expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
+  expect(mockGenerateZodSchemas).toHaveBeenCalledWith(mockSchema, options)
+  expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledWith(
+    mockSchema,
+    options,
+  )
+  // 3 files written: api.d.ts, zod-schemas.js, zod.d.ts
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(3)
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
     mockInterfaceContent,
+  )
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'zod-schemas.js'),
+    mockZodSchemasContent,
+  )
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'zod.d.ts'),
+    mockZodTypeDeclarationsContent,
   )
   expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
   expect(build.modifyRsbuildConfig).toHaveBeenCalled()
 })
 
-test('devupApiRsbuildPlugin setup hook modifies config with urlMap', async () => {
+test('devupApiRsbuildPlugin setup hook modifies config with urlMap and alias', async () => {
   const plugin = devupApiRsbuildPlugin()
   const build = createMockBuild()
   await plugin.setup?.(build as never)
@@ -134,6 +163,11 @@ test('devupApiRsbuildPlugin setup hook modifies config with urlMap', async () =>
   const result = configModifier(config)
 
   expect(result).toEqual({
+    resolve: {
+      alias: {
+        '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+      },
+    },
     source: {
       define: {
         'process.env.DEVUP_API_URL_MAP': JSON.stringify(
@@ -155,6 +189,11 @@ test('devupApiRsbuildPlugin setup hook handles config without source', async () 
   const result = configModifier(config)
 
   expect(result).toEqual({
+    resolve: {
+      alias: {
+        '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+      },
+    },
     source: {
       define: {
         'process.env.DEVUP_API_URL_MAP': JSON.stringify(
@@ -178,6 +217,11 @@ test('devupApiRsbuildPlugin setup hook handles config without define', async () 
   const result = configModifier(config)
 
   expect(result).toEqual({
+    resolve: {
+      alias: {
+        '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+      },
+    },
     source: {
       define: {
         'process.env.DEVUP_API_URL_MAP': JSON.stringify(
@@ -202,6 +246,11 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is null',
   const result = configModifier(config)
 
   expect(result).toEqual({
+    resolve: {
+      alias: {
+        '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+      },
+    },
     source: {
       define: {},
     },
@@ -222,6 +271,11 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is undefi
   const result = configModifier(config)
 
   expect(result).toEqual({
+    resolve: {
+      alias: {
+        '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+      },
+    },
     source: {
       define: {},
     },
@@ -242,6 +296,11 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is empty 
   const result = configModifier(config)
 
   expect(result).toEqual({
+    resolve: {
+      alias: {
+        '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+      },
+    },
     source: {
       define: {},
     },

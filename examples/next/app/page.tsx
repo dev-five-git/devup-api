@@ -2,6 +2,7 @@
 
 import { createApi, type DevupObject } from '@devup-api/fetch'
 import { createQueryClient } from '@devup-api/react-query'
+import { schemas } from '@devup-api/zod'
 import { Box, Text } from '@devup-ui/react'
 import { useEffect } from 'react'
 
@@ -14,6 +15,13 @@ const api2 = createApi({
 })
 
 const queryClient = createQueryClient(api)
+
+// Example usage of Zod schemas (will be populated after build)
+const schema = schemas['openapi.json'].request.CreateUserRequest
+const _a = schema.parse({
+  name: 'John Doe',
+  email: 'foo@bar.com',
+})
 
 export default function Home() {
   const { data, isLoading, error } = queryClient.useQuery('GET', 'getUsers', {

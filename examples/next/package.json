@@ -15,6 +15,7 @@
     "@devup-api/next-plugin": "workspace:*",
     "@devup-api/fetch": "workspace:*",
     "@devup-api/react-query": "workspace:*",
+    "@devup-api/zod": "workspace:*",
     "@devup-ui/react": "^1"
   },
   "devDependencies": {
