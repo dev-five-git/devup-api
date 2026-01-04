@@ -2,4 +2,4 @@
 coverage = true
 coveragePathIgnorePatterns = ["node_modules", "**/dist/**"]
 coverageSkipTestFiles = true
-preload = ["./packages/react-query/setup.ts"]
+preload = ["bun-test-env-dom"]
