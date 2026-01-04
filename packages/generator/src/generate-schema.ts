@@ -91,9 +91,6 @@ export function getTypeFromSchema(
 
   // Handle primitive types
   if (schemaObj.type === 'string') {
-    if (schemaObj.format === 'date' || schemaObj.format === 'date-time') {
-      return { type: 'string', default: schemaObj.default }
-    }
     return { type: 'string', default: schemaObj.default }
   }
 

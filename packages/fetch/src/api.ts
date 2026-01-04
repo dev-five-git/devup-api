@@ -292,36 +292,41 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     let error: unknown = ret.error
 
     for (const middleware of finalMiddleware) {
-      if (response && middleware.onResponse) {
-        const result = await (response && middleware.onResponse
-          ? middleware.onResponse({
-              request,
-              schemaPath: url,
-              params: requestOptions.params,
-              query: requestOptions.query,
-              headers: requestOptions.headers,
-              body: requestOptions.body,
-              response: ret.response,
-            })
-          : error && middleware.onError
-            ? middleware.onError({
-                request,
-                schemaPath: url,
-                params: requestOptions.params,
-                query: requestOptions.query,
-                headers: requestOptions.headers,
-                body: requestOptions.body,
-                error: ret.error,
-              })
-            : undefined)
-        if (result) {
-          if (result instanceof Response) {
-            response = result
-            break
-          } else if (result instanceof Error) {
-            error = result
-            break
-          }
+      const middlewareParams = {
+        request,
+        schemaPath: url,
+        params: requestOptions.params,
+        query: requestOptions.query,
+        headers: requestOptions.headers,
+        body: requestOptions.body,
+      }
+
+      let result: Response | Error | undefined
+
+      // Call onResponse if it exists
+      if (middleware.onResponse) {
+        result = await middleware.onResponse({
+          ...middlewareParams,
+          response: ret.response,
+        })
+      }
+
+      // Call onError if there's an error and onResponse didn't return a result
+      if (!result && error && middleware.onError) {
+        result = await middleware.onError({
+          ...middlewareParams,
+          error: ret.error,
+        })
+      }
+
+      if (result) {
+        if (result instanceof Response) {
+          response = result
+          break
+        }
+        if (result instanceof Error) {
+          error = result
+          break
         }
       }
     }

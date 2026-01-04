@@ -423,10 +423,7 @@ test('onError middleware is called when onResponse is not defined and error exis
   const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   let errorMiddlewareCalled = false
 
-  // onError is only called when onResponse is not defined and error exists
-  // The condition is: if (response && middleware.onResponse) - if onResponse is not defined, the block doesn't execute
-  // So onError is never called in the current implementation
-  // This test verifies the middleware structure exists
+  // onError is called when there's an error and no onResponse handler returned a result
   api.use({
     onError: async ({ error }) => {
       errorMiddlewareCalled = true
@@ -437,9 +434,8 @@ test('onError middleware is called when onResponse is not defined and error exis
 
   await api.get('/test' as never)
 
-  // Note: onError is not called because the condition requires response && middleware.onResponse
-  // If onResponse is not defined, the entire block is skipped
-  expect(errorMiddlewareCalled).toBe(false)
+  // onError should be called when there's an error response (404)
+  expect(errorMiddlewareCalled).toBe(true)
 })
 
 test('onError middleware can return Error', async () => {
@@ -455,7 +451,7 @@ test('onError middleware can return Error', async () => {
   const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
   const customError = new Error('Custom error from middleware')
 
-  // onError is registered but won't be called due to the condition check
+  // onError returns a custom Error to replace the original error
   api.use({
     onError: async () => customError,
   })
@@ -466,9 +462,8 @@ test('onError middleware can return Error', async () => {
     response: Response
   }
 
-  // Since onError is not called, error comes from convertResponse
-  expect(result.error).toBeDefined()
-  expect(result.error).not.toBe(customError)
+  // onError is called and returns the custom error
+  expect(result.error).toBe(customError)
 })
 
 test('onError middleware can return Response', async () => {
@@ -487,7 +482,7 @@ test('onError middleware can return Response', async () => {
     headers: { 'Content-Type': 'application/json' },
   })
 
-  // onError is registered but won't be called due to the condition check
+  // onError returns a recovery Response to replace the error
   api.use({
     onError: async () => recoveryResponse,
   })
@@ -498,9 +493,8 @@ test('onError middleware can return Response', async () => {
     response: Response
   }
 
-  // Since onError is not called, response comes from convertResponse
-  expect(result.response).toBeDefined()
-  expect(result.response).not.toBe(recoveryResponse)
+  // onError is called and returns the recovery response
+  expect(result.response).toBe(recoveryResponse)
 })
 
 test('middleware can be passed in request options', async () => {
