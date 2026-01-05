@@ -12,6 +12,8 @@ let mockCreateUrlMap: ReturnType<typeof spyOn>
 let mockGenerateInterface: ReturnType<typeof spyOn>
 let mockGenerateZodSchemas: ReturnType<typeof spyOn>
 let mockGenerateZodTypeDeclarations: ReturnType<typeof spyOn>
+let mockGenerateCrudConfigCode: ReturnType<typeof spyOn>
+let mockGenerateCrudConfigTypes: ReturnType<typeof spyOn>
 
 const mockSchema = {
   openapi: '3.1.0',
@@ -51,6 +53,8 @@ const mockInterfaceContent = 'export interface Test {}'
 
 const mockZodSchemasContent = 'export const schemas = {}'
 const mockZodTypeDeclarationsContent = 'declare module "@devup-api/zod" {}'
+const mockCrudConfigCodeContent = 'export function UserCrud() {}'
+const mockCrudConfigTypesContent = 'declare module "@devup-api/ui/crud" {}'
 
 beforeEach(() => {
   mockCreateTmpDirAsync = spyOn(utils, 'createTmpDirAsync').mockResolvedValue(
@@ -77,6 +81,14 @@ beforeEach(() => {
     generator,
     'generateZodTypeDeclarations',
   ).mockReturnValue(mockZodTypeDeclarationsContent)
+  mockGenerateCrudConfigCode = spyOn(
+    generator,
+    'generateCrudConfigCode',
+  ).mockReturnValue(mockCrudConfigCodeContent)
+  mockGenerateCrudConfigTypes = spyOn(
+    generator,
+    'generateCrudConfigTypes',
+  ).mockReturnValue(mockCrudConfigTypesContent)
 })
 
 test('devupApi returns plugin with correct name', () => {
@@ -261,5 +273,70 @@ test('devupApi configResolved writes zod type declarations', async () => {
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'zod.d.ts'),
     mockZodTypeDeclarationsContent,
+  )
+})
+
+// =============================================================================
+// Virtual UI Module Tests
+// =============================================================================
+
+test('devupApi resolveId returns resolved virtual module for @devup-api/ui/crud', () => {
+  const plugin = devupApi()
+  const resolveId = plugin.resolveId as (id: string) => string | null
+
+  const result = resolveId('@devup-api/ui/crud')
+  expect(result).toBe('\0@devup-api/ui/crud')
+})
+
+test('devupApi resolveId returns null for partial ui module path', () => {
+  const plugin = devupApi()
+  const resolveId = plugin.resolveId as (id: string) => string | null
+
+  expect(resolveId('@devup-api/ui')).toBeNull()
+  expect(resolveId('@devup-api/ui/other')).toBeNull()
+})
+
+test('devupApi load returns crud config code for virtual ui module', async () => {
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  const result = await load('\0@devup-api/ui/crud')
+  expect(result).toBe(mockCrudConfigCodeContent)
+  expect(mockGenerateCrudConfigCode).toHaveBeenCalled()
+})
+
+test('devupApi load returns null for non-resolved ui module', async () => {
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  expect(await load('@devup-api/ui/crud')).toBeNull() // Not the resolved virtual module
+})
+
+test('devupApi load caches crud config code', async () => {
+  // Clear mocks for this specific test
+  mockGenerateCrudConfigCode.mockClear()
+
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  // First call
+  await load('\0@devup-api/ui/crud')
+  expect(mockGenerateCrudConfigCode).toHaveBeenCalledTimes(1)
+
+  // Second call should use cached value
+  await load('\0@devup-api/ui/crud')
+  expect(mockGenerateCrudConfigCode).toHaveBeenCalledTimes(1)
+})
+
+test('devupApi configResolved writes crud config type declarations', async () => {
+  const plugin = devupApi()
+  await (
+    plugin as unknown as { configResolved?: () => Promise<void> }
+  ).configResolved?.()
+
+  expect(mockGenerateCrudConfigTypes).toHaveBeenCalledWith(mockSchema)
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'ui.d.ts'),
+    mockCrudConfigTypesContent,
   )
 })

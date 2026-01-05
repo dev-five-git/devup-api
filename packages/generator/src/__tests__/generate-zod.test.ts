@@ -73,7 +73,7 @@ describe('generateZodSchemas', () => {
     })
 
     expect(result).toContain('z.object')
-    expect(result).toContain('z.number().int()')
+    expect(result).toContain('z.int()')
     expect(result).toContain('z.string()')
   })
 
@@ -248,7 +248,7 @@ describe('generateZodSchemas - primitive types', () => {
       }),
     })
 
-    expect(result).toContain('z.number().int()')
+    expect(result).toContain('z.int()')
   })
 
   test('converts boolean type', () => {
@@ -425,7 +425,7 @@ describe('generateZodSchemas - string formats', () => {
       }),
     })
 
-    expect(result).toContain('z.string().email()')
+    expect(result).toContain('z.email()')
   })
 
   test('adds url validation', () => {
@@ -455,7 +455,7 @@ describe('generateZodSchemas - string formats', () => {
       }),
     })
 
-    expect(result).toContain('z.string().url()')
+    expect(result).toContain('z.url()')
   })
 
   test('adds uuid validation', () => {
@@ -485,7 +485,201 @@ describe('generateZodSchemas - string formats', () => {
       }),
     })
 
-    expect(result).toContain('z.string().uuid()')
+    expect(result).toContain('z.uuid()')
+  })
+
+  test('adds email validation with minLength constraint', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: { type: 'string', format: 'email', minLength: 5 },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.email()')
+    expect(result).toContain('.min(5)')
+  })
+
+  test('adds email validation with maxLength constraint', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: { type: 'string', format: 'email', maxLength: 100 },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.email()')
+    expect(result).toContain('.max(100)')
+  })
+
+  test('adds email validation with both minLength and maxLength constraints', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'string',
+              format: 'email',
+              minLength: 5,
+              maxLength: 100,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.email().min(5).max(100)')
+  })
+
+  test('adds url validation with minLength constraint', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: { type: 'string', format: 'uri', minLength: 10 },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.url()')
+    expect(result).toContain('.min(10)')
+  })
+
+  test('adds url validation with maxLength constraint', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: { type: 'string', format: 'url', maxLength: 2000 },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.url()')
+    expect(result).toContain('.max(2000)')
+  })
+
+  test('adds url validation with both minLength and maxLength constraints', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/test': {
+            get: {
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/Test' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            Test: {
+              type: 'string',
+              format: 'uri',
+              minLength: 10,
+              maxLength: 2000,
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.url().min(10).max(2000)')
   })
 })
 
@@ -930,7 +1124,7 @@ describe('generateZodSchemas - more string formats', () => {
       }),
     })
 
-    expect(result).toContain('.datetime()')
+    expect(result).toContain('z.iso.datetime()')
   })
 
   test('adds url validation for format url', () => {
@@ -3802,7 +3996,7 @@ describe('generateZodSchemas - additional coverage', () => {
       }),
     })
 
-    expect(result).toContain('z.number().int()')
+    expect(result).toContain('z.int()')
     expect(result).toContain('.nullable()')
   })
 

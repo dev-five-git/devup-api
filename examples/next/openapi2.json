@@ -29,6 +29,7 @@
       "post": {
         "summary": "Create a new user",
         "operationId": "createUser2",
+        "tags": ["devup:user:create"],
         "requestBody": {
           "required": true,
           "content": {
@@ -57,6 +58,7 @@
       "get": {
         "summary": "Get user by ID",
         "operationId": "getUserById2",
+        "tags": ["devup:user:one"],
         "parameters": [
           {
             "name": "id",
@@ -70,6 +72,80 @@
         "responses": {
           "200": {
             "description": "User details",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "summary": "Update user (full replacement)",
+        "operationId": "updateUser2",
+        "tags": ["devup:user:edit"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UpdateUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User updated",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/User"
+                }
+              }
+            }
+          }
+        }
+      },
+      "patch": {
+        "summary": "Patch user (partial update)",
+        "operationId": "patchUser2",
+        "tags": ["devup:user:fix"],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "integer"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/PatchUserRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "User patched",
             "content": {
               "application/json": {
                 "schema": {
@@ -131,6 +207,31 @@
           }
         },
         "required": ["name", "email"]
+      },
+      "UpdateUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        },
+        "required": ["name", "email"]
+      },
+      "PatchUserRequest": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          }
+        }
       }
     }
   }

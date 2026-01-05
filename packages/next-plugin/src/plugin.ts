@@ -1,7 +1,9 @@
-import { join, resolve } from 'node:path'
+import { join, relative, resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
+  generateCrudConfigCode,
+  generateCrudConfigTypes,
   generateInterface,
   generateZodSchemas,
   generateZodTypeDeclarations,
@@ -14,6 +16,13 @@ import {
 } from '@devup-api/utils'
 import { devupApiWebpackPlugin } from '@devup-api/webpack-plugin'
 import type { NextConfig } from 'next'
+
+/**
+ * Convert absolute path to relative path with forward slashes
+ */
+function toRelativePath(absolutePath: string): string {
+  return `./${relative(process.cwd(), absolutePath).replace(/\\/g, '/')}`
+}
 
 export function devupApi(
   config: NextConfig,
@@ -44,6 +53,15 @@ export function devupApi(
       generateZodTypeDeclarations(schemas, options),
     )
 
+    // Generate CRUD configs file
+    writeInterface(
+      join(tempDir, 'crud-configs.jsx'),
+      generateCrudConfigCode(schemas),
+    )
+
+    // Generate CRUD config type declarations
+    writeInterface(join(tempDir, 'ui.d.ts'), generateCrudConfigTypes(schemas))
+
     // Create urlMap and set environment variable
     const urlMap = createUrlMap(schemas, options)
     config.env ??= {}
@@ -53,15 +71,15 @@ export function devupApi(
       })
     }
 
-    // Add alias for @devup-api/zod in turbopack mode
-    const zodSchemasPath = resolve(tempDir, 'zod-schemas.js')
-    config.experimental ??= {}
-    // biome-ignore lint/suspicious/noExplicitAny: turbo config types may not be available in all Next.js versions
-    const experimental = config.experimental as any
-    experimental.turbo ??= {}
-    experimental.turbo.resolveAlias ??= {}
-    Object.assign(experimental.turbo.resolveAlias, {
-      '@devup-api/zod': zodSchemasPath,
+    // Add aliases for virtual modules in turbopack mode
+    // Use relative paths with forward slashes for Turbopack compatibility
+    config.turbopack ??= {}
+    config.turbopack.resolveAlias ??= {}
+    Object.assign(config.turbopack.resolveAlias, {
+      '@devup-api/zod': toRelativePath(resolve(tempDir, 'zod-schemas.js')),
+      '@devup-api/ui/crud': toRelativePath(
+        resolve(tempDir, 'crud-configs.jsx'),
+      ),
     })
 
     return config

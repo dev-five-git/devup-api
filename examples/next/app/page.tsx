@@ -2,6 +2,7 @@
 
 import { createApi, type DevupObject } from '@devup-api/fetch'
 import { createQueryClient } from '@devup-api/react-query'
+import { ApiCrud } from '@devup-api/ui'
 import { schemas } from '@devup-api/zod'
 import { Box, Text } from '@devup-ui/react'
 import { useEffect } from 'react'
@@ -37,20 +38,20 @@ export default function Home() {
   console.info(data, isLoading, error)
 
   const {
-    data: data2,
-    error: error2,
+    data: _data2,
+    error: _error2,
     mutateAsync,
   } = queryClient.useMutation('GET', '/users/{id}', {})
-  mutateAsync({
-    params: { id: 1 },
-    query: {
-      name: 'John Doe',
-    },
-  })
 
-  console.info(data2, error2)
+  // console.info(data2, error2)
 
   useEffect(() => {
+    mutateAsync({
+      params: { id: 1 },
+      query: {
+        name: 'John Doe',
+      },
+    })
     api2.get('getUsers2').then((res) => {
       console.log(res)
     })
@@ -79,11 +80,12 @@ export default function Home() {
       .then((res) => {
         console.log(res)
       })
-  }, [])
+  }, [mutateAsync])
   return (
     <Box>
       <Text>Next.js Example (Turbopack)</Text>
       <Box>
+        <ApiCrud api={'user'} apiClient={api} />
         <Box>
           <Box>
             <Box>

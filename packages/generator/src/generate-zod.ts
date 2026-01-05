@@ -158,6 +158,36 @@ function schemaToZod(
 
   // Handle primitive types
   if (primaryType === 'string') {
+    // Zod 4.0: Use top-level format validators instead of z.string().format()
+    // Check format first to use top-level validators
+    if (schemaObj.format === 'email') {
+      let zodStr = 'z.email()'
+      if (schemaObj.minLength !== undefined) {
+        zodStr += `.min(${schemaObj.minLength})`
+      }
+      if (schemaObj.maxLength !== undefined) {
+        zodStr += `.max(${schemaObj.maxLength})`
+      }
+      return wrapNullable(zodStr)
+    }
+    if (schemaObj.format === 'uri' || schemaObj.format === 'url') {
+      let zodStr = 'z.url()'
+      if (schemaObj.minLength !== undefined) {
+        zodStr += `.min(${schemaObj.minLength})`
+      }
+      if (schemaObj.maxLength !== undefined) {
+        zodStr += `.max(${schemaObj.maxLength})`
+      }
+      return wrapNullable(zodStr)
+    }
+    if (schemaObj.format === 'uuid') {
+      return wrapNullable('z.uuid()')
+    }
+    if (schemaObj.format === 'date-time') {
+      return wrapNullable('z.iso.datetime()')
+    }
+
+    // For strings without special format, use z.string() with constraints
     let zodStr = 'z.string()'
     if (schemaObj.minLength !== undefined) {
       zodStr += `.min(${schemaObj.minLength})`
@@ -168,23 +198,12 @@ function schemaToZod(
     if (schemaObj.pattern) {
       zodStr += `.regex(/${schemaObj.pattern}/)`
     }
-    if (schemaObj.format === 'email') {
-      zodStr += '.email()'
-    }
-    if (schemaObj.format === 'uri' || schemaObj.format === 'url') {
-      zodStr += '.url()'
-    }
-    if (schemaObj.format === 'uuid') {
-      zodStr += '.uuid()'
-    }
-    if (schemaObj.format === 'date-time') {
-      zodStr += '.datetime()'
-    }
     return wrapNullable(zodStr)
   }
 
   if (primaryType === 'number' || primaryType === 'integer') {
-    let zodStr = primaryType === 'integer' ? 'z.number().int()' : 'z.number()'
+    // Zod 4.0: Use z.int() for integers instead of z.number().int()
+    let zodStr = primaryType === 'integer' ? 'z.int()' : 'z.number()'
     if (schemaObj.minimum !== undefined) {
       zodStr += `.min(${schemaObj.minimum})`
     }
