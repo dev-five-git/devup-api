@@ -151,7 +151,7 @@ export function getTypeFromSchema(
 
   // Handle array
   if (actualType === 'array') {
-    const items = schemaObj.items
+    const items = 'items' in schemaObj ? schemaObj.items : undefined
     if (items) {
       const itemType = getTypeFromSchema(items, document, options)
       return {
