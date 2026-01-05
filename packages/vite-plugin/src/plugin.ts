@@ -2,6 +2,8 @@ import { join } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
+  generateCrudConfigCode,
+  generateCrudConfigTypes,
   generateInterface,
   generateZodSchemas,
   generateZodTypeDeclarations,
@@ -18,9 +20,13 @@ import type { Plugin } from 'vite'
 const VIRTUAL_ZOD_MODULE = '@devup-api/zod'
 const RESOLVED_VIRTUAL_ZOD_MODULE = `\0${VIRTUAL_ZOD_MODULE}`
 
+const VIRTUAL_UI_MODULE = '@devup-api/ui/crud'
+const RESOLVED_VIRTUAL_UI_MODULE = `\0${VIRTUAL_UI_MODULE}`
+
 export function devupApi(options?: DevupApiOptions): Plugin {
   let cachedSchemas: Record<string, OpenAPIV3_1.Document> | null = null
   let zodSchemasCode: string | null = null
+  let crudConfigCode: string | null = null
 
   const getSchemas = async (): Promise<
     Record<string, OpenAPIV3_1.Document>
@@ -35,10 +41,13 @@ export function devupApi(options?: DevupApiOptions): Plugin {
   return {
     name: 'devup-api',
 
-    // Resolve virtual module for @devup-api/zod
+    // Resolve virtual modules
     resolveId(id) {
       if (id === VIRTUAL_ZOD_MODULE) {
         return RESOLVED_VIRTUAL_ZOD_MODULE
+      }
+      if (id === VIRTUAL_UI_MODULE) {
+        return RESOLVED_VIRTUAL_UI_MODULE
       }
       return null
     },
@@ -51,6 +60,13 @@ export function devupApi(options?: DevupApiOptions): Plugin {
           zodSchemasCode = generateZodSchemas(schemas, options)
         }
         return zodSchemasCode
+      }
+      if (id === RESOLVED_VIRTUAL_UI_MODULE) {
+        if (!crudConfigCode) {
+          const schemas = await getSchemas()
+          crudConfigCode = generateCrudConfigCode(schemas)
+        }
+        return crudConfigCode
       }
       return null
     },
@@ -70,6 +86,12 @@ export function devupApi(options?: DevupApiOptions): Plugin {
       await writeInterfaceAsync(
         join(tempDir, 'zod.d.ts'),
         generateZodTypeDeclarations(schemas, options),
+      )
+
+      // Write CRUD config type declarations
+      await writeInterfaceAsync(
+        join(tempDir, 'ui.d.ts'),
+        generateCrudConfigTypes(schemas),
       )
     },
 

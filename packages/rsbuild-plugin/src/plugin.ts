@@ -2,6 +2,8 @@ import { join, resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
+  generateCrudConfigCode,
+  generateCrudConfigTypes,
   generateInterface,
   generateZodSchemas,
   generateZodTypeDeclarations,
@@ -42,11 +44,24 @@ export function devupApiRsbuildPlugin(
         generateZodTypeDeclarations(schemas, options),
       )
 
+      // Generate CRUD configs file
+      await writeInterfaceAsync(
+        join(tempDir, 'crud-configs.jsx'),
+        generateCrudConfigCode(schemas),
+      )
+
+      // Generate CRUD config type declarations
+      await writeInterfaceAsync(
+        join(tempDir, 'ui.d.ts'),
+        generateCrudConfigTypes(schemas),
+      )
+
       // Create urlMap and set environment variable
       const urlMap = createUrlMap(schemas, options)
 
-      // Get absolute path for Zod schemas
+      // Get absolute paths for virtual modules
       const zodSchemasPath = resolve(tempDir, 'zod-schemas.js')
+      const crudConfigsPath = resolve(tempDir, 'crud-configs.jsx')
 
       build.modifyRsbuildConfig((config) => {
         config.source ??= {}
@@ -62,6 +77,11 @@ export function devupApiRsbuildPlugin(
         // Add alias for @devup-api/zod
         ;(config.resolve.alias as Record<string, string>)['@devup-api/zod'] =
           zodSchemasPath
+
+        // Add alias for @devup-api/ui/crud
+        ;(config.resolve.alias as Record<string, string>)[
+          '@devup-api/ui/crud'
+        ] = crudConfigsPath
 
         return config
       })

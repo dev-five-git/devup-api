@@ -2,6 +2,8 @@ import { join, resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
+  generateCrudConfigCode,
+  generateCrudConfigTypes,
   generateInterface,
   generateZodSchemas,
   generateZodTypeDeclarations,
@@ -58,6 +60,18 @@ export class devupApiWebpackPlugin {
             generateZodTypeDeclarations(schemas, this.options),
           )
 
+          // Generate CRUD configs file
+          await writeInterfaceAsync(
+            join(tempDir, 'crud-configs.jsx'),
+            generateCrudConfigCode(schemas),
+          )
+
+          // Generate CRUD config type declarations
+          await writeInterfaceAsync(
+            join(tempDir, 'ui.d.ts'),
+            generateCrudConfigTypes(schemas),
+          )
+
           // Create urlMap and set environment variable
           const urlMap = createUrlMap(schemas, this.options)
           const define: Record<string, string> = {}
@@ -77,6 +91,13 @@ export class devupApiWebpackPlugin {
           new compiler.webpack.NormalModuleReplacementPlugin(
             /^@devup-api\/zod$/,
             zodSchemasPath,
+          ).apply(compiler)
+
+          // Add alias for @devup-api/ui/crud to resolve to the generated file
+          const crudConfigPath = resolve(tempDir, 'crud-configs.jsx')
+          new compiler.webpack.NormalModuleReplacementPlugin(
+            /^@devup-api\/ui\/crud$/,
+            crudConfigPath,
           ).apply(compiler)
 
           callback()

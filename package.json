@@ -21,8 +21,8 @@
     "lint": "biome check",
     "lint:fix": "biome check --write",
     "prepare": "husky",
-    "build": "bun run -F @devup-api/core build && bun run -F @devup-api/utils build && bun run -F @devup-api/generator build && bun run -F @devup-api/fetch build && bun run -F @devup-api/zod build && bun run -F @devup-api/webpack-plugin build && bun run -F @devup-api/vite-plugin build && bun run -F @devup-api/next-plugin build && bun run -F @devup-api/rsbuild-plugin build && bun run -F @devup-api/react-query build",
-    "publish": "bun publish --cwd packages/core && bun publish --cwd packages/utils && bun publish --cwd packages/generator && bun publish --cwd packages/fetch && bun publish --cwd packages/zod && bun publish --cwd packages/webpack-plugin && bun publish --cwd packages/vite-plugin && bun publish --cwd packages/next-plugin && bun publish --cwd packages/rsbuild-plugin && bun publish --cwd packages/react-query"
+    "build": "bun run -F @devup-api/core build && bun run -F @devup-api/utils build && bun run -F @devup-api/generator build && bun run -F @devup-api/fetch build && bun run -F @devup-api/zod build && bun run -F @devup-api/webpack-plugin build && bun run -F @devup-api/vite-plugin build && bun run -F @devup-api/next-plugin build && bun run -F @devup-api/rsbuild-plugin build && bun run -F @devup-api/react-query build && bun run -F @devup-api/hookform build && bun run -F @devup-api/ui build",
+    "publish": "bun publish --cwd packages/core && bun publish --cwd packages/utils && bun publish --cwd packages/generator && bun publish --cwd packages/fetch && bun publish --cwd packages/zod && bun publish --cwd packages/webpack-plugin && bun publish --cwd packages/vite-plugin && bun publish --cwd packages/next-plugin && bun publish --cwd packages/rsbuild-plugin && bun publish --cwd packages/react-query && bun publish --cwd packages/hookform && bun publish --cwd packages/ui"
   },
   "workspaces": [
     "packages/*",

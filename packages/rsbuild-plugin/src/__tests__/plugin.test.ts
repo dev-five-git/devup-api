@@ -132,8 +132,8 @@ test.each([
     mockSchema,
     options,
   )
-  // 3 files written: api.d.ts, zod-schemas.js, zod.d.ts
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(3)
+  // 5 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(5)
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
     mockInterfaceContent,
@@ -166,6 +166,7 @@ test('devupApiRsbuildPlugin setup hook modifies config with urlMap and alias', a
     resolve: {
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+        '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
       },
     },
     source: {
@@ -192,6 +193,7 @@ test('devupApiRsbuildPlugin setup hook handles config without source', async () 
     resolve: {
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+        '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
       },
     },
     source: {
@@ -220,6 +222,7 @@ test('devupApiRsbuildPlugin setup hook handles config without define', async () 
     resolve: {
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+        '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
       },
     },
     source: {
@@ -249,6 +252,7 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is null',
     resolve: {
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+        '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
       },
     },
     source: {
@@ -274,6 +278,7 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is undefi
     resolve: {
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+        '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
       },
     },
     source: {
@@ -299,6 +304,7 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is empty 
     resolve: {
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
+        '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
       },
     },
     source: {
