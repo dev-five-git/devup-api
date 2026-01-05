@@ -2,6 +2,35 @@ import type { OpenAPIV3_1 } from 'openapi-types'
 import type { ParameterDefinition } from './generate-interface'
 
 /**
+ * Check if a schema is nullable (OpenAPI 3.0 or 3.1)
+ * OpenAPI 3.0: uses `nullable: true`
+ * OpenAPI 3.1: uses type array like `["string", "null"]`
+ */
+function isNullable(schema: OpenAPIV3_1.SchemaObject): boolean {
+  // OpenAPI 3.0 style: nullable: true
+  if ('nullable' in schema && schema.nullable === true) {
+    return true
+  }
+
+  // OpenAPI 3.1 style: type is an array containing "null"
+  if (Array.isArray(schema.type) && schema.type.includes('null')) {
+    return true
+  }
+
+  return false
+}
+
+/**
+ * Get the non-null type from OpenAPI 3.1 type array
+ * e.g., ["string", "null"] -> "string"
+ */
+function getNonNullType(
+  types: (OpenAPIV3_1.NonArraySchemaObjectType | 'array')[],
+): OpenAPIV3_1.NonArraySchemaObjectType | 'array' | undefined {
+  return types.find((t) => t !== 'null')
+}
+
+/**
  * Resolve $ref reference in OpenAPI schema
  */
 function resolveSchemaRef<
@@ -81,42 +110,65 @@ export function getTypeFromSchema(
     }
   }
 
+  // Check if schema is nullable
+  const nullable = isNullable(schemaObj)
+
   // Handle enum
   if (schemaObj.enum) {
+    const enumType = schemaObj.enum.map((v) => `"${String(v)}"`).join(' | ')
     return {
-      type: schemaObj.enum.map((v) => `"${String(v)}"`).join(' | '),
+      type: nullable ? `${enumType} | null` : enumType,
       default: schemaObj.default,
     }
   }
 
+  // Get the actual type (handle OpenAPI 3.1 type arrays)
+  const actualType = Array.isArray(schemaObj.type)
+    ? getNonNullType(schemaObj.type)
+    : schemaObj.type
+
   // Handle primitive types
-  if (schemaObj.type === 'string') {
-    return { type: 'string', default: schemaObj.default }
+  if (actualType === 'string') {
+    return {
+      type: nullable ? 'string | null' : 'string',
+      default: schemaObj.default,
+    }
   }
 
-  if (schemaObj.type === 'number' || schemaObj.type === 'integer') {
-    return { type: 'number', default: schemaObj.default }
+  if (actualType === 'number' || actualType === 'integer') {
+    return {
+      type: nullable ? 'number | null' : 'number',
+      default: schemaObj.default,
+    }
   }
 
-  if (schemaObj.type === 'boolean') {
-    return { type: 'boolean', default: schemaObj.default }
+  if (actualType === 'boolean') {
+    return {
+      type: nullable ? 'boolean | null' : 'boolean',
+      default: schemaObj.default,
+    }
   }
 
   // Handle array
-  if (schemaObj.type === 'array') {
+  if (actualType === 'array') {
     const items = schemaObj.items
     if (items) {
       const itemType = getTypeFromSchema(items, document, options)
       return {
-        type: { __isArray: true, items: itemType.type },
+        type: nullable
+          ? { __isArray: true, items: itemType.type, __nullable: true }
+          : { __isArray: true, items: itemType.type },
         default: schemaObj.default,
       }
     }
-    return { type: 'unknown[]', default: schemaObj.default }
+    return {
+      type: nullable ? 'unknown[] | null' : 'unknown[]',
+      default: schemaObj.default,
+    }
   }
 
   // Handle object
-  if (schemaObj.type === 'object' || schemaObj.properties) {
+  if (actualType === 'object' || schemaObj.properties) {
     const props: Record<string, { type: unknown; default?: unknown }> = {}
     const required = schemaObj.required || []
 
@@ -169,7 +221,10 @@ export function getTypeFromSchema(
       }
     }
 
-    return { type: { ...props }, default: schemaObj.default }
+    return {
+      type: nullable ? { ...props, __nullable: true } : { ...props },
+      default: schemaObj.default,
+    }
   }
 
   // Handle oneOf/anyOf already handled above, but check again for safety
@@ -313,12 +368,26 @@ function isTypeObject(
  */
 function isArrayType(
   value: unknown,
-): value is { __isArray: true; items: unknown } {
+): value is { __isArray: true; items: unknown; __nullable?: boolean } {
   return (
     typeof value === 'object' &&
     value !== null &&
     '__isArray' in value &&
     (value as Record<string, unknown>).__isArray === true
+  )
+}
+
+/**
+ * Check if a value is a nullable object type marker
+ */
+function isNullableObject(
+  value: unknown,
+): value is Record<string, unknown> & { __nullable: true } {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    '__nullable' in value &&
+    (value as Record<string, unknown>).__nullable === true
   )
 }
 
@@ -333,12 +402,21 @@ export function formatTypeValue(value: unknown, indent: number = 0): string {
   // Handle array type marker
   if (isArrayType(value)) {
     const itemsFormatted = formatTypeValue(value.items, indent)
-    return `Array<${itemsFormatted}>`
+    const arrayType = `Array<${itemsFormatted}>`
+    return value.__nullable ? `${arrayType} | null` : arrayType
   }
 
   // Handle { type: unknown, default?: unknown } structure
   if (isTypeObject(value)) {
     return formatTypeValue(value.type, indent)
+  }
+
+  // Handle nullable object type marker
+  if (isNullableObject(value)) {
+    // Remove __nullable from the object before formatting
+    const { __nullable, ...rest } = value
+    const objectType = formatType(rest as Record<string, unknown>, indent)
+    return `${objectType} | null`
   }
 
   if (typeof value === 'object' && value !== null && !Array.isArray(value)) {

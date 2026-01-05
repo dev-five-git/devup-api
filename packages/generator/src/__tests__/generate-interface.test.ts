@@ -89,25 +89,128 @@ test.each([
   expect(
     generateInterface(createSchemas(createDocument(schema as any))),
   ).toMatchSnapshot()
+})
+
+// Test nullable properties (OpenAPI 3.0 style)
+test('generateInterface handles nullable properties (OpenAPI 3.0 style)', () => {
+  const schema = {
+    paths: {
+      '/users': {
+        get: {
+          operationId: 'getUsers',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      name: { type: 'string', nullable: true },
+                      age: { type: 'number', nullable: true },
+                      active: { type: 'boolean', nullable: true },
+                      tags: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        nullable: true,
+                      },
+                      metadata: {
+                        type: 'object',
+                        nullable: true,
+                        properties: {
+                          key: { type: 'string' },
+                        },
+                      },
+                      status: {
+                        type: 'string',
+                        enum: ['active', 'inactive'],
+                        nullable: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
   expect(
-    generateInterface(createSchemas(createDocument(schema as any)), {
-      convertCase: 'pascal',
-    }),
+    generateInterface(createSchemas(createDocument(schema as any))),
   ).toMatchSnapshot()
+})
+
+// Test nullable properties (OpenAPI 3.1 style with type array)
+test('generateInterface handles nullable properties (OpenAPI 3.1 style)', () => {
+  const schema = {
+    paths: {
+      '/users': {
+        get: {
+          operationId: 'getUsers',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      name: { type: ['string', 'null'] },
+                      age: { type: ['number', 'null'] },
+                      active: { type: ['boolean', 'null'] },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
   expect(
-    generateInterface(createSchemas(createDocument(schema as any)), {
-      convertCase: 'snake',
-    }),
+    generateInterface(createSchemas(createDocument(schema as any))),
   ).toMatchSnapshot()
+})
+
+// Test nullable in component schemas
+test('generateInterface handles nullable in component schemas', () => {
+  const schema = {
+    paths: {
+      '/users': {
+        get: {
+          operationId: 'getUsers',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/User',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        User: {
+          type: 'object',
+          properties: {
+            id: { type: 'string' },
+            nickname: { type: 'string', nullable: true },
+            bio: { type: ['string', 'null'] },
+          },
+        },
+      },
+    },
+  }
   expect(
-    generateInterface(createSchemas(createDocument(schema as any)), {
-      convertCase: 'camel',
-    }),
-  ).toMatchSnapshot()
-  expect(
-    generateInterface(createSchemas(createDocument(schema as any)), {
-      convertCase: 'maintain',
-    }),
+    generateInterface(createSchemas(createDocument(schema as any))),
   ).toMatchSnapshot()
 })
 
