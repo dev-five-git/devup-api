@@ -355,3 +355,136 @@ test('DevupQueryClient useInfiniteQuery with different HTTP methods', async () =
     })
   }
 })
+
+test('DevupQueryClient useQueries with multiple queries', async () => {
+  const api = createApi({ baseUrl: 'https://api.example.com' })
+  const queryClient = new DevupQueryClient(api)
+
+  const { result } = renderHook(
+    () =>
+      queryClient.useQueries([
+        ['get', '/test1'],
+        ['get', '/test2'],
+      ]),
+    { wrapper: createWrapper() },
+  )
+
+  await waitFor(
+    () => {
+      expect(result.current.every((r) => r.isSuccess)).toBe(true)
+    },
+    { timeout: 5000 },
+  )
+
+  expect(result.current).toHaveLength(2)
+  expect(result.current[0].data).toEqual({ id: 1, name: 'test' })
+  expect(result.current[1].data).toEqual({ id: 1, name: 'test' })
+})
+
+test('DevupQueryClient useQueries with options', async () => {
+  const api = createApi({ baseUrl: 'https://api.example.com' })
+  const queryClient = new DevupQueryClient(api)
+
+  const { result } = renderHook(
+    () =>
+      queryClient.useQueries([
+        ['get', '/test' as any, { params: { id: '123' } }],
+      ]),
+    { wrapper: createWrapper() },
+  )
+
+  await waitFor(
+    () => {
+      expect(result.current[0].isSuccess).toBe(true)
+    },
+    { timeout: 5000 },
+  )
+
+  expect(result.current[0].data).toEqual({ id: 1, name: 'test' })
+})
+
+test('DevupQueryClient useQueries with combine', async () => {
+  const api = createApi({ baseUrl: 'https://api.example.com' })
+  const queryClient = new DevupQueryClient(api)
+
+  const { result } = renderHook(
+    () =>
+      queryClient.useQueries(
+        [
+          ['get', '/test1' as any],
+          ['get', '/test2' as any],
+        ],
+        {
+          combine: (results) => ({
+            data: results.map((r) => r.data),
+            pending: results.some((r) => r.isPending),
+          }),
+        },
+      ),
+    { wrapper: createWrapper() },
+  )
+
+  await waitFor(
+    () => {
+      expect(result.current.pending).toBe(false)
+    },
+    { timeout: 5000 },
+  )
+
+  expect(result.current.data).toEqual([
+    { id: 1, name: 'test' },
+    { id: 1, name: 'test' },
+  ])
+})
+
+test('DevupQueryClient useQueries with different HTTP methods', async () => {
+  const api = createApi({ baseUrl: 'https://api.example.com' })
+  const queryClient = new DevupQueryClient(api)
+
+  const { result } = renderHook(
+    () =>
+      queryClient.useQueries([
+        ['get', '/test' as any],
+        ['GET', '/test' as any],
+        ['post', '/test' as any],
+      ]),
+    { wrapper: createWrapper() },
+  )
+
+  await waitFor(
+    () => {
+      expect(result.current.every((r) => r.isSuccess)).toBe(true)
+    },
+    { timeout: 5000 },
+  )
+
+  expect(result.current).toHaveLength(3)
+})
+
+test('DevupQueryClient useQueries with queryOptions', async () => {
+  const api = createApi({ baseUrl: 'https://api.example.com' })
+  const queryClient = new DevupQueryClient(api)
+
+  const { result } = renderHook(
+    () =>
+      queryClient.useQueries([
+        ['get', '/test' as any, undefined, { staleTime: 1000 }],
+        [
+          'get',
+          '/test2' as any,
+          { params: { id: '123' } },
+          { staleTime: 2000 },
+        ],
+      ]),
+    { wrapper: createWrapper() },
+  )
+
+  await waitFor(
+    () => {
+      expect(result.current.every((r) => r.isSuccess)).toBe(true)
+    },
+    { timeout: 5000 },
+  )
+
+  expect(result.current).toHaveLength(2)
+})

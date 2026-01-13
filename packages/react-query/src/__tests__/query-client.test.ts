@@ -33,6 +33,12 @@ test('DevupQueryClient useInfiniteQuery method exists', () => {
   expect(typeof queryClient.useInfiniteQuery).toBe('function')
 })
 
+test('DevupQueryClient useQueries method exists', () => {
+  const api = createApi({ baseUrl: 'https://api.example.com' })
+  const queryClient = new DevupQueryClient(api)
+  expect(typeof queryClient.useQueries).toBe('function')
+})
+
 test('getQueryKey returns correct key without options', () => {
   const result = getQueryKey('get', '/test', undefined)
   expect(result).toEqual(['get', '/test'])

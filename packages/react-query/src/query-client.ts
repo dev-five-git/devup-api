@@ -17,6 +17,7 @@ import type {
 import {
   useInfiniteQuery,
   useMutation,
+  useQueries,
   useQuery,
   useSuspenseQuery,
 } from '@tanstack/react-query'
@@ -298,5 +299,84 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
       } as Parameters<typeof useInfiniteQuery<D, E>>[0],
       options[2],
     )
+  }
+
+  useQueries<
+    M extends
+      | 'get'
+      | 'post'
+      | 'put'
+      | 'delete'
+      | 'patch'
+      | 'GET'
+      | 'POST'
+      | 'PUT'
+      | 'DELETE'
+      | 'PATCH',
+    ST extends {
+      get: DevupGetApiStructScope<S>
+      post: DevupPostApiStructScope<S>
+      put: DevupPutApiStructScope<S>
+      delete: DevupDeleteApiStructScope<S>
+      patch: DevupPatchApiStructScope<S>
+      GET: DevupGetApiStructScope<S>
+      POST: DevupPostApiStructScope<S>
+      PUT: DevupPutApiStructScope<S>
+      DELETE: DevupDeleteApiStructScope<S>
+      PATCH: DevupPatchApiStructScope<S>
+    }[M],
+    T extends ConditionalKeys<ST>,
+    O extends Additional<T, ST>,
+    D extends ExtractValue<O, 'response'>,
+    E extends ExtractValue<O, 'error'>,
+    TCombinedResult = Array<ReturnType<typeof useQuery<D, E>>>,
+  >(
+    queries: Array<
+      [
+        method: M,
+        path: T,
+        options?: ConditionalApiOption<O>,
+        queryOptions?: Omit<
+          Parameters<typeof useQuery<D, E>>[0],
+          'queryFn' | 'queryKey'
+        >,
+      ]
+    >,
+    options?: {
+      combine?: (
+        results: Array<ReturnType<typeof useQuery<D, E>>>,
+      ) => TCombinedResult
+      queryClient?: Parameters<typeof useQueries>[1]
+    },
+  ): TCombinedResult {
+    return useQueries(
+      {
+        queries: queries.map(([method, path, apiOptions, queryOptions]) => ({
+          queryKey: getQueryKey(method, path, apiOptions),
+          queryFn: ({
+            queryKey: [methodKey, pathKey, ...restOptions],
+            signal,
+          }: {
+            queryKey: [M, T, ...unknown[]]
+            signal: AbortSignal
+          }): Promise<D> =>
+            // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
+            (this.api as any)
+              [methodKey as string](pathKey, {
+                signal,
+                ...(restOptions[0] as DevupApiRequestInit),
+              })
+              .then(({ data, error }: DevupApiResponse<D, E>) => {
+                if (error) throw error
+                return data
+              }),
+          ...queryOptions,
+        })) as Parameters<typeof useQueries>[0]['queries'],
+        combine: options?.combine as Parameters<
+          typeof useQueries
+        >[0]['combine'],
+      },
+      options?.queryClient,
+    ) as TCombinedResult
   }
 }
