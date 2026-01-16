@@ -102,11 +102,22 @@ console.log(result.response.status) // raw Response
 
 ### DevupObject (Type References)
 
+Use `DevupObject` directly in type annotations without redefining types:
+
 ```ts
-type User = DevupObject['User']                              // response type
-type CreateUserBody = DevupObject<'request'>['CreateUserBody'] // request type
-type ApiError = DevupObject<'error'>['ErrorResponse']         // error type
-type Product = DevupObject<'response', 'openapi2.json'>['Product'] // multi-server
+// Direct usage in variable declarations
+const user: DevupObject['User'] = await fetchUser()
+const body: DevupObject<'request'>['CreateUserBody'] = { name: 'John', email: 'john@example.com' }
+const error: DevupObject<'error'>['ErrorResponse'] = result.error
+
+// Direct usage in function parameters
+function displayUser(user: DevupObject['User']) { /* ... */ }
+
+// Direct usage in component props
+function UserCard({ user }: { user: DevupObject['User'] }) { /* ... */ }
+
+// Multi-server types
+const product: DevupObject<'response', 'openapi2.json'>['Product'] = data
 ```
 
 ### Middleware
@@ -446,9 +457,9 @@ devupApi({ openapiFiles: ['openapi.json', 'openapi2.json'] })
 const api1 = createApi({ baseUrl: 'https://api1.com' })
 const api2 = createApi({ baseUrl: 'https://api2.com', serverName: 'openapi2.json' })
 
-// Types
-type User = DevupObject['User']  // openapi.json
-type Product = DevupObject<'response', 'openapi2.json'>['Product']
+// Types - use directly without redefining
+const user: DevupObject['User'] = data                                   // openapi.json
+const product: DevupObject<'response', 'openapi2.json'>['Product'] = data // openapi2.json
 ```
 
 ---
