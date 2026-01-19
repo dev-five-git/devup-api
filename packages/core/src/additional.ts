@@ -21,7 +21,15 @@ export type DevupApiRequestInit = Omit<RequestInit, 'body'> & {
   params?: Record<string, string | number | boolean | null | undefined>
   query?:
     | ConstructorParameters<typeof URLSearchParams>[0]
-    | Record<string, string | number | (number | string)[]>
+    | Record<
+        string,
+        | string
+        | number
+        | boolean
+        | null
+        | undefined
+        | (number | string | boolean)[]
+      >
   middleware?: Middleware[]
 }
 

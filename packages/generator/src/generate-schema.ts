@@ -1,5 +1,6 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import type { ParameterDefinition } from './generate-interface'
+import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 /**
  * Check if a schema is nullable (OpenAPI 3.0 or 3.1)
@@ -298,14 +299,15 @@ function formatType(obj: Record<string, unknown>, indent: number = 0): string {
     .map(([key, value]) => {
       // Handle string values (e.g., component references)
       if (typeof value === 'string') {
-        return `${nextIndentStr}${key}: ${value}`
+        return `${nextIndentStr}${wrapInterfaceKeyGuard(key)}: ${value}`
       }
 
       // Handle ParameterDefinition for params and query
       if (isParameterDefinition(value)) {
         const typeStr = formatTypeValue(value.type, nextIndent)
         const isOptional = value.required === false
-        const keyWithOptional = isOptional ? `${key}?` : key
+        const wrappedKey = wrapInterfaceKeyGuard(key)
+        const keyWithOptional = isOptional ? `${wrappedKey}?` : wrappedKey
         let description = ''
         if (value.description) {
           description += `${nextIndentStr}/**\n${nextIndentStr} * ${value.description}`
@@ -325,7 +327,7 @@ function formatType(obj: Record<string, unknown>, indent: number = 0): string {
       if (isTypeObject(value)) {
         const formattedValue = formatTypeValue(value.type, nextIndent)
         // Key already has '?' if it's optional (from getTypeFromSchema), keep it as is
-        return `${nextIndentStr}${key}: ${formattedValue}`
+        return `${nextIndentStr}${wrapInterfaceKeyGuard(key)}: ${formattedValue}`
       }
 
       // Check if value is an object (like params, query) with all optional properties
@@ -337,7 +339,7 @@ function formatType(obj: Record<string, unknown>, indent: number = 0): string {
       const optionalMarker = valueAllOptional ? '?' : ''
 
       const formattedValue = formatTypeValue(value, nextIndent)
-      return `${nextIndentStr}${key}${optionalMarker}: ${formattedValue}`
+      return `${nextIndentStr}${wrapInterfaceKeyGuard(key)}${optionalMarker}: ${formattedValue}`
     })
     .join(';\n')
 

@@ -1,6 +1,7 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import type { CrudConfig, CrudField } from './crud-types'
 import { parseCrudConfigsFromMultiple } from './parse-crud-tags'
+import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 /**
  * Convert string to PascalCase for component names
@@ -286,7 +287,7 @@ export function generateCrudConfigTypes(
     lines.push("declare module '@devup-api/ui' {")
     lines.push('  interface DevupCrudApiNames {')
     for (const name of apiNames) {
-      lines.push(`    ${name}: true`)
+      lines.push(`    ${wrapInterfaceKeyGuard(name)}: true`)
     }
     lines.push('  }')
     lines.push('}')

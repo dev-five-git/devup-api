@@ -55,3 +55,15 @@ test.each([
 ] as const)('wrapInterfaceKeyGuard wraps key with forbidden characters: %s -> %s', (key, expected) => {
   expect(wrapInterfaceKeyGuard(key)).toBe(expected)
 })
+
+test.each([
+  ['name?', 'name?'], // valid identifier with optional marker
+  ['email?', 'email?'], // valid identifier with optional marker
+  ['field_name?', 'field_name?'], // valid identifier with optional marker
+  ['field-name?', '[`field-name`]?'], // invalid identifier with optional marker
+  ['field name?', '[`field name`]?'], // invalid identifier with optional marker
+  ['/users?', '[`/users`]?'], // path with optional marker
+  ['123field?', '[`123field`]?'], // starts with number, with optional marker
+] as const)('wrapInterfaceKeyGuard handles optional keys (ending with ?): %s -> %s', (key, expected) => {
+  expect(wrapInterfaceKeyGuard(key)).toBe(expected)
+})
