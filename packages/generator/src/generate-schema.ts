@@ -3,6 +3,86 @@ import type { ParameterDefinition } from './generate-interface'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 /**
+ * Enum definition collected during schema processing
+ */
+export interface EnumDefinition {
+  /** Unique key for the enum (e.g., "UserStatus", "OrderType") */
+  name: string
+  /** Enum values */
+  values: (string | number)[]
+  /** Whether the enum is nullable */
+  nullable: boolean
+}
+
+/**
+ * Context for tracking enums during schema processing
+ */
+export interface SchemaProcessingContext {
+  /** Map of enum key to enum definition */
+  enums: Map<string, EnumDefinition>
+  /** Current property path for naming enums */
+  propertyPath: string[]
+  /** Schema name if processing a component schema */
+  schemaName?: string
+}
+
+/**
+ * Create a new schema processing context
+ */
+export function createSchemaContext(
+  schemaName?: string,
+): SchemaProcessingContext {
+  return {
+    enums: new Map(),
+    propertyPath: [],
+    schemaName,
+  }
+}
+
+/**
+ * Generate a unique enum name based on context
+ */
+function generateEnumName(
+  context: SchemaProcessingContext,
+  values: (string | number)[],
+): string {
+  // Use schema name + property path for naming
+  const parts: string[] = []
+
+  if (context.schemaName) {
+    parts.push(context.schemaName)
+  }
+
+  if (context.propertyPath.length > 0) {
+    parts.push(...context.propertyPath)
+  }
+
+  if (parts.length === 0) {
+    // Fallback: generate name from values
+    const valueBasedName = values
+      .slice(0, 3)
+      .map((v) => String(v).charAt(0).toUpperCase() + String(v).slice(1))
+      .join('')
+    return `${valueBasedName}Enum`
+  }
+
+  // Convert to PascalCase
+  const name = parts
+    .map((p) => {
+      // Remove special characters and convert to PascalCase
+      return p
+        .replace(/[^a-zA-Z0-9]/g, ' ')
+        .split(' ')
+        .filter(Boolean)
+        .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+        .join('')
+    })
+    .join('')
+
+  return name
+}
+
+/**
  * Check if a schema is nullable (OpenAPI 3.0 or 3.1)
  * OpenAPI 3.0: uses `nullable: true`
  * OpenAPI 3.1: uses type array like `["string", "null"]`
@@ -67,169 +147,223 @@ export function getTypeFromSchema(
   document: OpenAPIV3_1.Document,
   options?: {
     defaultNonNullable?: boolean
+    context?: SchemaProcessingContext
+    propertyName?: string
   },
 ): { type: unknown; default?: unknown } {
   const defaultNonNullable = options?.defaultNonNullable ?? false
-  // Handle $ref
-  if ('$ref' in schema) {
-    const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
-      schema.$ref,
-      document,
-    )
-    if (resolved) {
-      return getTypeFromSchema(resolved, document, options)
-    }
-    return { type: 'unknown', default: undefined }
+  const context = options?.context
+
+  // Push property name to path if provided
+  if (context && options?.propertyName) {
+    context.propertyPath.push(options.propertyName)
   }
 
-  const schemaObj = schema as OpenAPIV3_1.SchemaObject
-
-  // Handle allOf, anyOf, oneOf
-  if (schemaObj.allOf) {
-    const types = schemaObj.allOf.map((s) =>
-      getTypeFromSchema(s, document, options),
-    )
-    return {
-      type:
-        types.length > 0
-          ? types.map((t) => formatTypeValue(t.type)).join(' & ')
-          : 'unknown',
-      default: schemaObj.default,
+  try {
+    // Handle $ref
+    if ('$ref' in schema) {
+      const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+        schema.$ref,
+        document,
+      )
+      if (resolved) {
+        return getTypeFromSchema(resolved, document, {
+          ...options,
+          propertyName: undefined, // Don't double-push property name
+        })
+      }
+      return { type: 'unknown', default: undefined }
     }
-  }
 
-  if (schemaObj.anyOf || schemaObj.oneOf) {
-    const types = (schemaObj.anyOf || schemaObj.oneOf || []).map((s) =>
-      getTypeFromSchema(s, document, options),
-    )
-    return {
-      type:
-        types.length > 0
-          ? `(${types.map((t) => formatTypeValue(t.type)).join(' | ')})`
-          : 'unknown',
-      default: schemaObj.default,
-    }
-  }
+    const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
-  // Check if schema is nullable
-  const nullable = isNullable(schemaObj)
-
-  // Handle enum
-  if (schemaObj.enum) {
-    const enumType = schemaObj.enum.map((v) => `"${String(v)}"`).join(' | ')
-    return {
-      type: nullable ? `${enumType} | null` : enumType,
-      default: schemaObj.default,
-    }
-  }
-
-  // Get the actual type (handle OpenAPI 3.1 type arrays)
-  const actualType = Array.isArray(schemaObj.type)
-    ? getNonNullType(schemaObj.type)
-    : schemaObj.type
-
-  // Handle primitive types
-  if (actualType === 'string') {
-    return {
-      type: nullable ? 'string | null' : 'string',
-      default: schemaObj.default,
-    }
-  }
-
-  if (actualType === 'number' || actualType === 'integer') {
-    return {
-      type: nullable ? 'number | null' : 'number',
-      default: schemaObj.default,
-    }
-  }
-
-  if (actualType === 'boolean') {
-    return {
-      type: nullable ? 'boolean | null' : 'boolean',
-      default: schemaObj.default,
-    }
-  }
-
-  // Handle array
-  if (actualType === 'array') {
-    const items = 'items' in schemaObj ? schemaObj.items : undefined
-    if (items) {
-      const itemType = getTypeFromSchema(items, document, options)
+    // Handle allOf, anyOf, oneOf
+    if (schemaObj.allOf) {
+      const types = schemaObj.allOf.map((s) =>
+        getTypeFromSchema(s, document, {
+          ...options,
+          propertyName: undefined,
+        }),
+      )
       return {
-        type: nullable
-          ? { __isArray: true, items: itemType.type, __nullable: true }
-          : { __isArray: true, items: itemType.type },
+        type:
+          types.length > 0
+            ? types.map((t) => formatTypeValue(t.type)).join(' & ')
+            : 'unknown',
         default: schemaObj.default,
       }
     }
-    return {
-      type: nullable ? 'unknown[] | null' : 'unknown[]',
-      default: schemaObj.default,
+
+    if (schemaObj.anyOf || schemaObj.oneOf) {
+      const types = (schemaObj.anyOf || schemaObj.oneOf || []).map((s) =>
+        getTypeFromSchema(s, document, {
+          ...options,
+          propertyName: undefined,
+        }),
+      )
+      return {
+        type:
+          types.length > 0
+            ? `(${types.map((t) => formatTypeValue(t.type)).join(' | ')})`
+            : 'unknown',
+        default: schemaObj.default,
+      }
     }
-  }
 
-  // Handle object
-  if (actualType === 'object' || schemaObj.properties) {
-    const props: Record<string, { type: unknown; default?: unknown }> = {}
-    const required = schemaObj.required || []
+    // Check if schema is nullable
+    const nullable = isNullable(schemaObj)
 
-    if (schemaObj.properties) {
-      for (const [key, value] of Object.entries(schemaObj.properties)) {
-        const propType = getTypeFromSchema(value, document, options)
-        // Check if property has default value
-        // Need to resolve $ref if present to check for default
-        let hasDefault = false
-        if ('$ref' in value) {
-          const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
-            value.$ref,
-            document,
-          )
-          if (resolved) {
-            hasDefault = resolved.default !== undefined
+    // Handle enum
+    if (schemaObj.enum) {
+      // If context is provided, register the enum and return a reference
+      if (context) {
+        const enumName = generateEnumName(context, schemaObj.enum)
+        const existingEnum = context.enums.get(enumName)
+
+        if (!existingEnum) {
+          context.enums.set(enumName, {
+            name: enumName,
+            values: schemaObj.enum as (string | number)[],
+            nullable,
+          })
+        }
+
+        return {
+          type: nullable ? `${enumName} | null` : enumName,
+          default: schemaObj.default,
+        }
+      }
+
+      // Fallback: inline enum type (for backward compatibility)
+      const enumType = schemaObj.enum.map((v) => `"${String(v)}"`).join(' | ')
+      return {
+        type: nullable ? `${enumType} | null` : enumType,
+        default: schemaObj.default,
+      }
+    }
+
+    // Get the actual type (handle OpenAPI 3.1 type arrays)
+    const actualType = Array.isArray(schemaObj.type)
+      ? getNonNullType(schemaObj.type)
+      : schemaObj.type
+
+    // Handle primitive types
+    if (actualType === 'string') {
+      return {
+        type: nullable ? 'string | null' : 'string',
+        default: schemaObj.default,
+      }
+    }
+
+    if (actualType === 'number' || actualType === 'integer') {
+      return {
+        type: nullable ? 'number | null' : 'number',
+        default: schemaObj.default,
+      }
+    }
+
+    if (actualType === 'boolean') {
+      return {
+        type: nullable ? 'boolean | null' : 'boolean',
+        default: schemaObj.default,
+      }
+    }
+
+    // Handle array
+    if (actualType === 'array') {
+      const items = 'items' in schemaObj ? schemaObj.items : undefined
+      if (items) {
+        const itemType = getTypeFromSchema(items, document, {
+          ...options,
+          propertyName: undefined,
+        })
+        return {
+          type: nullable
+            ? { __isArray: true, items: itemType.type, __nullable: true }
+            : { __isArray: true, items: itemType.type },
+          default: schemaObj.default,
+        }
+      }
+      return {
+        type: nullable ? 'unknown[] | null' : 'unknown[]',
+        default: schemaObj.default,
+      }
+    }
+
+    // Handle object
+    if (actualType === 'object' || schemaObj.properties) {
+      const props: Record<string, { type: unknown; default?: unknown }> = {}
+      const required = schemaObj.required || []
+
+      if (schemaObj.properties) {
+        for (const [key, value] of Object.entries(schemaObj.properties)) {
+          const propType = getTypeFromSchema(value, document, {
+            ...options,
+            propertyName: key,
+          })
+          // Check if property has default value
+          // Need to resolve $ref if present to check for default
+          let hasDefault = false
+          if ('$ref' in value) {
+            const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+              value.$ref,
+              document,
+            )
+            if (resolved) {
+              hasDefault = resolved.default !== undefined
+            }
+          } else {
+            const propSchema = value as OpenAPIV3_1.SchemaObject
+            hasDefault = propSchema.default !== undefined
           }
-        } else {
-          const propSchema = value as OpenAPIV3_1.SchemaObject
-          hasDefault = propSchema.default !== undefined
-        }
-        const isInRequired = required.includes(key)
+          const isInRequired = required.includes(key)
 
-        // If defaultNonNullable is true and has default, treat as required
-        // Otherwise, mark as optional if not in required array
-        if (defaultNonNullable && hasDefault && !isInRequired) {
-          props[key] = propType
-        } else if (!isInRequired) {
-          props[`${key}?`] = propType
-        } else {
-          props[key] = propType
+          // If defaultNonNullable is true and has default, treat as required
+          // Otherwise, mark as optional if not in required array
+          if (defaultNonNullable && hasDefault && !isInRequired) {
+            props[key] = propType
+          } else if (!isInRequired) {
+            props[`${key}?`] = propType
+          } else {
+            props[key] = propType
+          }
         }
+      }
+
+      // Handle additionalProperties
+      if (schemaObj.additionalProperties) {
+        if (schemaObj.additionalProperties === true) {
+          props['[key: string]'] = { type: 'unknown', default: undefined }
+        } else if (typeof schemaObj.additionalProperties === 'object') {
+          const additionalType = getTypeFromSchema(
+            schemaObj.additionalProperties,
+            document,
+            {
+              ...options,
+              propertyName: undefined,
+            },
+          )
+          props['[key: string]'] = {
+            type: additionalType.type,
+            default: additionalType.default,
+          }
+        }
+      }
+
+      return {
+        type: nullable ? { ...props, __nullable: true } : { ...props },
+        default: schemaObj.default,
       }
     }
 
-    // Handle additionalProperties
-    if (schemaObj.additionalProperties) {
-      if (schemaObj.additionalProperties === true) {
-        props['[key: string]'] = { type: 'unknown', default: undefined }
-      } else if (typeof schemaObj.additionalProperties === 'object') {
-        const additionalType = getTypeFromSchema(
-          schemaObj.additionalProperties,
-          document,
-          options,
-        )
-        props['[key: string]'] = {
-          type: additionalType.type,
-          default: additionalType.default,
-        }
-      }
-    }
-
-    return {
-      type: nullable ? { ...props, __nullable: true } : { ...props },
-      default: schemaObj.default,
+    // Handle oneOf/anyOf already handled above, but check again for safety
+    return { type: 'unknown', default: undefined }
+  } finally {
+    // Pop property name from path
+    if (context && options?.propertyName) {
+      context.propertyPath.pop()
     }
   }
-
-  // Handle oneOf/anyOf already handled above, but check again for safety
-  return { type: 'unknown', default: undefined }
 }
 
 /**

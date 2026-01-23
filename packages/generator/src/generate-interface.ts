@@ -3,6 +3,8 @@ import { toPascal } from '@devup-api/utils'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import {
+  createSchemaContext,
+  type EnumDefinition,
   extractParameters,
   extractRequestBody,
   formatTypeValue,
@@ -50,7 +52,10 @@ function generateSchemaInterface(
   requestComponents: Record<string, unknown>
   responseComponents: Record<string, unknown>
   errorComponents: Record<string, unknown>
+  enumDefinitions: Map<string, EnumDefinition>
 } {
+  // Create context for tracking enums
+  const enumContext = createSchemaContext()
   const endpoints: Record<
     'get' | 'post' | 'put' | 'delete' | 'patch',
     Record<string, EndpointDefinition>
@@ -321,11 +326,21 @@ function generateSchemaInterface(
                     // Extract schema type with response options
                     const responseDefaultNonNullable =
                       options?.responseDefaultNonNullable ?? true
+                    const inlineContext = createSchemaContext('Response')
                     const { type: schemaType } = getTypeFromSchema(
                       jsonContent.schema,
                       schema,
-                      { defaultNonNullable: responseDefaultNonNullable },
+                      {
+                        defaultNonNullable: responseDefaultNonNullable,
+                        context: inlineContext,
+                      },
                     )
+                    // Merge enums
+                    for (const [enumName, enumDef] of inlineContext.enums) {
+                      if (!enumContext.enums.has(enumName)) {
+                        enumContext.enums.set(enumName, enumDef)
+                      }
+                    }
                     responseType = schemaType
                   }
                 } else {
@@ -352,22 +367,42 @@ function generateSchemaInterface(
                       // Extract schema type with response options
                       const responseDefaultNonNullable =
                         options?.responseDefaultNonNullable ?? true
+                      const inlineContext = createSchemaContext('Response')
                       const { type: schemaType } = getTypeFromSchema(
                         jsonContent.schema,
                         schema,
-                        { defaultNonNullable: responseDefaultNonNullable },
+                        {
+                          defaultNonNullable: responseDefaultNonNullable,
+                          context: inlineContext,
+                        },
                       )
+                      // Merge enums
+                      for (const [enumName, enumDef] of inlineContext.enums) {
+                        if (!enumContext.enums.has(enumName)) {
+                          enumContext.enums.set(enumName, enumDef)
+                        }
+                      }
                       responseType = schemaType
                     }
                   } else {
                     // Extract schema type with response options
                     const responseDefaultNonNullable =
                       options?.responseDefaultNonNullable ?? true
+                    const inlineContext = createSchemaContext('Response')
                     const { type: schemaType } = getTypeFromSchema(
                       jsonContent.schema,
                       schema,
-                      { defaultNonNullable: responseDefaultNonNullable },
+                      {
+                        defaultNonNullable: responseDefaultNonNullable,
+                        context: inlineContext,
+                      },
                     )
+                    // Merge enums
+                    for (const [enumName, enumDef] of inlineContext.enums) {
+                      if (!enumContext.enums.has(enumName)) {
+                        enumContext.enums.set(enumName, enumDef)
+                      }
+                    }
                     responseType = schemaType
                   }
                 }
@@ -425,11 +460,21 @@ function generateSchemaInterface(
                     // Extract schema type with response options
                     const responseDefaultNonNullable =
                       options?.responseDefaultNonNullable ?? true
+                    const inlineContext = createSchemaContext('Error')
                     const { type: schemaType } = getTypeFromSchema(
                       jsonContent.schema,
                       schema,
-                      { defaultNonNullable: responseDefaultNonNullable },
+                      {
+                        defaultNonNullable: responseDefaultNonNullable,
+                        context: inlineContext,
+                      },
                     )
+                    // Merge enums
+                    for (const [enumName, enumDef] of inlineContext.enums) {
+                      if (!enumContext.enums.has(enumName)) {
+                        enumContext.enums.set(enumName, enumDef)
+                      }
+                    }
                     errorType = schemaType
                   }
                 } else {
@@ -456,22 +501,42 @@ function generateSchemaInterface(
                       // Extract schema type with response options
                       const responseDefaultNonNullable =
                         options?.responseDefaultNonNullable ?? true
+                      const inlineContext = createSchemaContext('Error')
                       const { type: schemaType } = getTypeFromSchema(
                         jsonContent.schema,
                         schema,
-                        { defaultNonNullable: responseDefaultNonNullable },
+                        {
+                          defaultNonNullable: responseDefaultNonNullable,
+                          context: inlineContext,
+                        },
                       )
+                      // Merge enums
+                      for (const [enumName, enumDef] of inlineContext.enums) {
+                        if (!enumContext.enums.has(enumName)) {
+                          enumContext.enums.set(enumName, enumDef)
+                        }
+                      }
                       errorType = schemaType
                     }
                   } else {
                     // Extract schema type with response options
                     const responseDefaultNonNullable =
                       options?.responseDefaultNonNullable ?? true
+                    const inlineContext = createSchemaContext('Error')
                     const { type: schemaType } = getTypeFromSchema(
                       jsonContent.schema,
                       schema,
-                      { defaultNonNullable: responseDefaultNonNullable },
+                      {
+                        defaultNonNullable: responseDefaultNonNullable,
+                        context: inlineContext,
+                      },
                     )
+                    // Merge enums
+                    for (const [enumName, enumDef] of inlineContext.enums) {
+                      if (!enumContext.enums.has(enumName)) {
+                        enumContext.enums.set(enumName, enumDef)
+                      }
+                    }
                     errorType = schemaType
                   }
                 }
@@ -522,11 +587,22 @@ function generateSchemaInterface(
           defaultNonNullable = requestDefaultNonNullable
         }
 
+        // Create a fresh context for each schema with the schema name
+        const schemaContext = createSchemaContext(schemaName)
+
         const { type: schemaType } = getTypeFromSchema(
           schemaObj as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
           schema,
-          { defaultNonNullable },
+          { defaultNonNullable, context: schemaContext },
         )
+
+        // Merge enums from this schema into the main context
+        for (const [enumName, enumDef] of schemaContext.enums) {
+          if (!enumContext.enums.has(enumName)) {
+            enumContext.enums.set(enumName, enumDef)
+          }
+        }
+
         // Keep original schema name as-is
         if (requestSchemaNames.has(schemaName)) {
           requestComponents[schemaName] = schemaType
@@ -546,6 +622,7 @@ function generateSchemaInterface(
     requestComponents,
     responseComponents,
     errorComponents,
+    enumDefinitions: enumContext.enums,
   }
 }
 
@@ -569,6 +646,9 @@ export function generateInterface(
   const serverResponseComponents: Record<string, Record<string, unknown>> = {}
   const serverErrorComponents: Record<string, Record<string, unknown>> = {}
 
+  // Collect all enum definitions across all servers
+  const allEnumDefinitions = new Map<string, EnumDefinition>()
+
   for (const [originalServerName, schema] of Object.entries(schemas)) {
     const normalizedServerName = normalizeServerName(originalServerName)
     serverNames.push(normalizedServerName)
@@ -578,12 +658,20 @@ export function generateInterface(
       requestComponents,
       responseComponents,
       errorComponents,
+      enumDefinitions,
     } = generateSchemaInterface(schema, normalizedServerName, options)
 
     serverEndpoints[normalizedServerName] = endpoints
     serverRequestComponents[normalizedServerName] = requestComponents
     serverResponseComponents[normalizedServerName] = responseComponents
     serverErrorComponents[normalizedServerName] = errorComponents
+
+    // Merge enum definitions
+    for (const [enumName, enumDef] of enumDefinitions) {
+      if (!allEnumDefinitions.has(enumName)) {
+        allEnumDefinitions.set(enumName, enumDef)
+      }
+    }
   }
 
   // Generate DevupApiServers interface (just server names with never)
@@ -694,6 +782,13 @@ export function generateInterface(
       ? `  interface DevupErrorComponentStruct {\n${errorComponentEntries.join(';\n')}\n  }`
       : '  interface DevupErrorComponentStruct {}'
 
+  // Generate enum type aliases
+  const enumTypeAliases: string[] = []
+  for (const [enumName, enumDef] of allEnumDefinitions) {
+    const values = enumDef.values.map((v) => `"${String(v)}"`).join(' | ')
+    enumTypeAliases.push(`  type ${enumName} = ${values}`)
+  }
+
   // Combine all interfaces
   const allInterfaces = [
     serversInterface,
@@ -703,5 +798,9 @@ export function generateInterface(
     errorComponentInterface,
   ].join('\n\n')
 
-  return `import "@devup-api/fetch";\nimport type { DevupObject } from "@devup-api/fetch";\n\ndeclare module "@devup-api/fetch" {\n${allInterfaces}\n}`
+  // Generate enum types outside the module declaration (global types)
+  const enumTypesBlock =
+    enumTypeAliases.length > 0 ? `${enumTypeAliases.join('\n')}\n\n` : ''
+
+  return `import "@devup-api/fetch";\nimport type { DevupObject } from "@devup-api/fetch";\n\ndeclare module "@devup-api/fetch" {\n${enumTypesBlock}${allInterfaces}\n}`
 }
