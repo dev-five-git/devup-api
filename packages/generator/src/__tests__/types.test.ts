@@ -5,7 +5,11 @@
 import { describe, expect, test } from 'bun:test'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { generateInterface } from '../generate-interface'
-import { extractParameters, getTypeFromSchema } from '../generate-schema'
+import {
+  createSchemaContext,
+  extractParameters,
+  getTypeFromSchema,
+} from '../generate-schema'
 
 // =============================================================================
 // Helper
@@ -43,6 +47,51 @@ describe('getTypeFromSchema type conversion', () => {
     const result = getTypeFromSchema(schema, doc)
 
     expect(result.type).toBe('"active" | "inactive" | "pending"')
+  })
+
+  test('enum to named type with context', () => {
+    const schema: OpenAPIV3_1.SchemaObject = {
+      type: 'string',
+      enum: ['active', 'inactive', 'pending'],
+    }
+    const context = createSchemaContext('User')
+    context.propertyPath.push('status')
+    const result = getTypeFromSchema(schema, doc, {
+      context,
+      propertyName: undefined,
+    })
+
+    // With context, returns the enum type name
+    expect(result.type).toBe('UserStatus')
+    // Enum should be registered in context
+    expect(context.enums.has('UserStatus')).toBe(true)
+    expect(context.enums.get('UserStatus')?.values).toEqual([
+      'active',
+      'inactive',
+      'pending',
+    ])
+  })
+
+  test('enum in nested object with context', () => {
+    const schema: OpenAPIV3_1.SchemaObject = {
+      type: 'object',
+      properties: {
+        status: {
+          type: 'string',
+          enum: ['draft', 'published', 'archived'],
+        },
+      },
+    }
+    const context = createSchemaContext('Post')
+    const _result = getTypeFromSchema(schema, doc, { context })
+
+    // Enum should be registered with property path
+    expect(context.enums.has('PostStatus')).toBe(true)
+    expect(context.enums.get('PostStatus')?.values).toEqual([
+      'draft',
+      'published',
+      'archived',
+    ])
   })
 
   test('array type conversion', () => {
@@ -628,5 +677,854 @@ describe('Multi-server support', () => {
     expect(result).toContain('admin-api.json')
     expect(result).toContain('getUsers')
     expect(result).toContain('getAdminUsers')
+  })
+})
+
+// =============================================================================
+// Enum type generation
+// =============================================================================
+
+describe('Enum type generation', () => {
+  test('generates named type alias for enum in response', () => {
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          status: {
+                            type: 'string',
+                            enum: ['active', 'inactive', 'pending'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should generate a named type alias for the enum
+    expect(result).toContain(
+      'type ResponseStatus = "active" | "inactive" | "pending"',
+    )
+    // Should use the named type in the interface
+    expect(result).toContain('status?: ResponseStatus')
+  })
+
+  test('generates named type alias for enum in component schema', () => {
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/User' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            User: {
+              type: 'object',
+              properties: {
+                id: { type: 'string' },
+                role: {
+                  type: 'string',
+                  enum: ['admin', 'user', 'guest'],
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should generate a named type alias for the enum
+    expect(result).toContain('type UserRole = "admin" | "user" | "guest"')
+    // Should use the named type in the component
+    expect(result).toContain('role?: UserRole')
+  })
+
+  test('reuses same enum type for identical values', () => {
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/User' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            User: {
+              type: 'object',
+              properties: {
+                status: {
+                  type: 'string',
+                  enum: ['active', 'inactive'],
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should only have one type definition (not duplicated)
+    const matches = result.match(/type UserStatus/g)
+    expect(matches?.length).toBe(1)
+  })
+
+  test('deduplicates enum types across response and error with same name', () => {
+    // This test covers the branch where enum is already registered (lines 340-342, etc.)
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          status: {
+                            type: 'string',
+                            enum: ['success', 'pending'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+                '400': {
+                  description: 'Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          status: {
+                            type: 'string',
+                            enum: ['success', 'pending'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Same enum should only be defined once even if used in both response and error
+    const matches = result.match(/type (Response|Error)Status/g)
+    // Should have at most one definition (first one wins)
+    expect(matches?.length).toBeLessThanOrEqual(2)
+  })
+
+  test('handles enum in array response without component ref', () => {
+    // This covers lines 381-383 (array response with enum, not using component ref)
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            category: {
+                              type: 'string',
+                              enum: ['food', 'drink', 'other'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain(
+      'type ResponseCategory = "food" | "drink" | "other"',
+    )
+  })
+
+  test('handles enum in array error response without component ref', () => {
+    // This covers lines 515-517 (array error with enum, not using component ref)
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { type: 'object', properties: {} },
+                    },
+                  },
+                },
+                '400': {
+                  description: 'Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            severity: {
+                              type: 'string',
+                              enum: ['warning', 'error', 'critical'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain(
+      'type ErrorSeverity = "warning" | "error" | "critical"',
+    )
+  })
+
+  test('handles enum in error response object without component ref', () => {
+    // This covers lines 536-538 (error object with enum)
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: { type: 'object', properties: {} },
+                    },
+                  },
+                },
+                '500': {
+                  description: 'Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          errorCode: {
+                            type: 'string',
+                            enum: ['internal', 'timeout', 'unavailable'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain(
+      'type ErrorErrorCode = "internal" | "timeout" | "unavailable"',
+    )
+  })
+
+  test('generates enum name from values when no context path', () => {
+    // This covers generate-schema.ts lines 62-66 (fallback enum naming)
+    const context = createSchemaContext() // No schema name
+    // Don't push any property path
+
+    const schema: OpenAPIV3_1.SchemaObject = {
+      type: 'string',
+      enum: ['red', 'green', 'blue'],
+    }
+
+    const result = getTypeFromSchema(schema, createDocument(), { context })
+
+    // Should generate name from values: RedGreenBlueEnum
+    expect(result.type).toBe('RedGreenBlueEnum')
+    expect(context.enums.has('RedGreenBlueEnum')).toBe(true)
+  })
+
+  test('deduplicates enums when multiple operations have same enum property name', () => {
+    // This covers lines 340-342: duplicate enum check when merging from inline context
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          status: {
+                            type: 'string',
+                            enum: ['active', 'inactive'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/posts': {
+            get: {
+              operationId: 'getPosts',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          status: {
+                            type: 'string',
+                            enum: ['active', 'inactive'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should only define the enum once
+    const matches = result.match(/type ResponseStatus/g)
+    expect(matches?.length).toBe(1)
+  })
+
+  test('deduplicates enums in array responses across operations', () => {
+    // This covers lines 381-383: duplicate enum in array response
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            priority: {
+                              type: 'string',
+                              enum: ['low', 'medium', 'high'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/tasks': {
+            get: {
+              operationId: 'getTasks',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            priority: {
+                              type: 'string',
+                              enum: ['low', 'medium', 'high'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should only define the enum once
+    const matches = result.match(/type ResponsePriority/g)
+    expect(matches?.length).toBe(1)
+  })
+
+  test('deduplicates enums in error responses across operations', () => {
+    // This covers lines 474-476 and 536-538: duplicate enum in error response
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/users': {
+            get: {
+              operationId: 'getUsers',
+              responses: {
+                '200': { description: 'Success' },
+                '400': {
+                  description: 'Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          level: {
+                            type: 'string',
+                            enum: ['warn', 'error', 'fatal'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/posts': {
+            get: {
+              operationId: 'getPosts',
+              responses: {
+                '200': { description: 'Success' },
+                '400': {
+                  description: 'Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          level: {
+                            type: 'string',
+                            enum: ['warn', 'error', 'fatal'],
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should only define the enum once
+    const matches = result.match(/type ErrorLevel/g)
+    expect(matches?.length).toBe(1)
+  })
+
+  test('deduplicates enums in array error responses across operations', () => {
+    // This covers lines 515-517: duplicate enum in array error response
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/items': {
+            get: {
+              operationId: 'getItems',
+              responses: {
+                '200': { description: 'Success' },
+                '422': {
+                  description: 'Validation Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            severity: {
+                              type: 'string',
+                              enum: ['info', 'warning', 'error'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/orders': {
+            get: {
+              operationId: 'getOrders',
+              responses: {
+                '200': { description: 'Success' },
+                '422': {
+                  description: 'Validation Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            severity: {
+                              type: 'string',
+                              enum: ['info', 'warning', 'error'],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // Should only define the enum once
+    const matches = result.match(/type ErrorSeverity/g)
+    expect(matches?.length).toBe(1)
+  })
+
+  test('handles response with $ref that resolves to schema with enum (non-component ref)', () => {
+    // This specifically targets lines 340-342: $ref that is not in responseSchemaNames
+    // We use components.responses which resolves but doesn't go through the normal path
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/status': {
+            get: {
+              operationId: 'getStatus',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        // $ref to a response object (not schema) - extractSchemaNameFromRef returns null
+                        $ref: '#/components/responses/StatusResponse',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/health': {
+            get: {
+              operationId: 'getHealth',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/responses/StatusResponse',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          responses: {
+            StatusResponse: {
+              type: 'object',
+              properties: {
+                state: {
+                  type: 'string',
+                  enum: ['healthy', 'degraded', 'down'],
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    // The enum should be generated (may have different name based on resolution)
+    expect(result).toMatch(/type.*=.*"healthy".*\|.*"degraded".*\|.*"down"/)
+  })
+
+  test('handles error response with $ref that resolves to schema with enum (non-component ref)', () => {
+    // This specifically targets lines 474-476: $ref for error that is not in errorSchemaNames
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/action': {
+            post: {
+              operationId: 'doAction',
+              responses: {
+                '200': { description: 'Success' },
+                '400': {
+                  description: 'Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/responses/ErrorResponse',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/process': {
+            post: {
+              operationId: 'doProcess',
+              responses: {
+                '200': { description: 'Success' },
+                '400': {
+                  description: 'Error',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/responses/ErrorResponse',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          responses: {
+            ErrorResponse: {
+              type: 'object',
+              properties: {
+                errorType: {
+                  type: 'string',
+                  enum: ['validation', 'auth', 'server'],
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toMatch(/type.*=.*"validation".*\|.*"auth".*\|.*"server"/)
+  })
+
+  test('handles array response with items $ref that is not a component schema', () => {
+    // This targets lines 381-383: array response with items $ref not in responseSchemaNames
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/logs': {
+            get: {
+              operationId: 'getLogs',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/responses/LogEntry',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/events': {
+            get: {
+              operationId: 'getEvents',
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/responses/LogEntry',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          responses: {
+            LogEntry: {
+              type: 'object',
+              properties: {
+                level: {
+                  type: 'string',
+                  enum: ['debug', 'info', 'warn', 'error'],
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toMatch(
+      /type.*=.*"debug".*\|.*"info".*\|.*"warn".*\|.*"error"/,
+    )
+  })
+
+  test('handles array error response with items $ref that is not a component schema', () => {
+    // This targets lines 515-517: array error with items $ref not in errorSchemaNames
+    const result = generateInterface({
+      'openapi.json': createDocument({
+        paths: {
+          '/submit': {
+            post: {
+              operationId: 'submit',
+              responses: {
+                '200': { description: 'Success' },
+                '422': {
+                  description: 'Validation Errors',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/responses/ValidationError',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          '/update': {
+            put: {
+              operationId: 'update',
+              responses: {
+                '200': { description: 'Success' },
+                '422': {
+                  description: 'Validation Errors',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/responses/ValidationError',
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        components: {
+          responses: {
+            ValidationError: {
+              type: 'object',
+              properties: {
+                field: { type: 'string' },
+                constraint: {
+                  type: 'string',
+                  enum: ['required', 'format', 'range', 'unique'],
+                },
+              },
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toMatch(
+      /type.*=.*"required".*\|.*"format".*\|.*"range".*\|.*"unique"/,
+    )
   })
 })

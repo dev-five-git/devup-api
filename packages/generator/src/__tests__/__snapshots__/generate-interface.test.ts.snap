@@ -75,6 +75,8 @@ exports[`generateInterface handles nullable properties (OpenAPI 3.0 style) 1`] =
 import type { DevupObject } from "@devup-api/fetch";
 
 declare module "@devup-api/fetch" {
+  type ResponseStatus = "active" | "inactive"
+
   interface DevupApiServers {
     [\`openapi.json\`]: never
   }
@@ -90,7 +92,7 @@ declare module "@devup-api/fetch" {
           metadata?: {
             key?: string;
           } | null;
-          status?: "active" | "inactive" | null;
+          status?: ResponseStatus | null;
         };
       };
       getUsers: {
@@ -102,7 +104,7 @@ declare module "@devup-api/fetch" {
           metadata?: {
             key?: string;
           } | null;
-          status?: "active" | "inactive" | null;
+          status?: ResponseStatus | null;
         };
       };
     }
