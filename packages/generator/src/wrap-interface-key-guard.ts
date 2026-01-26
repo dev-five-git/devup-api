@@ -13,13 +13,12 @@ export function wrapInterfaceKeyGuard(key: string): string {
   // TypeScript identifier pattern: starts with letter/underscore/dollar, followed by letters/numbers/underscore/dollar
   const isValidIdentifier = /^[a-zA-Z_$][a-zA-Z0-9_$]*$/.test(baseKey)
 
-  if (
-    !isValidIdentifier ||
-    baseKey.includes('"') ||
-    baseKey.includes("'") ||
-    baseKey.includes('`')
-  ) {
-    const wrapped = `[\`${baseKey}\`]`
+  if (!isValidIdentifier || baseKey.includes("'")) {
+    // Use single quotes for keys, escape if needed
+    const escapedKey = baseKey.includes("'")
+      ? baseKey.replace(/'/g, "\\'")
+      : baseKey
+    const wrapped = `'${escapedKey}'`
     return isOptional ? `${wrapped}?` : wrapped
   }
   return key

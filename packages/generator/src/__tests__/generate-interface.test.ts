@@ -1794,3 +1794,108 @@ test('generateInterface handles error response $ref that extracts schema name', 
     generateInterface(createSchemas(createDocument(schema as any))),
   ).toMatchSnapshot()
 })
+
+// Test inline response with nested $ref containing enums
+// This ensures enum names are derived from the referenced schema, not context path
+test('generateInterface handles inline response with nested $ref containing enums', () => {
+  const schema = {
+    paths: {
+      '/items': {
+        get: {
+          operationId: 'listItems',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      items: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/schemas/ItemResponse',
+                        },
+                      },
+                      page: { type: 'number' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/other-items': {
+        get: {
+          operationId: 'listOtherItems',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      items: {
+                        type: 'array',
+                        items: {
+                          $ref: '#/components/schemas/OtherItemResponse',
+                        },
+                      },
+                      page: { type: 'number' },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        ItemResponse: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            status: {
+              $ref: '#/components/schemas/ItemStatus',
+            },
+          },
+        },
+        OtherItemResponse: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            status: {
+              $ref: '#/components/schemas/OtherStatus',
+            },
+          },
+        },
+        ItemStatus: {
+          type: 'string',
+          enum: ['draft', 'published', 'archived'],
+        },
+        OtherStatus: {
+          type: 'string',
+          enum: ['pending', 'approved', 'rejected'],
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Verify enum names are derived from schema names, not context path
+  expect(result).toContain('type ItemStatus =')
+  expect(result).toContain('type OtherStatus =')
+  // Should NOT contain ResponseItemsStatus (wrong context-based name)
+  expect(result).not.toContain('type ResponseItemsStatus =')
+  // Verify that nested $ref uses DevupObject reference instead of inline expansion
+  expect(result).toContain(
+    "DevupObject<'response', 'openapi.json'>['ItemResponse']",
+  )
+  expect(result).toContain(
+    "DevupObject<'response', 'openapi.json'>['OtherItemResponse']",
+  )
+})

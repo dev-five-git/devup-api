@@ -69,47 +69,70 @@ function generateSchemaInterface(
   const convertCaseType = options?.convertCase ?? 'camel'
 
   // Helper function to collect schema names from a schema object
+  // Recursively traverses into referenced schemas to find all nested $refs
   const collectSchemaNames = (
     schemaObj: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
     targetSet: Set<string>,
+    visited: Set<string> = new Set(),
   ): void => {
     if ('$ref' in schemaObj) {
       const schemaName = extractSchemaNameFromRef(schemaObj.$ref)
       if (schemaName) {
+        // Avoid infinite recursion for circular references
+        if (visited.has(schemaName)) {
+          return
+        }
         targetSet.add(schemaName)
+        visited.add(schemaName)
+
+        // Recursively collect from the referenced schema
+        const referencedSchema = schema.components?.schemas?.[schemaName]
+        if (referencedSchema) {
+          collectSchemaNames(
+            referencedSchema as
+              | OpenAPIV3_1.SchemaObject
+              | OpenAPIV3_1.ReferenceObject,
+            targetSet,
+            visited,
+          )
+        }
       }
       return
     }
 
-    const schema = schemaObj as OpenAPIV3_1.SchemaObject
+    const schemaObjTyped = schemaObj as OpenAPIV3_1.SchemaObject
 
     // Check allOf, anyOf, oneOf
-    if (schema.allOf) {
-      schema.allOf.forEach((s) => {
-        collectSchemaNames(s, targetSet)
+    if (schemaObjTyped.allOf) {
+      schemaObjTyped.allOf.forEach((s) => {
+        collectSchemaNames(s, targetSet, visited)
       })
     }
-    if (schema.anyOf) {
-      schema.anyOf.forEach((s) => {
-        collectSchemaNames(s, targetSet)
+    if (schemaObjTyped.anyOf) {
+      schemaObjTyped.anyOf.forEach((s) => {
+        collectSchemaNames(s, targetSet, visited)
       })
     }
-    if (schema.oneOf) {
-      schema.oneOf.forEach((s) => {
-        collectSchemaNames(s, targetSet)
+    if (schemaObjTyped.oneOf) {
+      schemaObjTyped.oneOf.forEach((s) => {
+        collectSchemaNames(s, targetSet, visited)
       })
     }
 
     // Check properties
-    if (schema.properties) {
-      Object.values(schema.properties).forEach((prop) => {
-        collectSchemaNames(prop, targetSet)
+    if (schemaObjTyped.properties) {
+      Object.values(schemaObjTyped.properties).forEach((prop) => {
+        collectSchemaNames(prop, targetSet, visited)
       })
     }
 
     // Check items (for arrays)
-    if (schema.type === 'array' && 'items' in schema && schema.items) {
-      collectSchemaNames(schema.items, targetSet)
+    if (
+      schemaObjTyped.type === 'array' &&
+      'items' in schemaObjTyped &&
+      schemaObjTyped.items
+    ) {
+      collectSchemaNames(schemaObjTyped.items, targetSet, visited)
     }
   }
 
@@ -333,6 +356,9 @@ function generateSchemaInterface(
                       {
                         defaultNonNullable: responseDefaultNonNullable,
                         context: inlineContext,
+                        serverName,
+                        componentType: 'response',
+                        usedSchemaNames: responseSchemaNames,
                       },
                     )
                     // Merge enums
@@ -374,6 +400,9 @@ function generateSchemaInterface(
                         {
                           defaultNonNullable: responseDefaultNonNullable,
                           context: inlineContext,
+                          serverName,
+                          componentType: 'response',
+                          usedSchemaNames: responseSchemaNames,
                         },
                       )
                       // Merge enums
@@ -395,6 +424,9 @@ function generateSchemaInterface(
                       {
                         defaultNonNullable: responseDefaultNonNullable,
                         context: inlineContext,
+                        serverName,
+                        componentType: 'response',
+                        usedSchemaNames: responseSchemaNames,
                       },
                     )
                     // Merge enums
@@ -467,6 +499,9 @@ function generateSchemaInterface(
                       {
                         defaultNonNullable: responseDefaultNonNullable,
                         context: inlineContext,
+                        serverName,
+                        componentType: 'error',
+                        usedSchemaNames: errorSchemaNames,
                       },
                     )
                     // Merge enums
@@ -508,6 +543,9 @@ function generateSchemaInterface(
                         {
                           defaultNonNullable: responseDefaultNonNullable,
                           context: inlineContext,
+                          serverName,
+                          componentType: 'error',
+                          usedSchemaNames: errorSchemaNames,
                         },
                       )
                       // Merge enums
@@ -529,6 +567,9 @@ function generateSchemaInterface(
                       {
                         defaultNonNullable: responseDefaultNonNullable,
                         context: inlineContext,
+                        serverName,
+                        componentType: 'error',
+                        usedSchemaNames: errorSchemaNames,
                       },
                     )
                     // Merge enums
@@ -568,49 +609,103 @@ function generateSchemaInterface(
   }
 
   // Extract components schemas
+  // Generate separately for each context (request/response/error) to:
+  // 1. Apply correct defaultNonNullable per context
+  // 2. Use appropriate usedSchemaNames for nested $ref resolution
   const requestComponents: Record<string, unknown> = {}
   const responseComponents: Record<string, unknown> = {}
   const errorComponents: Record<string, unknown> = {}
   if (schema.components?.schemas) {
+    const requestDefaultNonNullable =
+      options?.requestDefaultNonNullable ?? false
+    const responseDefaultNonNullable =
+      options?.responseDefaultNonNullable ?? true
+
     for (const [schemaName, schemaObj] of Object.entries(
       schema.components.schemas,
     )) {
       if (schemaObj) {
-        const requestDefaultNonNullable =
-          options?.requestDefaultNonNullable ?? false
-        const responseDefaultNonNullable =
-          options?.responseDefaultNonNullable ?? true
-
-        // Determine which defaultNonNullable to use based on where schema is used
-        let defaultNonNullable = responseDefaultNonNullable
-        if (requestSchemaNames.has(schemaName)) {
-          defaultNonNullable = requestDefaultNonNullable
-        }
-
-        // Create a fresh context for each schema with the schema name
-        const schemaContext = createSchemaContext(schemaName)
-
-        const { type: schemaType } = getTypeFromSchema(
-          schemaObj as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
-          schema,
-          { defaultNonNullable, context: schemaContext },
-        )
-
-        // Merge enums from this schema into the main context
-        for (const [enumName, enumDef] of schemaContext.enums) {
-          if (!enumContext.enums.has(enumName)) {
-            enumContext.enums.set(enumName, enumDef)
+        // Skip enum schemas - they are defined as top-level type aliases
+        // and referenced directly by type name (e.g., Gender instead of DevupObject<...>['Gender'])
+        const typedSchemaObj = schemaObj as OpenAPIV3_1.SchemaObject
+        if ('enum' in typedSchemaObj && typedSchemaObj.enum) {
+          // Still need to collect enum definition for top-level type alias
+          const schemaContext = createSchemaContext(schemaName)
+          getTypeFromSchema(typedSchemaObj, schema, { context: schemaContext })
+          for (const [enumName, enumDef] of schemaContext.enums) {
+            if (!enumContext.enums.has(enumName)) {
+              enumContext.enums.set(enumName, enumDef)
+            }
           }
+          continue
         }
 
-        // Keep original schema name as-is
+        // Generate for request context
         if (requestSchemaNames.has(schemaName)) {
+          const schemaContext = createSchemaContext(schemaName)
+          const { type: schemaType } = getTypeFromSchema(
+            schemaObj as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+            schema,
+            {
+              defaultNonNullable: requestDefaultNonNullable,
+              context: schemaContext,
+              serverName,
+              componentType: 'request',
+              usedSchemaNames: requestSchemaNames,
+            },
+          )
+          // Merge enums
+          for (const [enumName, enumDef] of schemaContext.enums) {
+            if (!enumContext.enums.has(enumName)) {
+              enumContext.enums.set(enumName, enumDef)
+            }
+          }
           requestComponents[schemaName] = schemaType
         }
+
+        // Generate for response context
         if (responseSchemaNames.has(schemaName)) {
+          const schemaContext = createSchemaContext(schemaName)
+          const { type: schemaType } = getTypeFromSchema(
+            schemaObj as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+            schema,
+            {
+              defaultNonNullable: responseDefaultNonNullable,
+              context: schemaContext,
+              serverName,
+              componentType: 'response',
+              usedSchemaNames: responseSchemaNames,
+            },
+          )
+          // Merge enums
+          for (const [enumName, enumDef] of schemaContext.enums) {
+            if (!enumContext.enums.has(enumName)) {
+              enumContext.enums.set(enumName, enumDef)
+            }
+          }
           responseComponents[schemaName] = schemaType
         }
+
+        // Generate for error context
         if (errorSchemaNames.has(schemaName)) {
+          const schemaContext = createSchemaContext(schemaName)
+          const { type: schemaType } = getTypeFromSchema(
+            schemaObj as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+            schema,
+            {
+              defaultNonNullable: responseDefaultNonNullable,
+              context: schemaContext,
+              serverName,
+              componentType: 'error',
+              usedSchemaNames: errorSchemaNames,
+            },
+          )
+          // Merge enums
+          for (const [enumName, enumDef] of schemaContext.enums) {
+            if (!enumContext.enums.has(enumName)) {
+              enumContext.enums.set(enumName, enumDef)
+            }
+          }
           errorComponents[schemaName] = schemaType
         }
       }

@@ -140,6 +140,18 @@ function resolveSchemaRef<
 }
 
 /**
+ * Options for component reference handling
+ */
+export interface ComponentRefOptions {
+  /** Server name for DevupObject reference */
+  serverName?: string
+  /** Component type: 'request' | 'response' | 'error' */
+  componentType?: 'request' | 'response' | 'error'
+  /** Set of schema names that should be referenced as components */
+  usedSchemaNames?: Set<string>
+}
+
+/**
  * Convert OpenAPI schema to TypeScript type representation
  */
 export function getTypeFromSchema(
@@ -149,7 +161,7 @@ export function getTypeFromSchema(
     defaultNonNullable?: boolean
     context?: SchemaProcessingContext
     propertyName?: string
-  },
+  } & ComponentRefOptions,
 ): { type: unknown; default?: unknown } {
   const defaultNonNullable = options?.defaultNonNullable ?? false
   const context = options?.context
@@ -162,17 +174,62 @@ export function getTypeFromSchema(
   try {
     // Handle $ref
     if ('$ref' in schema) {
+      // Extract schema name from $ref
+      const refSchemaName = schema.$ref.startsWith('#/components/schemas/')
+        ? schema.$ref.replace('#/components/schemas/', '')
+        : undefined
+
       const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
         schema.$ref,
         document,
       )
-      if (resolved) {
-        return getTypeFromSchema(resolved, document, {
-          ...options,
-          propertyName: undefined, // Don't double-push property name
-        })
+
+      // If $ref cannot be resolved, return unknown
+      if (!resolved) {
+        return { type: 'unknown', default: undefined }
       }
-      return { type: 'unknown', default: undefined }
+
+      // If this $ref points to a used component schema, decide how to reference it
+      if (
+        refSchemaName &&
+        options?.serverName &&
+        options?.componentType &&
+        options?.usedSchemaNames?.has(refSchemaName)
+      ) {
+        // Check if the referenced schema is an enum
+        // Enums are defined at top-level as type aliases, so use direct type name
+        if ('enum' in resolved && resolved.enum) {
+          // Return the enum type name directly (e.g., "Gender" instead of DevupObject<...>['Gender'])
+          return {
+            type: refSchemaName,
+            default: undefined,
+          }
+        }
+
+        // For object schemas, return a component reference marker
+        return {
+          type: {
+            __componentRef: true,
+            schemaName: refSchemaName,
+            serverName: options.serverName,
+            componentType: options.componentType,
+          },
+          default: undefined,
+        }
+      }
+
+      // Create updated context with the referenced schema name
+      // Reset propertyPath since we're entering a new schema context
+      const updatedContext =
+        context && refSchemaName
+          ? { ...context, schemaName: refSchemaName, propertyPath: [] }
+          : context
+
+      return getTypeFromSchema(resolved, document, {
+        ...options,
+        context: updatedContext,
+        propertyName: undefined, // Don't double-push property name
+      })
     }
 
     const schemaObj = schema as OpenAPIV3_1.SchemaObject
@@ -528,11 +585,33 @@ function isNullableObject(
 }
 
 /**
+ * Check if a value is a component reference marker
+ */
+function isComponentRef(value: unknown): value is {
+  __componentRef: true
+  schemaName: string
+  serverName: string
+  componentType: 'request' | 'response' | 'error'
+} {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    '__componentRef' in value &&
+    (value as Record<string, unknown>).__componentRef === true
+  )
+}
+
+/**
  * Format a type value to TypeScript type string
  */
 export function formatTypeValue(value: unknown, indent: number = 0): string {
   if (typeof value === 'string') {
     return value
+  }
+
+  // Handle component reference marker
+  if (isComponentRef(value)) {
+    return `DevupObject<'${value.componentType}', '${value.serverName}'>['${value.schemaName}']`
   }
 
   // Handle array type marker
