@@ -1899,3 +1899,158 @@ test('generateInterface handles inline response with nested $ref containing enum
     "DevupObject<'response', 'openapi.json'>['OtherItemResponse']",
   )
 })
+
+// Test circular reference handling in collectSchemaNames (line 83 coverage)
+test('generateInterface handles circular references in schema collection', () => {
+  const schema = {
+    paths: {
+      '/nodes': {
+        get: {
+          operationId: 'listNodes',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'array',
+                    items: {
+                      $ref: '#/components/schemas/TreeNode',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        TreeNode: {
+          type: 'object',
+          properties: {
+            id: { type: 'number' },
+            name: { type: 'string' },
+            // Circular reference - children contains TreeNode
+            children: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/TreeNode',
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Should not cause infinite loop and should generate valid output
+  expect(result).toContain('TreeNode')
+})
+
+// Test request schema with inline enum (lines 659-661 coverage)
+test('generateInterface handles request schema with inline enum', () => {
+  const schema = {
+    paths: {
+      '/items': {
+        post: {
+          operationId: 'createItem',
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CreateItemRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        CreateItemRequest: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            // Inline enum - not a $ref, should be collected during schema processing
+            priority: {
+              type: 'string',
+              enum: ['low', 'medium', 'high'],
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Inline enum should generate type alias based on context
+  expect(result).toContain('type CreateItemRequestPriority =')
+  expect(result).toContain('"low"')
+})
+
+// Test error schema with inline enum (lines 705-707 coverage)
+test('generateInterface handles error schema with inline enum', () => {
+  const schema = {
+    paths: {
+      '/items': {
+        get: {
+          operationId: 'getItems',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+            '400': {
+              description: 'Error',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ErrorResponse',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        ErrorResponse: {
+          type: 'object',
+          properties: {
+            message: { type: 'string' },
+            // Inline enum - not a $ref, should be collected during schema processing
+            code: {
+              type: 'string',
+              enum: ['INVALID_INPUT', 'NOT_FOUND', 'UNAUTHORIZED'],
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Inline enum should generate type alias based on context
+  expect(result).toContain('type ErrorResponseCode =')
+  expect(result).toContain('"INVALID_INPUT"')
+})

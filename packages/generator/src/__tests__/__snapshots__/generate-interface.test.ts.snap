@@ -1638,3 +1638,117 @@ declare module "@devup-api/fetch" {
   interface DevupErrorComponentStruct {}
 }"
 `;
+
+exports[`generateInterface handles circular references in schema collection 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupGetApiStruct {
+    'openapi.json': {
+      '/nodes': {
+        response: Array<DevupObject<'response', 'openapi.json'>['TreeNode']>;
+      };
+      listNodes: {
+        response: Array<DevupObject<'response', 'openapi.json'>['TreeNode']>;
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    'openapi.json': {
+      TreeNode: {
+        id?: number;
+        name?: string;
+        children?: Array<DevupObject<'response', 'openapi.json'>['TreeNode']>;
+      };
+    }
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles request schema with inline enum 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  type CreateItemRequestPriority = "low" | "medium" | "high"
+
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupPostApiStruct {
+    'openapi.json': {
+      '/items': {
+        body: DevupObject<'request', 'openapi.json'>['CreateItemRequest'];
+        response?: {};
+      };
+      createItem: {
+        body: DevupObject<'request', 'openapi.json'>['CreateItemRequest'];
+        response?: {};
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {
+    'openapi.json': {
+      CreateItemRequest: {
+        name?: string;
+        priority?: CreateItemRequestPriority;
+      };
+    }
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles error schema with inline enum 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  type ErrorResponseCode = "INVALID_INPUT" | "NOT_FOUND" | "UNAUTHORIZED"
+
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupGetApiStruct {
+    'openapi.json': {
+      '/items': {
+        response?: {};
+        error: DevupObject<'error', 'openapi.json'>['ErrorResponse'];
+      };
+      getItems: {
+        response?: {};
+        error: DevupObject<'error', 'openapi.json'>['ErrorResponse'];
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {
+    'openapi.json': {
+      ErrorResponse: {
+      message?: string;
+      code?: ErrorResponseCode;
+    };
+    }
+  }
+}"
+`;
