@@ -3,3 +3,4 @@ coverage = true
 coveragePathIgnorePatterns = ["node_modules", "**/dist/**"]
 coverageSkipTestFiles = true
 preload = ["bun-test-env-dom"]
+coverageThreshold = 1.0
