@@ -94,8 +94,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
               signal,
               ...(options[0] as DevupApiRequestInit),
             })
-            .then(({ data, error }: DevupApiResponse<D, E>) => {
-              if (error) throw error
+            .then(({ data, error, isError }: DevupApiResponse<D, E>) => {
+              if (isError) throw error
               return data
             }),
         ...options[1],
@@ -149,8 +149,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
           // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
           (this.api as any)
             [mutationKey?.[0] as string](mutationKey?.[1] as T, variables)
-            .then(({ data, error }: DevupApiResponse<D, E>) => {
-              if (error) throw error
+            .then(({ data, error, isError }: DevupApiResponse<D, E>) => {
+              if (isError) throw error
               return data
             }),
         ...queryOptions,
@@ -214,8 +214,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
               signal,
               ...(options[0] as DevupApiRequestInit),
             })
-            .then(({ data, error }: DevupApiResponse<D, E>) => {
-              if (error) throw error
+            .then(({ data, error, isError }: DevupApiResponse<D, E>) => {
+              if (isError) throw error
               return data
             }),
         ...options[1],
@@ -290,8 +290,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
                 },
               } as DevupApiRequestInit,
             )
-            .then(({ data, error }: DevupApiResponse<D, E>) => {
-              if (error) throw error
+            .then(({ data, error, isError }: DevupApiResponse<D, E>) => {
+              if (isError) throw error
               return data as D
             })
         },
@@ -366,8 +366,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
                 signal,
                 ...(restOptions[0] as DevupApiRequestInit),
               })
-              .then(({ data, error }: DevupApiResponse<D, E>) => {
-                if (error) throw error
+              .then(({ data, error, isError }: DevupApiResponse<D, E>) => {
+                if (isError) throw error
                 return data
               }),
           ...queryOptions,
