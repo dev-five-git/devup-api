@@ -1,1 +1,0 @@
-{"changes":{"packages/fetch/package.json":"Patch","packages/react-query/package.json":"Patch"},"note":"Fix error without body issue","date":"2026-01-27T06:44:10.883719900Z"}
