@@ -29,11 +29,15 @@ export type DevupApiResponse<T, E = any> =
   | {
       data: T
       error?: undefined
+      isOk: true
+      isError: false
       response: Response
     }
   | {
       data?: undefined
       error: E
+      isOk: false
+      isError: true
       response: Response
     }
 
@@ -289,6 +293,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     >
 
     let response = ret.response
+    const hasError = !ret.response.ok
     let error: unknown = ret.error
 
     for (const middleware of finalMiddleware) {
@@ -307,15 +312,15 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
       if (middleware.onResponse) {
         result = await middleware.onResponse({
           ...middlewareParams,
-          response: ret.response,
+          response,
         })
       }
 
       // Call onError if there's an error and onResponse didn't return a result
-      if (!result && error && middleware.onError) {
+      if (!result && hasError && middleware.onError) {
         result = await middleware.onError({
           ...middlewareParams,
-          error: ret.error,
+          error,
         })
       }
 
@@ -334,6 +339,8 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
     return {
       data: ret.data,
       error: error,
+      isOk: !hasError,
+      isError: hasError,
       response,
     } as DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   }
