@@ -14,6 +14,10 @@ const api2 = createApi({
   baseUrl: 'https://api.example2.com',
   serverName: 'openapi2.json',
 })
+const api3 = createApi({
+  baseUrl: 'https://api.example2.com',
+  serverName: 'openapi3.json',
+})
 
 const queryClient = createQueryClient(api)
 
@@ -80,6 +84,19 @@ export default function Home() {
       .then((res) => {
         console.log(res)
       })
+    api3.POST('/form', {
+      body: {
+        email: 'name',
+        name: 'John Doe',
+      },
+    })
+
+    api3.POST('/typed-form', {
+      body: {
+        name: 'John Doe',
+        tags: 'tag1,tag2',
+      },
+    })
   }, [mutateAsync])
   return (
     <Box>

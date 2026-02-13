@@ -19,7 +19,8 @@
     "@devup-ui/react": "^1",
     "@tanstack/react-query": "^5",
     "@devup-api/ui": "workspace:*",
-    "@devup-api/hookform": "workspace:*"
+    "@devup-api/hookform": "workspace:*",
+    "zod": "^4.3"
   },
   "devDependencies": {
     "@devup-ui/next-plugin": "^1",
