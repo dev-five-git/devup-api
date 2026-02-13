@@ -23,7 +23,7 @@
     "@devup-api/core": "workspace:^"
   },
   "devDependencies": {
-    "@types/node": "^25.0",
+    "@types/node": "^25.2",
     "typescript": "^5.9"
   }
 }

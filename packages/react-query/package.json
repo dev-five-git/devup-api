@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^8.0.1",
-    "@types/node": "^25.0",
+    "@types/node": "^25.2",
     "@types/react": "^19.2",
-    "happy-dom": "^20.0.11",
+    "happy-dom": "^20.6.1",
     "typescript": "^5.9"
   }
 }
