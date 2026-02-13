@@ -2,7 +2,7 @@
 import { describe, expect, test } from 'bun:test'
 import type { UrlMapValue } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
-import { createUrlMap, getBodyType } from '../create-url-map'
+import { createUrlMap } from '../create-url-map'
 
 test.each([
   [
@@ -605,95 +605,4 @@ describe('bodyType emission', () => {
   })
 })
 
-describe('getBodyType', () => {
-  const emptyDoc: OpenAPIV3_1.Document = {
-    openapi: '3.1.0',
-    info: { title: 'Test', version: '1.0.0' },
-    paths: {},
-  }
-
-  test('returns undefined when no requestBody', () => {
-    expect(getBodyType({ responses: {} }, emptyDoc)).toBeUndefined()
-  })
-
-  test('returns undefined for JSON content', () => {
-    expect(
-      getBodyType(
-        {
-          requestBody: {
-            content: {
-              'application/json': { schema: { type: 'object' } },
-            },
-          },
-          responses: {},
-        },
-        emptyDoc,
-      ),
-    ).toBeUndefined()
-  })
-
-  test('returns form for urlencoded content', () => {
-    expect(
-      getBodyType(
-        {
-          requestBody: {
-            content: {
-              'application/x-www-form-urlencoded': {
-                schema: { type: 'object' },
-              },
-            },
-          },
-          responses: {},
-        },
-        emptyDoc,
-      ),
-    ).toBe('form')
-  })
-
-  test('returns multipart for multipart/form-data content', () => {
-    expect(
-      getBodyType(
-        {
-          requestBody: {
-            content: {
-              'multipart/form-data': { schema: { type: 'object' } },
-            },
-          },
-          responses: {},
-        },
-        emptyDoc,
-      ),
-    ).toBe('multipart')
-  })
-
-  test('returns undefined when requestBody has no content', () => {
-    expect(
-      getBodyType(
-        {
-          requestBody: { content: {} },
-          responses: {},
-        },
-        emptyDoc,
-      ),
-    ).toBeUndefined()
-  })
-
-  test('prefers urlencoded over multipart when both present', () => {
-    expect(
-      getBodyType(
-        {
-          requestBody: {
-            content: {
-              'application/x-www-form-urlencoded': {
-                schema: { type: 'object' },
-              },
-              'multipart/form-data': { schema: { type: 'object' } },
-            },
-          },
-          responses: {},
-        },
-        emptyDoc,
-      ),
-    ).toBe('form')
-  })
-})
+// getBodyType is now internal (not exported) — tested indirectly through createUrlMap tests above

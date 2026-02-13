@@ -5,7 +5,6 @@ test('index.ts exports', () => {
   expect({ ...indexModule }).toEqual({
     // URL map
     createUrlMap: expect.any(Function),
-    getBodyType: expect.any(Function),
     // Interface generation
     generateInterface: expect.any(Function),
     // Zod generation

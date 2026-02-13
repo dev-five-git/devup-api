@@ -3,7 +3,7 @@ import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import { resolveRef } from './openapi-utils'
 
-export function getBodyType(
+function getBodyType(
   operation: OpenAPIV3_1.OperationObject,
   document: OpenAPIV3_1.Document,
 ): 'form' | 'multipart' | undefined {
