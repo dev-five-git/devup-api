@@ -22,7 +22,13 @@ import type {
 } from '@devup-api/core'
 import { convertResponse } from './response-converter'
 import { getApiEndpointInfo } from './url-map'
-import { getApiEndpoint, getQueryString, isPlainObject } from './utils'
+import {
+  getApiEndpoint,
+  getQueryString,
+  isPlainObject,
+  objectToFormData,
+  objectToURLSearchParams,
+} from './utils'
 
 // biome-ignore lint/suspicious/noExplicitAny: any is used to allow for flexibility in the type
 export type DevupApiResponse<T, E = any> =
@@ -217,7 +223,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
-    const { method, url } = getApiEndpointInfo(path, this.serverName)
+    const { method, url, bodyType } = getApiEndpointInfo(path, this.serverName)
     const {
       middleware = [],
       query,
@@ -237,13 +243,29 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
       headers: mergedHeaders,
     }
     if (body) {
-      if (isPlainObject(body)) {
+      if (!isPlainObject(body)) {
+        // Non-plain-object passthrough (FormData, Blob, string, etc.)
+        requestOptions.body = body
+      } else if (bodyType === 'form') {
+        // URLSearchParams serialization
+        requestOptions.body = objectToURLSearchParams(
+          body as Record<string, unknown>,
+        )
+        if (!requestOptions.headers.has('Content-Type')) {
+          requestOptions.headers.set(
+            'Content-Type',
+            'application/x-www-form-urlencoded',
+          )
+        }
+      } else if (bodyType === 'multipart') {
+        // FormData serialization — do NOT set Content-Type (browser sets it with boundary)
+        requestOptions.body = objectToFormData(body as Record<string, unknown>)
+      } else {
+        // Default: JSON serialization (bodyType === 'json' or undefined)
         requestOptions.body = JSON.stringify(body)
         if (!requestOptions.headers.has('Content-Type')) {
           requestOptions.headers.set('Content-Type', 'application/json')
         }
-      } else {
-        requestOptions.body = body
       }
     }
     const queryString = query ? `?${getQueryString(query).toString()}` : ''

@@ -19,6 +19,36 @@ export function getApiEndpoint(
   return ret
 }
 
+export function objectToURLSearchParams(
+  obj: Record<string, unknown>,
+): URLSearchParams {
+  const params = new URLSearchParams()
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === null || value === undefined) continue
+    if (typeof value === 'object') {
+      params.append(key, JSON.stringify(value))
+    } else {
+      params.append(key, String(value))
+    }
+  }
+  return params
+}
+
+export function objectToFormData(obj: Record<string, unknown>): FormData {
+  const formData = new FormData()
+  for (const [key, value] of Object.entries(obj)) {
+    if (value === null || value === undefined) continue
+    if (value instanceof File || value instanceof Blob) {
+      formData.append(key, value)
+    } else if (typeof value === 'object') {
+      formData.append(key, JSON.stringify(value))
+    } else {
+      formData.append(key, String(value))
+    }
+  }
+  return formData
+}
+
 export function getQueryString(
   query: NonNullable<DevupApiRequestInit['query']>,
 ): URLSearchParams {
