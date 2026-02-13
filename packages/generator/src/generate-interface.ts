@@ -8,6 +8,7 @@ import {
   extractParameters,
   extractRequestBody,
   formatTypeValue,
+  getRequestBodyContent,
   getTypeFromSchema,
 } from './generate-schema'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
@@ -170,9 +171,9 @@ function generateSchemaInterface(
             }
           } else {
             const content = operation.requestBody.content
-            const jsonContent = content?.['application/json']
-            if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
-              collectSchemaNames(jsonContent.schema, requestSchemaNames)
+            const bodyContent = getRequestBodyContent(content)
+            if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
+              collectSchemaNames(bodyContent.schema, requestSchemaNames)
             }
           }
         }
@@ -270,12 +271,12 @@ function generateSchemaInterface(
             }
           } else {
             const content = operation.requestBody.content
-            const jsonContent = content?.['application/json']
-            if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
+            const bodyContent = getRequestBodyContent(content)
+            if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
               // Check if schema is a direct reference to components.schemas
-              if ('$ref' in jsonContent.schema) {
+              if ('$ref' in bodyContent.schema) {
                 const schemaName = extractSchemaNameFromRef(
-                  jsonContent.schema.$ref,
+                  bodyContent.schema.$ref,
                 )
                 // Check if schema exists in components.schemas and is used in request body
                 if (
@@ -295,12 +296,31 @@ function generateSchemaInterface(
                   }
                 }
               } else {
-                const requestBody = extractRequestBody(
-                  operation.requestBody,
-                  schema,
-                )
-                if (requestBody !== undefined) {
-                  requestBodyType = requestBody
+                // Check for raw multipart: multipart/form-data with empty/generic object schema
+                const schemaObj = bodyContent.schema as OpenAPIV3_1.SchemaObject
+                const isMultipart =
+                  content?.['multipart/form-data'] !== undefined &&
+                  !content?.['application/json'] &&
+                  !content?.['application/x-www-form-urlencoded']
+                const isEmptyObject =
+                  schemaObj.type === 'object' &&
+                  (!schemaObj.properties ||
+                    Object.keys(schemaObj.properties).length === 0) &&
+                  !schemaObj.allOf &&
+                  !schemaObj.anyOf &&
+                  !schemaObj.oneOf
+
+                if (isMultipart && isEmptyObject) {
+                  // Raw multipart with no typed schema
+                  requestBodyType = 'FormData | Record<string, unknown>'
+                } else {
+                  const requestBody = extractRequestBody(
+                    operation.requestBody,
+                    schema,
+                  )
+                  if (requestBody !== undefined) {
+                    requestBodyType = requestBody
+                  }
                 }
               }
             }

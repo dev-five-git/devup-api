@@ -1752,3 +1752,282 @@ declare module "@devup-api/fetch" {
   }
 }"
 `;
+
+exports[`generateInterface handles urlencoded request body with $ref 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupPostApiStruct {
+    'openapi.json': {
+      '/form': {
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        response?: {
+          ok?: boolean;
+        };
+      };
+      subscribe: {
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        response?: {
+          ok?: boolean;
+        };
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {
+    'openapi.json': {
+      SubscribeRequest: {
+        name?: string;
+        email?: string;
+      };
+    }
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles urlencoded request body with inline schema 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupPostApiStruct {
+    'openapi.json': {
+      '/form/contact': {
+        body?: {
+          name?: string;
+          email?: string;
+          message?: string;
+        };
+        response?: {};
+      };
+      contact: {
+        body?: {
+          name?: string;
+          email?: string;
+          message?: string;
+        };
+        response?: {};
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles typed multipart request body with $ref 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupPostApiStruct {
+    'openapi.json': {
+      '/typed-form': {
+        body: DevupObject<'request', 'openapi.json'>['CreateFileUploadRequest'];
+        response?: {
+          id?: string;
+        };
+      };
+      createFileUpload: {
+        body: DevupObject<'request', 'openapi.json'>['CreateFileUploadRequest'];
+        response?: {
+          id?: string;
+        };
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {
+    'openapi.json': {
+      CreateFileUploadRequest: {
+        name: string;
+        document?: File | Blob;
+        tags?: Array<string>;
+        thumbnail?: File | Blob;
+      };
+    }
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles raw multipart with empty object schema 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupPostApiStruct {
+    'openapi.json': {
+      '/form/upload': {
+        body: FormData | Record<string, unknown>;
+        response?: {
+          url?: string;
+        };
+      };
+      upload: {
+        body: FormData | Record<string, unknown>;
+        response?: {
+          url?: string;
+        };
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles multipart PUT and PATCH endpoints 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupPutApiStruct {
+    'openapi.json': {
+      '/typed-form/{id}': {
+        params: {
+          id: string;
+        };
+        body: DevupObject<'request', 'openapi.json'>['UpdateFileUploadRequest'];
+        response?: {};
+      };
+      updateFileUpload: {
+        params: {
+          id: string;
+        };
+        body: DevupObject<'request', 'openapi.json'>['UpdateFileUploadRequest'];
+        response?: {};
+      };
+    }
+  }
+
+  interface DevupPatchApiStruct {
+    'openapi.json': {
+      '/typed-form/{id}': {
+        params: {
+          id: string;
+        };
+        body: DevupObject<'request', 'openapi.json'>['PatchFileUploadRequest'];
+        response?: {};
+      };
+      patchFileUpload: {
+        params: {
+          id: string;
+        };
+        body: DevupObject<'request', 'openapi.json'>['PatchFileUploadRequest'];
+        response?: {};
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {
+    'openapi.json': {
+      UpdateFileUploadRequest: {
+        name: string;
+        document?: File | Blob;
+      };
+      PatchFileUploadRequest: {
+        name?: string;
+        document?: File | Blob;
+      };
+    }
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface preserves JSON endpoints alongside form/multipart endpoints 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupPostApiStruct {
+    'openapi.json': {
+      '/users': {
+        body: DevupObject<'request', 'openapi.json'>['CreateUserRequest'];
+        response?: {};
+      };
+      createUser: {
+        body: DevupObject<'request', 'openapi.json'>['CreateUserRequest'];
+        response?: {};
+      };
+      '/form': {
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        response?: {};
+      };
+      subscribe: {
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        response?: {};
+      };
+      '/form/upload': {
+        body: FormData | Record<string, unknown>;
+        response?: {};
+      };
+      upload: {
+        body: FormData | Record<string, unknown>;
+        response?: {};
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {
+    'openapi.json': {
+      CreateUserRequest: {
+        name?: string;
+        email?: string;
+      };
+      SubscribeRequest: {
+        name?: string;
+        email?: string;
+      };
+    }
+  }
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
