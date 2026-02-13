@@ -1,4 +1,3 @@
-import { join } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
@@ -10,11 +9,14 @@ import {
 } from '@devup-api/generator'
 import {
   createTmpDirAsync,
+  type DevupArtifacts,
+  type DevupGenerators,
+  type DevupIOAsync,
+  generateDevupArtifactsAsync,
   normalizeOpenapiFiles,
   readOpenapiAsync,
   writeInterfaceAsync,
 } from '@devup-api/utils'
-import type { OpenAPIV3_1 } from 'openapi-types'
 import type { Plugin } from 'vite'
 
 const VIRTUAL_ZOD_MODULE = '@devup-api/zod'
@@ -24,18 +26,29 @@ const VIRTUAL_UI_MODULE = '@devup-api/ui/crud'
 const RESOLVED_VIRTUAL_UI_MODULE = `\0${VIRTUAL_UI_MODULE}`
 
 export function devupApi(options?: DevupApiOptions): Plugin {
-  let cachedSchemas: Record<string, OpenAPIV3_1.Document> | null = null
-  let zodSchemasCode: string | null = null
-  let crudConfigCode: string | null = null
+  let artifacts: DevupArtifacts | null = null
 
-  const getSchemas = async (): Promise<
-    Record<string, OpenAPIV3_1.Document>
-  > => {
-    if (!cachedSchemas) {
-      const openapiFiles = normalizeOpenapiFiles(options?.openapiFiles)
-      cachedSchemas = await readOpenapiAsync(openapiFiles)
+  const io: DevupIOAsync = {
+    createTmpDirAsync,
+    normalizeOpenapiFiles,
+    readOpenapiAsync,
+    writeInterfaceAsync,
+  }
+
+  const generators: DevupGenerators<DevupApiOptions> = {
+    generateInterface,
+    generateZodSchemas,
+    generateZodTypeDeclarations,
+    generateCrudConfigCode,
+    generateCrudConfigTypes,
+    createUrlMap,
+  }
+
+  const getArtifacts = async (): Promise<DevupArtifacts> => {
+    if (!artifacts) {
+      artifacts = await generateDevupArtifactsAsync(io, generators, options)
     }
-    return cachedSchemas
+    return artifacts
   }
 
   return {
@@ -55,50 +68,24 @@ export function devupApi(options?: DevupApiOptions): Plugin {
     // Load virtual module content
     async load(id) {
       if (id === RESOLVED_VIRTUAL_ZOD_MODULE) {
-        if (!zodSchemasCode) {
-          const schemas = await getSchemas()
-          zodSchemasCode = generateZodSchemas(schemas, options)
-        }
-        return zodSchemasCode
+        const { files } = await getArtifacts()
+        return files.zodSchemas
       }
       if (id === RESOLVED_VIRTUAL_UI_MODULE) {
-        if (!crudConfigCode) {
-          const schemas = await getSchemas()
-          crudConfigCode = generateCrudConfigCode(schemas)
-        }
-        return crudConfigCode
+        const { files } = await getArtifacts()
+        return files.crudConfig
       }
       return null
     },
 
     // Generate type definitions
     async configResolved() {
-      const tempDir = await createTmpDirAsync(options?.tempDir)
-      const schemas = await getSchemas()
-
-      // Write API interface definitions
-      await writeInterfaceAsync(
-        join(tempDir, 'api.d.ts'),
-        generateInterface(schemas, options),
-      )
-
-      // Write Zod type declarations
-      await writeInterfaceAsync(
-        join(tempDir, 'zod.d.ts'),
-        generateZodTypeDeclarations(schemas, options),
-      )
-
-      // Write CRUD config type declarations
-      await writeInterfaceAsync(
-        join(tempDir, 'ui.d.ts'),
-        generateCrudConfigTypes(schemas),
-      )
+      await getArtifacts()
     },
 
     // Inject URL map as environment variable
     async config() {
-      const schemas = await getSchemas()
-      const urlMap = createUrlMap(schemas, options)
+      const { urlMap } = await getArtifacts()
       const define: Record<string, string> = {}
       if (urlMap && Object.keys(urlMap).length > 0) {
         // json stringify twice to avoid JSON.parse error

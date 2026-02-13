@@ -30,5 +30,8 @@ test('index.ts exports', () => {
     extractSchemaNameFromRef: expect.any(Function),
     normalizeServerName: expect.any(Function),
     isErrorStatusCode: expect.any(Function),
+    isNullableSchema: expect.any(Function),
+    getPrimaryType: expect.any(Function),
+    collectSchemaNames: expect.any(Function),
   })
 })

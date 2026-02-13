@@ -1,4 +1,5 @@
 export * from './create-tmp-dir'
+export * from './generate-devup'
 export * from './read-openapi'
 export * from './to-camel'
 export * from './to-pascal'

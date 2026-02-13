@@ -7,6 +7,7 @@ import type {
   DevupOperation,
   ParsedDevupTag,
 } from './crud-types'
+import { resolveRef } from './openapi-utils'
 
 /**
  * Regex pattern for devup tags: devup:{name}:{mode}
@@ -78,30 +79,6 @@ function getExpectedModeForMethod(method: string): CrudMode | null {
 }
 
 /**
- * Resolve a schema reference
- */
-function resolveSchemaRef(
-  ref: string,
-  document: OpenAPIV3_1.Document,
-): OpenAPIV3_1.SchemaObject | null {
-  // Format: #/components/schemas/SchemaName
-  const parts = ref.split('/')
-  if (
-    parts.length !== 4 ||
-    parts[1] !== 'components' ||
-    parts[2] !== 'schemas'
-  ) {
-    return null
-  }
-  const schemaName = parts[3]
-  return (
-    (document.components?.schemas?.[
-      schemaName as string
-    ] as OpenAPIV3_1.SchemaObject) ?? null
-  )
-}
-
-/**
  * Extract fields from an OpenAPI schema
  */
 function extractFieldsFromSchema(
@@ -111,7 +88,7 @@ function extractFieldsFromSchema(
   // Resolve reference if needed
   let resolvedSchema: OpenAPIV3_1.SchemaObject
   if ('$ref' in schema) {
-    const resolved = resolveSchemaRef(schema.$ref, document)
+    const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(schema.$ref, document)
     if (!resolved) return []
     resolvedSchema = resolved
   } else {

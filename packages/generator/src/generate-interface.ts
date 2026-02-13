@@ -11,6 +11,7 @@ import {
   getTypeFromSchema,
 } from './generate-schema'
 import {
+  collectSchemaNames,
   extractSchemaNameFromRef,
   getRequestBodyContent,
   isErrorStatusCode,
@@ -145,73 +146,10 @@ function generateSchemaInterface(
   } as const
   const convertCaseType = options?.convertCase ?? 'camel'
 
-  // Helper function to collect schema names from a schema object
-  // Recursively traverses into referenced schemas to find all nested $refs
-  const collectSchemaNames = (
-    schemaObj: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
-    targetSet: Set<string>,
-    visited: Set<string> = new Set(),
-  ): void => {
-    if ('$ref' in schemaObj) {
-      const schemaName = extractSchemaNameFromRef(schemaObj.$ref)
-      if (schemaName) {
-        // Avoid infinite recursion for circular references
-        if (visited.has(schemaName)) {
-          return
-        }
-        targetSet.add(schemaName)
-        visited.add(schemaName)
-
-        // Recursively collect from the referenced schema
-        const referencedSchema = schema.components?.schemas?.[schemaName]
-        if (referencedSchema) {
-          collectSchemaNames(
-            referencedSchema as
-              | OpenAPIV3_1.SchemaObject
-              | OpenAPIV3_1.ReferenceObject,
-            targetSet,
-            visited,
-          )
-        }
-      }
-      return
-    }
-
-    const schemaObjTyped = schemaObj as OpenAPIV3_1.SchemaObject
-
-    // Check allOf, anyOf, oneOf
-    if (schemaObjTyped.allOf) {
-      schemaObjTyped.allOf.forEach((s) => {
-        collectSchemaNames(s, targetSet, visited)
-      })
-    }
-    if (schemaObjTyped.anyOf) {
-      schemaObjTyped.anyOf.forEach((s) => {
-        collectSchemaNames(s, targetSet, visited)
-      })
-    }
-    if (schemaObjTyped.oneOf) {
-      schemaObjTyped.oneOf.forEach((s) => {
-        collectSchemaNames(s, targetSet, visited)
-      })
-    }
-
-    // Check properties
-    if (schemaObjTyped.properties) {
-      Object.values(schemaObjTyped.properties).forEach((prop) => {
-        collectSchemaNames(prop, targetSet, visited)
-      })
-    }
-
-    // Check items (for arrays)
-    if (
-      schemaObjTyped.type === 'array' &&
-      'items' in schemaObjTyped &&
-      schemaObjTyped.items
-    ) {
-      collectSchemaNames(schemaObjTyped.items, targetSet, visited)
-    }
-  }
+  const collectOpts = {
+    followComponentRefs: true,
+    document: schema,
+  } as const
 
   // Track which schemas are used in request body and responses
   const requestSchemaNames = new Set<string>()
@@ -242,7 +180,11 @@ function generateSchemaInterface(
             const content = operation.requestBody.content
             const bodyContent = getRequestBodyContent(content)
             if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
-              collectSchemaNames(bodyContent.schema, requestSchemaNames)
+              collectSchemaNames(
+                bodyContent.schema,
+                requestSchemaNames,
+                collectOpts,
+              )
             }
           }
         }
@@ -272,9 +214,17 @@ function generateSchemaInterface(
                 jsonContent.schema
               ) {
                 if (isError) {
-                  collectSchemaNames(jsonContent.schema, errorSchemaNames)
+                  collectSchemaNames(
+                    jsonContent.schema,
+                    errorSchemaNames,
+                    collectOpts,
+                  )
                 } else {
-                  collectSchemaNames(jsonContent.schema, responseSchemaNames)
+                  collectSchemaNames(
+                    jsonContent.schema,
+                    responseSchemaNames,
+                    collectOpts,
+                  )
                 }
               }
             }

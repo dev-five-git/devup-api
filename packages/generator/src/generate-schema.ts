@@ -1,6 +1,11 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import type { ParameterDefinition } from './generate-interface'
-import { getRequestBodyContent, resolveRef } from './openapi-utils'
+import {
+  getPrimaryType,
+  getRequestBodyContent,
+  isNullableSchema,
+  resolveRef,
+} from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 /**
@@ -81,35 +86,6 @@ function generateEnumName(
     .join('')
 
   return name
-}
-
-/**
- * Check if a schema is nullable (OpenAPI 3.0 or 3.1)
- * OpenAPI 3.0: uses `nullable: true`
- * OpenAPI 3.1: uses type array like `["string", "null"]`
- */
-function isNullable(schema: OpenAPIV3_1.SchemaObject): boolean {
-  // OpenAPI 3.0 style: nullable: true
-  if ('nullable' in schema && schema.nullable === true) {
-    return true
-  }
-
-  // OpenAPI 3.1 style: type is an array containing "null"
-  if (Array.isArray(schema.type) && schema.type.includes('null')) {
-    return true
-  }
-
-  return false
-}
-
-/**
- * Get the non-null type from OpenAPI 3.1 type array
- * e.g., ["string", "null"] -> "string"
- */
-function getNonNullType(
-  types: (OpenAPIV3_1.NonArraySchemaObjectType | 'array')[],
-): OpenAPIV3_1.NonArraySchemaObjectType | 'array' | undefined {
-  return types.find((t) => t !== 'null')
 }
 
 /**
@@ -241,7 +217,7 @@ export function getTypeFromSchema(
     }
 
     // Check if schema is nullable
-    const nullable = isNullable(schemaObj)
+    const nullable = isNullableSchema(schemaObj)
 
     // Handle enum
     if (schemaObj.enum) {
@@ -273,9 +249,7 @@ export function getTypeFromSchema(
     }
 
     // Get the actual type (handle OpenAPI 3.1 type arrays)
-    const actualType = Array.isArray(schemaObj.type)
-      ? getNonNullType(schemaObj.type)
-      : schemaObj.type
+    const actualType = getPrimaryType(schemaObj)
 
     // Handle primitive types
     if (actualType === 'string') {
@@ -718,7 +692,10 @@ export function extractRequestBody(
   }
 
   if ('$ref' in requestBody) {
-    const resolved = resolveRef(requestBody.$ref, document)
+    const resolved = resolveRef<OpenAPIV3_1.RequestBodyObject>(
+      requestBody.$ref,
+      document,
+    )
     if (resolved && 'content' in resolved && resolved.content) {
       const content =
         resolved.content as OpenAPIV3_1.RequestBodyObject['content']

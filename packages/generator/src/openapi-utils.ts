@@ -103,3 +103,114 @@ export function isErrorStatusCode(statusCode: string): boolean {
   const code = parseInt(statusCode, 10)
   return code >= 400 && code < 600
 }
+
+// =============================================================================
+// Nullable Detection
+// =============================================================================
+
+/**
+ * Check if a schema is nullable (OpenAPI 3.0 or 3.1).
+ * OpenAPI 3.0: uses `nullable: true`
+ * OpenAPI 3.1: uses type array like `["string", "null"]`
+ */
+export function isNullableSchema(schema: OpenAPIV3_1.SchemaObject): boolean {
+  if ('nullable' in schema && schema.nullable === true) {
+    return true
+  }
+  if (Array.isArray(schema.type) && schema.type.includes('null')) {
+    return true
+  }
+  return false
+}
+
+// =============================================================================
+// Type Extraction
+// =============================================================================
+
+/**
+ * Get the primary (non-null) type from an OpenAPI schema.
+ * For OpenAPI 3.1 type arrays like `["string", "null"]`, returns `"string"`.
+ * For simple type strings, returns the type directly.
+ */
+export function getPrimaryType(
+  schema: OpenAPIV3_1.SchemaObject,
+): string | undefined {
+  if (Array.isArray(schema.type)) {
+    return schema.type.find((t) => t !== 'null')
+  }
+  return schema.type
+}
+
+// =============================================================================
+// Schema Name Collection
+// =============================================================================
+
+/**
+ * Recursively collect component schema names referenced by a schema object.
+ *
+ * When `followComponentRefs` is true (and `document` is provided), follows
+ * `$ref` into `components.schemas` to discover transitive dependencies,
+ * with circular-reference protection via the `visited` set.
+ *
+ * When `followComponentRefs` is false (default), only collects the direct
+ * schema name from `$ref` without following into the referenced schema.
+ */
+export function collectSchemaNames(
+  schemaObj: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+  targetSet: Set<string>,
+  options?: {
+    followComponentRefs?: boolean
+    document?: OpenAPIV3_1.Document
+    visited?: Set<string>
+  },
+): void {
+  if ('$ref' in schemaObj) {
+    const schemaName = extractSchemaNameFromRef(schemaObj.$ref)
+    if (schemaName) {
+      targetSet.add(schemaName)
+
+      if (options?.followComponentRefs && options.document) {
+        const visited = options.visited ?? new Set<string>()
+        if (visited.has(schemaName)) return
+        visited.add(schemaName)
+
+        const referencedSchema = options.document.components?.schemas?.[
+          schemaName
+        ] as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject | undefined
+        if (referencedSchema) {
+          collectSchemaNames(referencedSchema, targetSet, {
+            ...options,
+            visited,
+          })
+        }
+      }
+    }
+    return
+  }
+
+  const s = schemaObj as OpenAPIV3_1.SchemaObject
+
+  if (s.allOf) {
+    for (const sub of s.allOf) {
+      collectSchemaNames(sub, targetSet, options)
+    }
+  }
+  if (s.anyOf) {
+    for (const sub of s.anyOf) {
+      collectSchemaNames(sub, targetSet, options)
+    }
+  }
+  if (s.oneOf) {
+    for (const sub of s.oneOf) {
+      collectSchemaNames(sub, targetSet, options)
+    }
+  }
+  if (s.properties) {
+    for (const prop of Object.values(s.properties)) {
+      collectSchemaNames(prop, targetSet, options)
+    }
+  }
+  if (s.type === 'array' && 'items' in s && s.items) {
+    collectSchemaNames(s.items, targetSet, options)
+  }
+}

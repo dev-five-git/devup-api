@@ -76,6 +76,34 @@ export type DevupDeleteApiStructKey<O extends string> = ConditionalKeys<
 export type DevupPatchApiStructKey<O extends string> = ConditionalKeys<
   DevupPatchApiStructScope<O>
 >
+export type DevupApiMethodKeys =
+  | 'get'
+  | 'post'
+  | 'put'
+  | 'delete'
+  | 'patch'
+  | 'GET'
+  | 'POST'
+  | 'PUT'
+  | 'DELETE'
+  | 'PATCH'
+
+export type DevupApiMethodScope<
+  S extends string,
+  M extends DevupApiMethodKeys,
+> = {
+  get: DevupGetApiStructScope<S>
+  post: DevupPostApiStructScope<S>
+  put: DevupPutApiStructScope<S>
+  delete: DevupDeleteApiStructScope<S>
+  patch: DevupPatchApiStructScope<S>
+  GET: DevupGetApiStructScope<S>
+  POST: DevupPostApiStructScope<S>
+  PUT: DevupPutApiStructScope<S>
+  DELETE: DevupDeleteApiStructScope<S>
+  PATCH: DevupPatchApiStructScope<S>
+}[M]
+
 export type DevupApiStructScope<O extends string> = DevupGetApiStructScope<O> &
   DevupPostApiStructScope<O> &
   DevupPutApiStructScope<O> &

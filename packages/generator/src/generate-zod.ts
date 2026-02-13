@@ -3,8 +3,11 @@ import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import {
   CONTENT_TYPE_PRIORITY,
+  collectSchemaNames,
   extractSchemaNameFromRef,
+  getPrimaryType,
   isErrorStatusCode,
+  isNullableSchema,
   normalizeServerName,
   resolveRef,
 } from './openapi-utils'
@@ -41,37 +44,14 @@ function schemaToZod(
 
   const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
-  // Handle nullable (OpenAPI 3.0 uses 'nullable', OpenAPI 3.1 uses type array with 'null')
-  const isNullable = (): boolean => {
-    // Check for OpenAPI 3.0 style nullable
-    if ('nullable' in schemaObj && schemaObj.nullable === true) {
-      return true
-    }
-    // Check for OpenAPI 3.1 style nullable (type: ["string", "null"])
-    if (Array.isArray(schemaObj.type) && schemaObj.type.includes('null')) {
-      return true
-    }
-    return false
-  }
-
   const wrapNullable = (zodStr: string): string => {
-    if (isNullable()) {
+    if (isNullableSchema(schemaObj)) {
       return `${zodStr}.nullable()`
     }
     return zodStr
   }
 
-  // Helper to get the primary type from OpenAPI 3.1 type array
-  const getPrimaryType = (): string | undefined => {
-    if (Array.isArray(schemaObj.type)) {
-      // Filter out 'null' to get the primary type
-      const nonNullTypes = schemaObj.type.filter((t) => t !== 'null')
-      return nonNullTypes[0]
-    }
-    return schemaObj.type
-  }
-
-  const primaryType = getPrimaryType()
+  const primaryType = getPrimaryType(schemaObj)
 
   // Handle allOf (intersection)
   if (schemaObj.allOf) {
@@ -283,35 +263,14 @@ function schemaToZodType(
 
   const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
-  // Handle nullable
-  const isNullable = (): boolean => {
-    if ('nullable' in schemaObj && schemaObj.nullable === true) {
-      return true
-    }
-    if (Array.isArray(schemaObj.type) && schemaObj.type.includes('null')) {
-      return true
-    }
-    return false
-  }
-
   const wrapNullable = (zodType: string): string => {
-    if (isNullable()) {
+    if (isNullableSchema(schemaObj)) {
       return `z.ZodNullable<${zodType}>`
     }
     return zodType
   }
 
-  // Helper to get the primary type from OpenAPI 3.1 type array
-  const getPrimaryType = (): string | undefined => {
-    if (Array.isArray(schemaObj.type)) {
-      // Filter out 'null' to get the primary type
-      const nonNullTypes = schemaObj.type.filter((t) => t !== 'null')
-      return nonNullTypes[0]
-    }
-    return schemaObj.type
-  }
-
-  const primaryType = getPrimaryType()
+  const primaryType = getPrimaryType(schemaObj)
 
   // Handle allOf (intersection)
   if (schemaObj.allOf) {
@@ -470,42 +429,6 @@ function collectSchemaUsage(
     patch: {},
   }
   const convertCaseType = options?.convertCase ?? 'camel'
-
-  const collectSchemaNames = (
-    schemaObj: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
-    targetSet: Set<string>,
-  ): void => {
-    if ('$ref' in schemaObj) {
-      const schemaName = extractSchemaNameFromRef(schemaObj.$ref)
-      if (schemaName) {
-        targetSet.add(schemaName)
-      }
-      return
-    }
-
-    const s = schemaObj as OpenAPIV3_1.SchemaObject
-
-    if (s.allOf)
-      s.allOf.forEach((sub) => {
-        collectSchemaNames(sub, targetSet)
-      })
-    if (s.anyOf)
-      s.anyOf.forEach((sub) => {
-        collectSchemaNames(sub, targetSet)
-      })
-    if (s.oneOf)
-      s.oneOf.forEach((sub) => {
-        collectSchemaNames(sub, targetSet)
-      })
-    if (s.properties) {
-      Object.values(s.properties).forEach((prop) => {
-        collectSchemaNames(prop, targetSet)
-      })
-    }
-    if (s.type === 'array' && 'items' in s && s.items) {
-      collectSchemaNames(s.items, targetSet)
-    }
-  }
 
   // Helper to get direct schema name from request body
   const getRequestBodySchemaName = (

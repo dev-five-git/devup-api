@@ -1,4 +1,4 @@
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
@@ -10,6 +10,9 @@ import {
 } from '@devup-api/generator'
 import {
   createTmpDirAsync,
+  type DevupGenerators,
+  type DevupIOAsync,
+  generateDevupArtifactsAsync,
   normalizeOpenapiFiles,
   readOpenapiAsync,
   writeInterfaceAsync,
@@ -38,42 +41,29 @@ export class devupApiWebpackPlugin {
         try {
           this.initialized = true
 
-          const tempDir = await createTmpDirAsync(this.options?.tempDir)
-          const openapiFiles = normalizeOpenapiFiles(this.options?.openapiFiles)
-          const schemas = await readOpenapiAsync(openapiFiles)
+          const io: DevupIOAsync = {
+            createTmpDirAsync,
+            normalizeOpenapiFiles,
+            readOpenapiAsync,
+            writeInterfaceAsync,
+          }
 
-          // Generate interface file
-          await writeInterfaceAsync(
-            join(tempDir, 'api.d.ts'),
-            generateInterface(schemas, this.options),
-          )
+          const generators: DevupGenerators<DevupApiOptions> = {
+            generateInterface,
+            generateZodSchemas,
+            generateZodTypeDeclarations,
+            generateCrudConfigCode,
+            generateCrudConfigTypes,
+            createUrlMap,
+          }
 
-          // Generate Zod schemas file
-          await writeInterfaceAsync(
-            join(tempDir, 'zod-schemas.js'),
-            generateZodSchemas(schemas, this.options),
-          )
-
-          // Generate Zod type declarations
-          await writeInterfaceAsync(
-            join(tempDir, 'zod.d.ts'),
-            generateZodTypeDeclarations(schemas, this.options),
-          )
-
-          // Generate CRUD configs file
-          await writeInterfaceAsync(
-            join(tempDir, 'crud-configs.jsx'),
-            generateCrudConfigCode(schemas),
-          )
-
-          // Generate CRUD config type declarations
-          await writeInterfaceAsync(
-            join(tempDir, 'ui.d.ts'),
-            generateCrudConfigTypes(schemas),
+          const { tempDir, urlMap } = await generateDevupArtifactsAsync(
+            io,
+            generators,
+            this.options,
           )
 
           // Create urlMap and set environment variable
-          const urlMap = createUrlMap(schemas, this.options)
           const define: Record<string, string> = {}
           if (urlMap && Object.keys(urlMap).length > 0) {
             define['process.env.DEVUP_API_URL_MAP'] = JSON.stringify(

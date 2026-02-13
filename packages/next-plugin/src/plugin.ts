@@ -1,4 +1,4 @@
-import { join, relative, resolve } from 'node:path'
+import { relative, resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
@@ -10,6 +10,9 @@ import {
 } from '@devup-api/generator'
 import {
   createTmpDir,
+  type DevupGenerators,
+  type DevupIOSync,
+  generateDevupArtifacts,
   normalizeOpenapiFiles,
   readOpenapis,
   writeInterface,
@@ -31,39 +34,25 @@ export function devupApi(
   const isTurbo =
     process.env.TURBOPACK === '1' || process.env.TURBOPACK === 'auto'
   if (isTurbo) {
-    const tempDir = createTmpDir(options?.tempDir)
-    const openapiFiles = normalizeOpenapiFiles(options?.openapiFiles)
-    const schemas = readOpenapis(openapiFiles)
+    const io: DevupIOSync = {
+      createTmpDir,
+      normalizeOpenapiFiles,
+      readOpenapis,
+      writeInterface,
+    }
 
-    // Generate API interface file
-    writeInterface(
-      join(tempDir, 'api.d.ts'),
-      generateInterface(schemas, options),
-    )
+    const generators: DevupGenerators<DevupApiOptions> = {
+      generateInterface,
+      generateZodSchemas,
+      generateZodTypeDeclarations,
+      generateCrudConfigCode,
+      generateCrudConfigTypes,
+      createUrlMap,
+    }
 
-    // Generate Zod schemas file
-    writeInterface(
-      join(tempDir, 'zod-schemas.js'),
-      generateZodSchemas(schemas, options),
-    )
+    const { tempDir, urlMap } = generateDevupArtifacts(io, generators, options)
 
-    // Generate Zod type declarations
-    writeInterface(
-      join(tempDir, 'zod.d.ts'),
-      generateZodTypeDeclarations(schemas, options),
-    )
-
-    // Generate CRUD configs file
-    writeInterface(
-      join(tempDir, 'crud-configs.jsx'),
-      generateCrudConfigCode(schemas),
-    )
-
-    // Generate CRUD config type declarations
-    writeInterface(join(tempDir, 'ui.d.ts'), generateCrudConfigTypes(schemas))
-
-    // Create urlMap and set environment variable
-    const urlMap = createUrlMap(schemas, options)
+    // Set environment variable
     config.env ??= {}
     if (urlMap && Object.keys(urlMap).length > 0) {
       Object.assign(config.env, {
