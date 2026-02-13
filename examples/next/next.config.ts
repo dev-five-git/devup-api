@@ -6,7 +6,7 @@ const config = devupApi(
     reactStrictMode: true,
   },
   {
-    openapiFiles: ['./openapi.json', './openapi2.json'],
+    openapiFiles: ['./openapi.json', './openapi2.json', './openapi3.json'],
   },
 )
 

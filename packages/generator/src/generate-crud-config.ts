@@ -1,17 +1,8 @@
+import { toPascal } from '@devup-api/utils'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import type { CrudConfig, CrudField } from './crud-types'
 import { parseCrudConfigsFromMultiple } from './parse-crud-tags'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
-
-/**
- * Convert string to PascalCase for component names
- */
-function toPascalCase(str: string): string {
-  return str
-    .split(/[-_]/)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-    .join('')
-}
 
 /**
  * Convert string to title case for labels
@@ -162,7 +153,7 @@ function generateFieldsComponent(
  */
 function generateCrudComponent(name: string, config: CrudConfig): string[] {
   const lines: string[] = []
-  const componentName = `${toPascalCase(name)}Crud`
+  const componentName = `${toPascal(name)}Crud`
   const fieldsComponentName = `${componentName}Fields`
 
   // Determine edit method and operationId
@@ -235,7 +226,7 @@ export function generateCrudConfigCode(
 
   // Generate component for each CRUD group
   for (const [name, config] of Object.entries(configs)) {
-    const componentName = `${toPascalCase(name)}Crud`
+    const componentName = `${toPascal(name)}Crud`
 
     // Get fields from create endpoint (primary form fields)
     const fields = config.create.fields ?? []
@@ -259,7 +250,7 @@ export function generateCrudConfigCode(
   // Default export
   lines.push('export default {')
   for (const name of Object.keys(configs)) {
-    const componentName = `${toPascalCase(name)}Crud`
+    const componentName = `${toPascal(name)}Crud`
     lines.push(`  ${name}: ${componentName},`)
   }
   lines.push('};')

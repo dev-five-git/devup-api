@@ -25,7 +25,7 @@
     "@devup-api/fetch": "workspace:^",
     "@devup-api/zod": "workspace:^",
     "@hookform/resolvers": ">=5.2.2",
-    "react-hook-form": ">=7.70.0"
+    "react-hook-form": ">=7.71.1"
   },
   "peerDependencies": {
     "@tanstack/react-query": ">=5.0.0",
@@ -34,14 +34,14 @@
     "zod": "*"
   },
   "devDependencies": {
-    "@tanstack/react-query": "^5.90.16",
-    "@testing-library/react": "^16.3.1",
-    "@types/node": "^25.0",
+    "@tanstack/react-query": "^5.90",
+    "@testing-library/react": "^16.3",
+    "@types/node": "^25.2",
     "@types/react": "^19.2",
-    "bun-test-env-dom": "^1.0.3",
-    "happy-dom": "^20.0.11",
-    "react": "^19.2.3",
-    "react-dom": "^19.2.3",
+    "bun-test-env-dom": "^1.0",
+    "happy-dom": "^20.6",
+    "react": "^19.2",
+    "react-dom": "^19.2",
     "typescript": "^5.9",
     "zod": "^4.3",
     "rollup-plugin-preserve-directives": "^0.4",

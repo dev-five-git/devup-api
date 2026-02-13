@@ -1,65 +1,17 @@
 import type { DevupApiTypeGeneratorOptions } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
+import {
+  CONTENT_TYPE_PRIORITY,
+  collectSchemaNames,
+  extractSchemaNameFromRef,
+  getPrimaryType,
+  isErrorStatusCode,
+  isNullableSchema,
+  normalizeServerName,
+  resolveRef,
+} from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-/**
- * Normalize server name by removing ./ prefix
- */
-function normalizeServerName(serverName: string): string {
-  return serverName.replace(/^\.\//, '')
-}
-
-/**
- * Resolve $ref reference in OpenAPI schema
- */
-function resolveSchemaRef<
-  T extends OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ParameterObject,
->(ref: string, document: OpenAPIV3_1.Document): T | null {
-  if (!ref.startsWith('#/')) {
-    return null
-  }
-
-  const parts = ref.slice(2).split('/')
-  let current: unknown = document
-
-  for (const part of parts) {
-    if (current && typeof current === 'object' && part in current) {
-      current = (current as Record<string, unknown>)[part]
-    } else {
-      return null
-    }
-  }
-
-  if (current && typeof current === 'object' && !('$ref' in current)) {
-    return current as T
-  }
-
-  return null
-}
-
-/**
- * Extract schema name from $ref
- */
-function extractSchemaNameFromRef(ref: string): string | null {
-  if (ref.startsWith('#/components/schemas/')) {
-    return ref.replace('#/components/schemas/', '')
-  }
-  return null
-}
-
-/**
- * Check if status code is an error response
- */
-function isErrorStatusCode(statusCode: string): boolean {
-  if (statusCode === 'default') return true
-  const code = parseInt(statusCode, 10)
-  return code >= 400 && code < 600
-}
 
 // =============================================================================
 // OpenAPI to Zod Conversion
@@ -83,10 +35,7 @@ function schemaToZod(
       // Return lazy reference for circular dependencies
       return `z.lazy(() => ${schemaRefs.get(schemaName)})`
     }
-    const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
-      schema.$ref,
-      document,
-    )
+    const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(schema.$ref, document)
     if (resolved) {
       return schemaToZod(resolved, document, schemaRefs, options)
     }
@@ -95,37 +44,14 @@ function schemaToZod(
 
   const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
-  // Handle nullable (OpenAPI 3.0 uses 'nullable', OpenAPI 3.1 uses type array with 'null')
-  const isNullable = (): boolean => {
-    // Check for OpenAPI 3.0 style nullable
-    if ('nullable' in schemaObj && schemaObj.nullable === true) {
-      return true
-    }
-    // Check for OpenAPI 3.1 style nullable (type: ["string", "null"])
-    if (Array.isArray(schemaObj.type) && schemaObj.type.includes('null')) {
-      return true
-    }
-    return false
-  }
-
   const wrapNullable = (zodStr: string): string => {
-    if (isNullable()) {
+    if (isNullableSchema(schemaObj)) {
       return `${zodStr}.nullable()`
     }
     return zodStr
   }
 
-  // Helper to get the primary type from OpenAPI 3.1 type array
-  const getPrimaryType = (): string | undefined => {
-    if (Array.isArray(schemaObj.type)) {
-      // Filter out 'null' to get the primary type
-      const nonNullTypes = schemaObj.type.filter((t) => t !== 'null')
-      return nonNullTypes[0]
-    }
-    return schemaObj.type
-  }
-
-  const primaryType = getPrimaryType()
+  const primaryType = getPrimaryType(schemaObj)
 
   // Handle allOf (intersection)
   if (schemaObj.allOf) {
@@ -158,6 +84,11 @@ function schemaToZod(
 
   // Handle primitive types
   if (primaryType === 'string') {
+    // Handle binary format for file upload fields
+    if (schemaObj.format === 'binary') {
+      return wrapNullable('z.instanceof(File)')
+    }
+
     // Zod 4.0: Use top-level format validators instead of z.string().format()
     // Check format first to use top-level validators
     if (schemaObj.format === 'email') {
@@ -257,7 +188,7 @@ function schemaToZod(
         // Check for default value
         let hasDefault = false
         if ('$ref' in value) {
-          const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+          const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
             value.$ref,
             document,
           )
@@ -323,10 +254,7 @@ function schemaToZodType(
       // Return a lazy type reference
       return `z.ZodLazy<z.ZodTypeAny>`
     }
-    const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
-      schema.$ref,
-      document,
-    )
+    const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(schema.$ref, document)
     if (resolved) {
       return schemaToZodType(resolved, document, options)
     }
@@ -335,35 +263,14 @@ function schemaToZodType(
 
   const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
-  // Handle nullable
-  const isNullable = (): boolean => {
-    if ('nullable' in schemaObj && schemaObj.nullable === true) {
-      return true
-    }
-    if (Array.isArray(schemaObj.type) && schemaObj.type.includes('null')) {
-      return true
-    }
-    return false
-  }
-
   const wrapNullable = (zodType: string): string => {
-    if (isNullable()) {
+    if (isNullableSchema(schemaObj)) {
       return `z.ZodNullable<${zodType}>`
     }
     return zodType
   }
 
-  // Helper to get the primary type from OpenAPI 3.1 type array
-  const getPrimaryType = (): string | undefined => {
-    if (Array.isArray(schemaObj.type)) {
-      // Filter out 'null' to get the primary type
-      const nonNullTypes = schemaObj.type.filter((t) => t !== 'null')
-      return nonNullTypes[0]
-    }
-    return schemaObj.type
-  }
-
-  const primaryType = getPrimaryType()
+  const primaryType = getPrimaryType(schemaObj)
 
   // Handle allOf (intersection)
   if (schemaObj.allOf) {
@@ -401,6 +308,9 @@ function schemaToZodType(
 
   // Handle primitive types
   if (primaryType === 'string') {
+    if (schemaObj.format === 'binary') {
+      return wrapNullable('z.ZodType<File>')
+    }
     return wrapNullable('z.ZodString')
   }
 
@@ -434,7 +344,7 @@ function schemaToZodType(
         // Check for default value
         let hasDefault = false
         if ('$ref' in value) {
-          const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+          const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
             value.$ref,
             document,
           )
@@ -520,42 +430,6 @@ function collectSchemaUsage(
   }
   const convertCaseType = options?.convertCase ?? 'camel'
 
-  const collectSchemaNames = (
-    schemaObj: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
-    targetSet: Set<string>,
-  ): void => {
-    if ('$ref' in schemaObj) {
-      const schemaName = extractSchemaNameFromRef(schemaObj.$ref)
-      if (schemaName) {
-        targetSet.add(schemaName)
-      }
-      return
-    }
-
-    const s = schemaObj as OpenAPIV3_1.SchemaObject
-
-    if (s.allOf)
-      s.allOf.forEach((sub) => {
-        collectSchemaNames(sub, targetSet)
-      })
-    if (s.anyOf)
-      s.anyOf.forEach((sub) => {
-        collectSchemaNames(sub, targetSet)
-      })
-    if (s.oneOf)
-      s.oneOf.forEach((sub) => {
-        collectSchemaNames(sub, targetSet)
-      })
-    if (s.properties) {
-      Object.values(s.properties).forEach((prop) => {
-        collectSchemaNames(prop, targetSet)
-      })
-    }
-    if (s.type === 'array' && 'items' in s && s.items) {
-      collectSchemaNames(s.items, targetSet)
-    }
-  }
-
   // Helper to get direct schema name from request body
   const getRequestBodySchemaName = (
     requestBody: OpenAPIV3_1.RequestBodyObject | OpenAPIV3_1.ReferenceObject,
@@ -564,9 +438,11 @@ function collectSchemaUsage(
       return extractSchemaNameFromRef(requestBody.$ref)
     }
     const content = requestBody.content
-    const jsonContent = content?.['application/json']
-    if (jsonContent?.schema && '$ref' in jsonContent.schema) {
-      return extractSchemaNameFromRef(jsonContent.schema.$ref)
+    for (const ct of CONTENT_TYPE_PRIORITY) {
+      const bodyContent = content?.[ct]
+      if (bodyContent?.schema && '$ref' in bodyContent.schema) {
+        return extractSchemaNameFromRef(bodyContent.schema.$ref)
+      }
     }
     return null
   }
@@ -604,9 +480,12 @@ function collectSchemaUsage(
             }
           } else {
             const content = operation.requestBody.content
-            const jsonContent = content?.['application/json']
-            if (jsonContent?.schema) {
-              collectSchemaNames(jsonContent.schema, requestSchemaNames)
+            for (const ct of CONTENT_TYPE_PRIORITY) {
+              const bodyContent = content?.[ct]
+              if (bodyContent?.schema) {
+                collectSchemaNames(bodyContent.schema, requestSchemaNames)
+                break
+              }
             }
           }
         }

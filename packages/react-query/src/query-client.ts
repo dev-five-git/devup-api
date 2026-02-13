@@ -4,14 +4,11 @@ import type {
   ConditionalApiOption,
   ConditionalKeys,
   DevupApi,
+  DevupApiMethodKeys,
+  DevupApiMethodScope,
   DevupApiRequestInit,
   DevupApiResponse,
   DevupApiServers,
-  DevupDeleteApiStructScope,
-  DevupGetApiStructScope,
-  DevupPatchApiStructScope,
-  DevupPostApiStructScope,
-  DevupPutApiStructScope,
   ExtractValue,
 } from '@devup-api/fetch'
 import {
@@ -40,29 +37,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   useQuery<
-    M extends
-      | 'get'
-      | 'post'
-      | 'put'
-      | 'delete'
-      | 'patch'
-      | 'GET'
-      | 'POST'
-      | 'PUT'
-      | 'DELETE'
-      | 'PATCH',
-    ST extends {
-      get: DevupGetApiStructScope<S>
-      post: DevupPostApiStructScope<S>
-      put: DevupPutApiStructScope<S>
-      delete: DevupDeleteApiStructScope<S>
-      patch: DevupPatchApiStructScope<S>
-      GET: DevupGetApiStructScope<S>
-      POST: DevupPostApiStructScope<S>
-      PUT: DevupPutApiStructScope<S>
-      DELETE: DevupDeleteApiStructScope<S>
-      PATCH: DevupPatchApiStructScope<S>
-    }[M],
+    M extends DevupApiMethodKeys,
+    ST extends DevupApiMethodScope<S, M>,
     T extends ConditionalKeys<ST>,
     O extends Additional<T, ST>,
     D extends ExtractValue<O, 'response'>,
@@ -105,29 +81,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   useMutation<
-    M extends
-      | 'get'
-      | 'post'
-      | 'put'
-      | 'delete'
-      | 'patch'
-      | 'GET'
-      | 'POST'
-      | 'PUT'
-      | 'DELETE'
-      | 'PATCH',
-    ST extends {
-      get: DevupGetApiStructScope<S>
-      post: DevupPostApiStructScope<S>
-      put: DevupPutApiStructScope<S>
-      delete: DevupDeleteApiStructScope<S>
-      patch: DevupPatchApiStructScope<S>
-      GET: DevupGetApiStructScope<S>
-      POST: DevupPostApiStructScope<S>
-      PUT: DevupPutApiStructScope<S>
-      DELETE: DevupDeleteApiStructScope<S>
-      PATCH: DevupPatchApiStructScope<S>
-    }[M],
+    M extends DevupApiMethodKeys,
+    ST extends DevupApiMethodScope<S, M>,
     T extends ConditionalKeys<ST>,
     O extends Additional<T, ST>,
     D extends ExtractValue<O, 'response'>,
@@ -160,29 +115,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   useSuspenseQuery<
-    M extends
-      | 'get'
-      | 'post'
-      | 'put'
-      | 'delete'
-      | 'patch'
-      | 'GET'
-      | 'POST'
-      | 'PUT'
-      | 'DELETE'
-      | 'PATCH',
-    ST extends {
-      get: DevupGetApiStructScope<S>
-      post: DevupPostApiStructScope<S>
-      put: DevupPutApiStructScope<S>
-      delete: DevupDeleteApiStructScope<S>
-      patch: DevupPatchApiStructScope<S>
-      GET: DevupGetApiStructScope<S>
-      POST: DevupPostApiStructScope<S>
-      PUT: DevupPutApiStructScope<S>
-      DELETE: DevupDeleteApiStructScope<S>
-      PATCH: DevupPatchApiStructScope<S>
-    }[M],
+    M extends DevupApiMethodKeys,
+    ST extends DevupApiMethodScope<S, M>,
     T extends ConditionalKeys<ST>,
     O extends Additional<T, ST>,
     D extends ExtractValue<O, 'response'>,
@@ -225,29 +159,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   useInfiniteQuery<
-    M extends
-      | 'get'
-      | 'post'
-      | 'put'
-      | 'delete'
-      | 'patch'
-      | 'GET'
-      | 'POST'
-      | 'PUT'
-      | 'DELETE'
-      | 'PATCH',
-    ST extends {
-      get: DevupGetApiStructScope<S>
-      post: DevupPostApiStructScope<S>
-      put: DevupPutApiStructScope<S>
-      delete: DevupDeleteApiStructScope<S>
-      patch: DevupPatchApiStructScope<S>
-      GET: DevupGetApiStructScope<S>
-      POST: DevupPostApiStructScope<S>
-      PUT: DevupPutApiStructScope<S>
-      DELETE: DevupDeleteApiStructScope<S>
-      PATCH: DevupPatchApiStructScope<S>
-    }[M],
+    M extends DevupApiMethodKeys,
+    ST extends DevupApiMethodScope<S, M>,
     T extends ConditionalKeys<ST>,
     O extends Additional<T, ST>,
     D extends ExtractValue<O, 'response'>,
@@ -302,29 +215,8 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   useQueries<
-    M extends
-      | 'get'
-      | 'post'
-      | 'put'
-      | 'delete'
-      | 'patch'
-      | 'GET'
-      | 'POST'
-      | 'PUT'
-      | 'DELETE'
-      | 'PATCH',
-    ST extends {
-      get: DevupGetApiStructScope<S>
-      post: DevupPostApiStructScope<S>
-      put: DevupPutApiStructScope<S>
-      delete: DevupDeleteApiStructScope<S>
-      patch: DevupPatchApiStructScope<S>
-      GET: DevupGetApiStructScope<S>
-      POST: DevupPostApiStructScope<S>
-      PUT: DevupPutApiStructScope<S>
-      DELETE: DevupDeleteApiStructScope<S>
-      PATCH: DevupPatchApiStructScope<S>
-    }[M],
+    M extends DevupApiMethodKeys,
+    ST extends DevupApiMethodScope<S, M>,
     T extends ConditionalKeys<ST>,
     O extends Additional<T, ST>,
     D extends ExtractValue<O, 'response'>,

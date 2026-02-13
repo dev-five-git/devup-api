@@ -1,5 +1,11 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import type { ParameterDefinition } from './generate-interface'
+import {
+  getPrimaryType,
+  getRequestBodyContent,
+  isNullableSchema,
+  resolveRef,
+} from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 /**
@@ -83,63 +89,6 @@ function generateEnumName(
 }
 
 /**
- * Check if a schema is nullable (OpenAPI 3.0 or 3.1)
- * OpenAPI 3.0: uses `nullable: true`
- * OpenAPI 3.1: uses type array like `["string", "null"]`
- */
-function isNullable(schema: OpenAPIV3_1.SchemaObject): boolean {
-  // OpenAPI 3.0 style: nullable: true
-  if ('nullable' in schema && schema.nullable === true) {
-    return true
-  }
-
-  // OpenAPI 3.1 style: type is an array containing "null"
-  if (Array.isArray(schema.type) && schema.type.includes('null')) {
-    return true
-  }
-
-  return false
-}
-
-/**
- * Get the non-null type from OpenAPI 3.1 type array
- * e.g., ["string", "null"] -> "string"
- */
-function getNonNullType(
-  types: (OpenAPIV3_1.NonArraySchemaObjectType | 'array')[],
-): OpenAPIV3_1.NonArraySchemaObjectType | 'array' | undefined {
-  return types.find((t) => t !== 'null')
-}
-
-/**
- * Resolve $ref reference in OpenAPI schema
- */
-function resolveSchemaRef<
-  T extends OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ParameterObject,
->(ref: string, document: OpenAPIV3_1.Document): T | null {
-  if (!ref.startsWith('#/')) {
-    return null
-  }
-
-  const parts = ref.slice(2).split('/')
-  let current: unknown = document
-
-  for (const part of parts) {
-    if (current && typeof current === 'object' && part in current) {
-      current = (current as Record<string, unknown>)[part]
-    } else {
-      return null
-    }
-  }
-
-  if (current && typeof current === 'object' && !('$ref' in current)) {
-    return current as T
-  }
-
-  return null
-}
-
-/**
  * Options for component reference handling
  */
 export interface ComponentRefOptions {
@@ -179,7 +128,7 @@ export function getTypeFromSchema(
         ? schema.$ref.replace('#/components/schemas/', '')
         : undefined
 
-      const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+      const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
         schema.$ref,
         document,
       )
@@ -268,7 +217,7 @@ export function getTypeFromSchema(
     }
 
     // Check if schema is nullable
-    const nullable = isNullable(schemaObj)
+    const nullable = isNullableSchema(schemaObj)
 
     // Handle enum
     if (schemaObj.enum) {
@@ -300,12 +249,17 @@ export function getTypeFromSchema(
     }
 
     // Get the actual type (handle OpenAPI 3.1 type arrays)
-    const actualType = Array.isArray(schemaObj.type)
-      ? getNonNullType(schemaObj.type)
-      : schemaObj.type
+    const actualType = getPrimaryType(schemaObj)
 
     // Handle primitive types
     if (actualType === 'string') {
+      // Handle binary format for file upload fields
+      if (schemaObj.format === 'binary') {
+        return {
+          type: nullable ? 'File | Blob | null' : 'File | Blob',
+          default: schemaObj.default,
+        }
+      }
       return {
         type: nullable ? 'string | null' : 'string',
         default: schemaObj.default,
@@ -362,7 +316,7 @@ export function getTypeFromSchema(
           // Need to resolve $ref if present to check for default
           let hasDefault = false
           if ('$ref' in value) {
-            const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+            const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
               value.$ref,
               document,
             )
@@ -665,7 +619,7 @@ export function extractParameters(
   for (const param of allParams) {
     if ('$ref' in param) {
       // Resolve $ref parameter
-      const resolved = resolveSchemaRef<OpenAPIV3_1.ParameterObject>(
+      const resolved = resolveRef<OpenAPIV3_1.ParameterObject>(
         param.$ref,
         document,
       )
@@ -738,13 +692,16 @@ export function extractRequestBody(
   }
 
   if ('$ref' in requestBody) {
-    const resolved = resolveSchemaRef(requestBody.$ref, document)
+    const resolved = resolveRef<OpenAPIV3_1.RequestBodyObject>(
+      requestBody.$ref,
+      document,
+    )
     if (resolved && 'content' in resolved && resolved.content) {
       const content =
         resolved.content as OpenAPIV3_1.RequestBodyObject['content']
-      const jsonContent = content['application/json']
-      if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
-        return getTypeFromSchema(jsonContent.schema, document, {
+      const bodyContent = getRequestBodyContent(content)
+      if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
+        return getTypeFromSchema(bodyContent.schema, document, {
           defaultNonNullable: false,
         }).type
       }
@@ -754,9 +711,9 @@ export function extractRequestBody(
 
   const content = requestBody.content
   if (content) {
-    const jsonContent = content['application/json']
-    if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
-      return getTypeFromSchema(jsonContent.schema, document, {
+    const bodyContent = getRequestBodyContent(content)
+    if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
+      return getTypeFromSchema(bodyContent.schema, document, {
         defaultNonNullable: false,
       }).type
     }

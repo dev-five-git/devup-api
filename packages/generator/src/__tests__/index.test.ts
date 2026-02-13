@@ -19,5 +19,19 @@ test('index.ts exports', () => {
     parseCrudConfigsFromMultiple: expect.any(Function),
     parseDevupOperations: expect.any(Function),
     parseDevupTag: expect.any(Function),
+    // OpenAPI utilities
+    CONTENT_TYPE_PRIORITY: [
+      'application/json',
+      'application/x-www-form-urlencoded',
+      'multipart/form-data',
+    ],
+    resolveRef: expect.any(Function),
+    getRequestBodyContent: expect.any(Function),
+    extractSchemaNameFromRef: expect.any(Function),
+    normalizeServerName: expect.any(Function),
+    isErrorStatusCode: expect.any(Function),
+    isNullableSchema: expect.any(Function),
+    getPrimaryType: expect.any(Function),
+    collectSchemaNames: expect.any(Function),
   })
 })

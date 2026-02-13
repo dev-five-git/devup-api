@@ -7,6 +7,7 @@ import {
   formatTypeValue,
   getTypeFromSchema,
 } from '../generate-schema'
+import { getRequestBodyContent } from '../openapi-utils'
 
 const createDocument = (
   document: Partial<OpenAPIV3_1.Document> = {},
@@ -1184,4 +1185,172 @@ test('extractRequestBody handles requestBody with empty content', () => {
     content: {},
   } as OpenAPIV3_1.RequestBodyObject
   expect(extractRequestBody(requestBody, createDocument())).toBeUndefined()
+})
+
+// Tests for form-urlencoded content type
+test('extractRequestBody handles requestBody with application/x-www-form-urlencoded', () => {
+  const requestBody = {
+    content: {
+      'application/x-www-form-urlencoded': {
+        schema: {
+          type: 'object' as const,
+          properties: {
+            name: { type: 'string' as const },
+            email: { type: 'string' as const },
+          },
+        },
+      },
+    },
+  } as OpenAPIV3_1.RequestBodyObject
+  expect(extractRequestBody(requestBody, createDocument())).toMatchSnapshot()
+})
+
+test('extractRequestBody handles requestBody $ref with application/x-www-form-urlencoded', () => {
+  const requestBody = {
+    $ref: '#/components/requestBodies/SubscribeForm',
+  } as OpenAPIV3_1.ReferenceObject
+  const document = {
+    components: {
+      requestBodies: {
+        SubscribeForm: {
+          content: {
+            'application/x-www-form-urlencoded': {
+              schema: {
+                type: 'object' as const,
+                properties: {
+                  name: { type: 'string' as const },
+                  email: { type: 'string' as const },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  expect(
+    extractRequestBody(requestBody, createDocument(document)),
+  ).toMatchSnapshot()
+})
+
+// Tests for multipart/form-data content type
+test('extractRequestBody handles requestBody with multipart/form-data', () => {
+  const requestBody = {
+    content: {
+      'multipart/form-data': {
+        schema: {
+          type: 'object' as const,
+          properties: {
+            name: { type: 'string' as const },
+            document: { type: 'string' as const, format: 'binary' },
+          },
+        },
+      },
+    },
+  } as OpenAPIV3_1.RequestBodyObject
+  expect(extractRequestBody(requestBody, createDocument())).toMatchSnapshot()
+})
+
+test('extractRequestBody handles requestBody $ref with multipart/form-data', () => {
+  const requestBody = {
+    $ref: '#/components/requestBodies/FileUpload',
+  } as OpenAPIV3_1.ReferenceObject
+  const document = {
+    components: {
+      requestBodies: {
+        FileUpload: {
+          content: {
+            'multipart/form-data': {
+              schema: {
+                type: 'object' as const,
+                properties: {
+                  file: { type: 'string' as const, format: 'binary' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  expect(
+    extractRequestBody(requestBody, createDocument(document)),
+  ).toMatchSnapshot()
+})
+
+// Tests for JSON priority over other content types
+test('extractRequestBody prefers application/json over other content types', () => {
+  const requestBody = {
+    content: {
+      'multipart/form-data': {
+        schema: {
+          type: 'object' as const,
+          properties: {
+            file: { type: 'string' as const, format: 'binary' },
+          },
+        },
+      },
+      'application/json': {
+        schema: {
+          type: 'object' as const,
+          properties: {
+            name: { type: 'string' as const },
+          },
+        },
+      },
+    },
+  } as OpenAPIV3_1.RequestBodyObject
+  // Should pick JSON content (no binary field)
+  const result = extractRequestBody(requestBody, createDocument())
+  expect(result).toMatchSnapshot()
+})
+
+// Tests for getRequestBodyContent helper
+test('getRequestBodyContent returns undefined for undefined content', () => {
+  expect(getRequestBodyContent(undefined)).toBeUndefined()
+})
+
+test('getRequestBodyContent returns json content when available', () => {
+  const content = {
+    'application/json': { schema: { type: 'object' as const } },
+    'multipart/form-data': { schema: { type: 'object' as const } },
+  }
+  expect(getRequestBodyContent(content)).toBe(content['application/json'])
+})
+
+test('getRequestBodyContent returns urlencoded content when no json', () => {
+  const content = {
+    'application/x-www-form-urlencoded': {
+      schema: { type: 'object' as const },
+    },
+    'multipart/form-data': { schema: { type: 'object' as const } },
+  }
+  expect(getRequestBodyContent(content)).toBe(
+    content['application/x-www-form-urlencoded'],
+  )
+})
+
+test('getRequestBodyContent returns multipart content when no json or urlencoded', () => {
+  const content = {
+    'multipart/form-data': { schema: { type: 'object' as const } },
+  }
+  expect(getRequestBodyContent(content)).toBe(content['multipart/form-data'])
+})
+
+test('getRequestBodyContent returns undefined for unsupported content types', () => {
+  const content = {
+    'application/xml': { schema: { type: 'object' as const } },
+  }
+  expect(getRequestBodyContent(content)).toBeUndefined()
+})
+
+// Tests for format: "binary" in getTypeFromSchema
+test('getTypeFromSchema handles string with format binary', () => {
+  const schema = { type: 'string' as const, format: 'binary' }
+  expect(getTypeFromSchema(schema, createDocument())).toMatchSnapshot()
+})
+
+test('getTypeFromSchema handles nullable string with format binary', () => {
+  const schema = { type: ['string', 'null'] as any, format: 'binary' }
+  expect(getTypeFromSchema(schema, createDocument())).toMatchSnapshot()
 })

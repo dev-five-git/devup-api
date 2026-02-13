@@ -1052,3 +1052,74 @@ exports[`extractRequestBody handles requestBody $ref 1`] = `
   },
 }
 `;
+
+exports[`extractRequestBody handles requestBody with application/x-www-form-urlencoded 1`] = `
+{
+  "email?": {
+    "default": undefined,
+    "type": "string",
+  },
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
+`;
+
+exports[`extractRequestBody handles requestBody $ref with application/x-www-form-urlencoded 1`] = `
+{
+  "email?": {
+    "default": undefined,
+    "type": "string",
+  },
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
+`;
+
+exports[`extractRequestBody handles requestBody with multipart/form-data 1`] = `
+{
+  "document?": {
+    "default": undefined,
+    "type": "File | Blob",
+  },
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
+`;
+
+exports[`extractRequestBody handles requestBody $ref with multipart/form-data 1`] = `
+{
+  "file?": {
+    "default": undefined,
+    "type": "File | Blob",
+  },
+}
+`;
+
+exports[`extractRequestBody prefers application/json over other content types 1`] = `
+{
+  "name?": {
+    "default": undefined,
+    "type": "string",
+  },
+}
+`;
+
+exports[`getTypeFromSchema handles string with format binary 1`] = `
+{
+  "default": undefined,
+  "type": "File | Blob",
+}
+`;
+
+exports[`getTypeFromSchema handles nullable string with format binary 1`] = `
+{
+  "default": undefined,
+  "type": "File | Blob | null",
+}
+`;

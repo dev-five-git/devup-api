@@ -1,5 +1,11 @@
-import { expect, test } from 'bun:test'
-import { getApiEndpoint, getQueryString, isPlainObject } from '../utils'
+import { describe, expect, test } from 'bun:test'
+import {
+  getApiEndpoint,
+  getQueryString,
+  isPlainObject,
+  objectToFormData,
+  objectToURLSearchParams,
+} from '../utils'
 
 test.each([
   [{}, true],
@@ -159,4 +165,118 @@ test.each([
     query as NonNullable<Parameters<typeof getQueryString>[0]>,
   )
   expect(result.toString()).toBe(expected)
+})
+
+describe('objectToURLSearchParams', () => {
+  test('converts simple key-value pairs', () => {
+    const params = objectToURLSearchParams({ name: 'test', age: 25 })
+    expect(params.get('name')).toBe('test')
+    expect(params.get('age')).toBe('25')
+  })
+
+  test('skips null values', () => {
+    const params = objectToURLSearchParams({ name: 'test', skip: null })
+    expect(params.get('name')).toBe('test')
+    expect(params.has('skip')).toBe(false)
+  })
+
+  test('skips undefined values', () => {
+    const params = objectToURLSearchParams({ name: 'test', skip: undefined })
+    expect(params.get('name')).toBe('test')
+    expect(params.has('skip')).toBe(false)
+  })
+
+  test('JSON.stringifies nested objects', () => {
+    const nested = { key: 'value' }
+    const params = objectToURLSearchParams({ data: nested })
+    expect(params.get('data')).toBe(JSON.stringify(nested))
+  })
+
+  test('JSON.stringifies arrays', () => {
+    const arr = [1, 2, 3]
+    const params = objectToURLSearchParams({ items: arr })
+    expect(params.get('items')).toBe(JSON.stringify(arr))
+  })
+
+  test('converts boolean values to string', () => {
+    const params = objectToURLSearchParams({ active: true, deleted: false })
+    expect(params.get('active')).toBe('true')
+    expect(params.get('deleted')).toBe('false')
+  })
+
+  test('converts number values to string', () => {
+    const params = objectToURLSearchParams({ count: 42, price: 9.99 })
+    expect(params.get('count')).toBe('42')
+    expect(params.get('price')).toBe('9.99')
+  })
+
+  test('handles empty object', () => {
+    const params = objectToURLSearchParams({})
+    expect(params.toString()).toBe('')
+  })
+})
+
+describe('objectToFormData', () => {
+  test('converts simple key-value pairs', () => {
+    const formData = objectToFormData({ name: 'test', age: 25 })
+    expect(formData.get('name')).toBe('test')
+    expect(formData.get('age')).toBe('25')
+  })
+
+  test('skips null values', () => {
+    const formData = objectToFormData({ name: 'test', skip: null })
+    expect(formData.get('name')).toBe('test')
+    expect(formData.has('skip')).toBe(false)
+  })
+
+  test('skips undefined values', () => {
+    const formData = objectToFormData({ name: 'test', skip: undefined })
+    expect(formData.get('name')).toBe('test')
+    expect(formData.has('skip')).toBe(false)
+  })
+
+  test('JSON.stringifies nested objects', () => {
+    const nested = { key: 'value' }
+    const formData = objectToFormData({ data: nested })
+    expect(formData.get('data')).toBe(JSON.stringify(nested))
+  })
+
+  test('JSON.stringifies arrays', () => {
+    const arr = [1, 2, 3]
+    const formData = objectToFormData({ items: arr })
+    expect(formData.get('items')).toBe(JSON.stringify(arr))
+  })
+
+  test('appends Blob values directly', () => {
+    const blob = new Blob(['hello'], { type: 'text/plain' })
+    const formData = objectToFormData({ file: blob })
+    const result = formData.get('file')
+    expect(result).toBeInstanceOf(Blob)
+  })
+
+  test('appends File values directly', () => {
+    const file = new File(['content'], 'test.txt', { type: 'text/plain' })
+    const formData = objectToFormData({ document: file })
+    const result = formData.get('document')
+    expect(result).toBeInstanceOf(File)
+    expect((result as File).name).toBe('test.txt')
+  })
+
+  test('converts boolean values to string', () => {
+    const formData = objectToFormData({ active: true, deleted: false })
+    expect(formData.get('active')).toBe('true')
+    expect(formData.get('deleted')).toBe('false')
+  })
+
+  test('converts number values to string', () => {
+    const formData = objectToFormData({ count: 42, price: 9.99 })
+    expect(formData.get('count')).toBe('42')
+    expect(formData.get('price')).toBe('9.99')
+  })
+
+  test('handles empty object', () => {
+    const formData = objectToFormData({})
+    const entries = Array.from(formData.entries())
+    expect(entries).toHaveLength(0)
+  })
 })

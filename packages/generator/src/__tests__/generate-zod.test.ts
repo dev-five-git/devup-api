@@ -3157,7 +3157,7 @@ describe('generateZodSchemas - inline request body schema', () => {
     expect(result).toContain('post')
   })
 
-  test('handles requestBody with no application/json content', () => {
+  test('handles requestBody with multipart/form-data content', () => {
     const result = generateZodSchemas({
       'openapi.json': createDocument({
         paths: {
@@ -3183,8 +3183,9 @@ describe('generateZodSchemas - inline request body schema', () => {
       }),
     })
 
-    // Should handle gracefully when no application/json content
+    // Should process multipart/form-data content (inline schemas still produce pathSchemas structure)
     expect(result).toContain('pathSchemas')
+    expect(result).toContain('postPathSchemas')
   })
 
   test('handles requestBody with empty content', () => {
@@ -4082,5 +4083,217 @@ describe('generateZodSchemas - additional coverage', () => {
     )
 
     expect(result).toContain('requestSchemas')
+  })
+})
+
+// =============================================================================
+// Binary format handling
+// =============================================================================
+
+describe('generateZodSchemas - binary format handling', () => {
+  test('generates z.instanceof(File) for format: binary in runtime schemas', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/upload': {
+            post: {
+              operationId: 'uploadFile',
+              requestBody: {
+                content: {
+                  'multipart/form-data': {
+                    schema: {
+                      $ref: '#/components/schemas/FileUpload',
+                    },
+                  },
+                },
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            FileUpload: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                document: { type: 'string', format: 'binary' },
+              },
+              required: ['name'],
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('requestSchemas')
+    expect(result).toContain('z.instanceof(File)')
+    expect(result).toContain('z.string()')
+  })
+
+  test('generates z.ZodType<File> for format: binary in type declarations', () => {
+    const result = generateZodTypeDeclarations({
+      'openapi.json': createDocument({
+        paths: {
+          '/upload': {
+            post: {
+              operationId: 'uploadFile',
+              requestBody: {
+                content: {
+                  'multipart/form-data': {
+                    schema: {
+                      $ref: '#/components/schemas/FileUpload',
+                    },
+                  },
+                },
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            FileUpload: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                document: { type: 'string', format: 'binary' },
+              },
+              required: ['name'],
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('z.ZodType<File>')
+    expect(result).toContain('z.ZodString')
+  })
+})
+
+// =============================================================================
+// Content type support in request body schema collection
+// =============================================================================
+
+describe('generateZodSchemas - multi content type support', () => {
+  test('collects schema names from application/x-www-form-urlencoded', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/form': {
+            post: {
+              operationId: 'submitForm',
+              requestBody: {
+                content: {
+                  'application/x-www-form-urlencoded': {
+                    schema: {
+                      $ref: '#/components/schemas/FormInput',
+                    },
+                  },
+                },
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            FormInput: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                email: { type: 'string', format: 'email' },
+              },
+              required: ['name', 'email'],
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('requestSchemas')
+    expect(result).toContain('FormInput')
+  })
+
+  test('collects schema names from multipart/form-data with $ref', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/upload': {
+            post: {
+              operationId: 'createUpload',
+              requestBody: {
+                content: {
+                  'multipart/form-data': {
+                    schema: {
+                      $ref: '#/components/schemas/UploadRequest',
+                    },
+                  },
+                },
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            UploadRequest: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                file: { type: 'string', format: 'binary' },
+              },
+              required: ['name', 'file'],
+            },
+          },
+        },
+      }),
+    })
+
+    expect(result).toContain('requestSchemas')
+    expect(result).toContain('UploadRequest')
+    expect(result).toContain('z.instanceof(File)')
+  })
+
+  test('getRequestBodySchemaName returns schema name for urlencoded body', () => {
+    const result = generateZodSchemas({
+      'openapi.json': createDocument({
+        paths: {
+          '/subscribe': {
+            post: {
+              operationId: 'subscribe',
+              requestBody: {
+                content: {
+                  'application/x-www-form-urlencoded': {
+                    schema: {
+                      $ref: '#/components/schemas/SubscribeRequest',
+                    },
+                  },
+                },
+              },
+              responses: { '200': { description: 'Success' } },
+            },
+          },
+        },
+        components: {
+          schemas: {
+            SubscribeRequest: {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                email: { type: 'string' },
+              },
+              required: ['name', 'email'],
+            },
+          },
+        },
+      }),
+    })
+
+    // pathSchemas should map subscribe to SubscribeRequest schema
+    expect(result).toContain('requestSchemas')
+    expect(result).toContain('SubscribeRequest')
+    expect(result).toContain('pathSchemas')
+    expect(result).toContain('subscribe')
   })
 })

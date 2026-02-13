@@ -2003,6 +2003,83 @@ test('generateInterface handles request schema with inline enum', () => {
 })
 
 // Test error schema with inline enum (lines 705-707 coverage)
+test('generateInterface handles response with non-JSON content type only', () => {
+  const schema = {
+    paths: {
+      '/files/{id}': {
+        get: {
+          operationId: 'downloadFile',
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'File content',
+              content: {
+                'text/plain': {
+                  schema: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Should not have a typed response since there's no application/json
+  expect(result).not.toContain("DevupObject<'response'")
+})
+
+test('generateInterface handles response schema with inline enum', () => {
+  const schema = {
+    paths: {
+      '/items': {
+        get: {
+          operationId: 'listItems',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ItemResponse',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        ItemResponse: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            status: {
+              type: 'string',
+              enum: ['active', 'inactive', 'archived'],
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Inline enum in response schema should generate type alias
+  expect(result).toContain('type ItemResponseStatus =')
+  expect(result).toContain('"active"')
+})
+
 test('generateInterface handles error schema with inline enum', () => {
   const schema = {
     paths: {
@@ -2053,4 +2130,405 @@ test('generateInterface handles error schema with inline enum', () => {
   // Inline enum should generate type alias based on context
   expect(result).toContain('type ErrorResponseCode =')
   expect(result).toContain('"INVALID_INPUT"')
+})
+
+// Test urlencoded request body with $ref
+test('generateInterface handles urlencoded request body with $ref', () => {
+  const schema = {
+    paths: {
+      '/form': {
+        post: {
+          operationId: 'subscribe',
+          requestBody: {
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: {
+                  $ref: '#/components/schemas/SubscribeRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: { ok: { type: 'boolean' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        SubscribeRequest: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string' },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Should use DevupObject reference for the urlencoded request body
+  expect(result).toContain(
+    "DevupObject<'request', 'openapi.json'>['SubscribeRequest']",
+  )
+  // Should generate the request component
+  expect(result).toContain('SubscribeRequest')
+})
+
+// Test urlencoded request body with inline schema
+test('generateInterface handles urlencoded request body with inline schema', () => {
+  const schema = {
+    paths: {
+      '/form/contact': {
+        post: {
+          operationId: 'contact',
+          requestBody: {
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                    email: { type: 'string' },
+                    message: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Should generate body type with string properties
+  expect(result).toContain('name')
+  expect(result).toContain('email')
+  expect(result).toContain('message')
+})
+
+// Test typed multipart request body with $ref (includes binary fields)
+test('generateInterface handles typed multipart request body with $ref', () => {
+  const schema = {
+    paths: {
+      '/typed-form': {
+        post: {
+          operationId: 'createFileUpload',
+          requestBody: {
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  $ref: '#/components/schemas/CreateFileUploadRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: { id: { type: 'string' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        CreateFileUploadRequest: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string' },
+            document: { type: 'string', format: 'binary' },
+            tags: { type: 'array', items: { type: 'string' } },
+            thumbnail: { type: 'string', format: 'binary' },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Should use DevupObject reference for the multipart request body
+  expect(result).toContain(
+    "DevupObject<'request', 'openapi.json'>['CreateFileUploadRequest']",
+  )
+  // Should generate request component with binary fields as File | Blob
+  expect(result).toContain('File | Blob')
+})
+
+// Test raw multipart (empty object schema)
+test('generateInterface handles raw multipart with empty object schema', () => {
+  const schema = {
+    paths: {
+      '/form/upload': {
+        post: {
+          operationId: 'upload',
+          requestBody: {
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: { url: { type: 'string' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Raw multipart should use FormData | Record<string, unknown>
+  expect(result).toContain('FormData | Record<string, unknown>')
+})
+
+// Test typed multipart PUT and PATCH endpoints
+test('generateInterface handles multipart PUT and PATCH endpoints', () => {
+  const schema = {
+    paths: {
+      '/typed-form/{id}': {
+        put: {
+          operationId: 'updateFileUpload',
+          parameters: [
+            {
+              name: 'id',
+              in: 'path' as const,
+              required: true,
+              schema: { type: 'string' as const },
+            },
+          ],
+          requestBody: {
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  $ref: '#/components/schemas/UpdateFileUploadRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+          },
+        },
+        patch: {
+          operationId: 'patchFileUpload',
+          parameters: [
+            {
+              name: 'id',
+              in: 'path' as const,
+              required: true,
+              schema: { type: 'string' as const },
+            },
+          ],
+          requestBody: {
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  $ref: '#/components/schemas/PatchFileUploadRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        UpdateFileUploadRequest: {
+          type: 'object',
+          required: ['name'],
+          properties: {
+            name: { type: 'string' },
+            document: { type: 'string', format: 'binary' },
+          },
+        },
+        PatchFileUploadRequest: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            document: { type: 'string', format: 'binary' },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Should use DevupObject references for both multipart request bodies
+  expect(result).toContain(
+    "DevupObject<'request', 'openapi.json'>['UpdateFileUploadRequest']",
+  )
+  expect(result).toContain(
+    "DevupObject<'request', 'openapi.json'>['PatchFileUploadRequest']",
+  )
+})
+
+// Test that JSON endpoints are unchanged when form/multipart endpoints exist alongside
+test('generateInterface preserves JSON endpoints alongside form/multipart endpoints', () => {
+  const schema = {
+    paths: {
+      '/users': {
+        post: {
+          operationId: 'createUser',
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/CreateUserRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/form': {
+        post: {
+          operationId: 'subscribe',
+          requestBody: {
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: {
+                  $ref: '#/components/schemas/SubscribeRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+          },
+        },
+      },
+      '/form/upload': {
+        post: {
+          operationId: 'upload',
+          requestBody: {
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: { type: 'object', properties: {} },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        CreateUserRequest: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string' },
+          },
+        },
+        SubscribeRequest: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string' },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // JSON endpoint should use DevupObject reference
+  expect(result).toContain(
+    "DevupObject<'request', 'openapi.json'>['CreateUserRequest']",
+  )
+  // Urlencoded endpoint should use DevupObject reference
+  expect(result).toContain(
+    "DevupObject<'request', 'openapi.json'>['SubscribeRequest']",
+  )
+  // Raw multipart should use FormData | Record<string, unknown>
+  expect(result).toContain('FormData | Record<string, unknown>')
 })

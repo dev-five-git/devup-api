@@ -1,4 +1,4 @@
-import { join, resolve } from 'node:path'
+import { resolve } from 'node:path'
 import type { DevupApiOptions } from '@devup-api/core'
 import {
   createUrlMap,
@@ -10,6 +10,9 @@ import {
 } from '@devup-api/generator'
 import {
   createTmpDirAsync,
+  type DevupGenerators,
+  type DevupIOAsync,
+  generateDevupArtifactsAsync,
   normalizeOpenapiFiles,
   readOpenapiAsync,
   writeInterfaceAsync,
@@ -22,42 +25,27 @@ export function devupApiRsbuildPlugin(
   return {
     name: 'devup-api',
     async setup(build) {
-      const tempDir = await createTmpDirAsync(options?.tempDir)
-      const openapiFiles = normalizeOpenapiFiles(options?.openapiFiles)
-      const schemas = await readOpenapiAsync(openapiFiles)
+      const io: DevupIOAsync = {
+        createTmpDirAsync,
+        normalizeOpenapiFiles,
+        readOpenapiAsync,
+        writeInterfaceAsync,
+      }
 
-      // Generate interface file
-      await writeInterfaceAsync(
-        join(tempDir, 'api.d.ts'),
-        generateInterface(schemas, options),
+      const generators: DevupGenerators<DevupApiOptions> = {
+        generateInterface,
+        generateZodSchemas,
+        generateZodTypeDeclarations,
+        generateCrudConfigCode,
+        generateCrudConfigTypes,
+        createUrlMap,
+      }
+
+      const { tempDir, urlMap } = await generateDevupArtifactsAsync(
+        io,
+        generators,
+        options,
       )
-
-      // Generate Zod schemas file
-      await writeInterfaceAsync(
-        join(tempDir, 'zod-schemas.js'),
-        generateZodSchemas(schemas, options),
-      )
-
-      // Generate Zod type declarations
-      await writeInterfaceAsync(
-        join(tempDir, 'zod.d.ts'),
-        generateZodTypeDeclarations(schemas, options),
-      )
-
-      // Generate CRUD configs file
-      await writeInterfaceAsync(
-        join(tempDir, 'crud-configs.jsx'),
-        generateCrudConfigCode(schemas),
-      )
-
-      // Generate CRUD config type declarations
-      await writeInterfaceAsync(
-        join(tempDir, 'ui.d.ts'),
-        generateCrudConfigTypes(schemas),
-      )
-
-      // Create urlMap and set environment variable
-      const urlMap = createUrlMap(schemas, options)
 
       // Get absolute paths for virtual modules
       const zodSchemasPath = resolve(tempDir, 'zod-schemas.js')
