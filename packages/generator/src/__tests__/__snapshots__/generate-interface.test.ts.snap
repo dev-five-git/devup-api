@@ -1714,6 +1714,75 @@ declare module "@devup-api/fetch" {
 }"
 `;
 
+exports[`generateInterface handles response with non-JSON content type only 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupGetApiStruct {
+    'openapi.json': {
+      '/files/{id}': {
+        params: {
+          id: string;
+        };
+      };
+      downloadFile: {
+        params: {
+          id: string;
+        };
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {}
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
+exports[`generateInterface handles response schema with inline enum 1`] = `
+"import "@devup-api/fetch";
+import type { DevupObject } from "@devup-api/fetch";
+
+declare module "@devup-api/fetch" {
+  type ItemResponseStatus = "active" | "inactive" | "archived"
+
+  interface DevupApiServers {
+    'openapi.json': never
+  }
+
+  interface DevupGetApiStruct {
+    'openapi.json': {
+      '/items': {
+        response: DevupObject<'response', 'openapi.json'>['ItemResponse'];
+      };
+      listItems: {
+        response: DevupObject<'response', 'openapi.json'>['ItemResponse'];
+      };
+    }
+  }
+
+  interface DevupRequestComponentStruct {}
+
+  interface DevupResponseComponentStruct {
+    'openapi.json': {
+      ItemResponse: {
+        name?: string;
+        status?: ItemResponseStatus;
+      };
+    }
+  }
+
+  interface DevupErrorComponentStruct {}
+}"
+`;
+
 exports[`generateInterface handles error schema with inline enum 1`] = `
 "import "@devup-api/fetch";
 import type { DevupObject } from "@devup-api/fetch";

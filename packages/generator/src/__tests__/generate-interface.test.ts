@@ -2003,6 +2003,83 @@ test('generateInterface handles request schema with inline enum', () => {
 })
 
 // Test error schema with inline enum (lines 705-707 coverage)
+test('generateInterface handles response with non-JSON content type only', () => {
+  const schema = {
+    paths: {
+      '/files/{id}': {
+        get: {
+          operationId: 'downloadFile',
+          parameters: [
+            {
+              name: 'id',
+              in: 'path',
+              required: true,
+              schema: { type: 'string' },
+            },
+          ],
+          responses: {
+            '200': {
+              description: 'File content',
+              content: {
+                'text/plain': {
+                  schema: { type: 'string' },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Should not have a typed response since there's no application/json
+  expect(result).not.toContain("DevupObject<'response'")
+})
+
+test('generateInterface handles response schema with inline enum', () => {
+  const schema = {
+    paths: {
+      '/items': {
+        get: {
+          operationId: 'listItems',
+          responses: {
+            '200': {
+              description: 'Success',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ItemResponse',
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        ItemResponse: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+            status: {
+              type: 'string',
+              enum: ['active', 'inactive', 'archived'],
+            },
+          },
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  expect(result).toMatchSnapshot()
+  // Inline enum in response schema should generate type alias
+  expect(result).toContain('type ItemResponseStatus =')
+  expect(result).toContain('"active"')
+})
+
 test('generateInterface handles error schema with inline enum', () => {
   const schema = {
     paths: {
