@@ -1,8 +1,8 @@
 /** biome-ignore-all lint/style/noNonNullAssertion: test code */
-import { expect, test } from 'bun:test'
+import { describe, expect, test } from 'bun:test'
 import type { UrlMapValue } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
-import { createUrlMap } from '../create-url-map'
+import { createUrlMap, getBodyType } from '../create-url-map'
 
 test.each([
   [
@@ -333,4 +333,367 @@ test.each([
   )
 
   expect(result['']).toHaveProperty(expectedKey)
+})
+
+describe('bodyType emission', () => {
+  test('emits bodyType: form for application/x-www-form-urlencoded endpoint', () => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/form': {
+          post: {
+            operationId: 'subscribe',
+            requestBody: {
+              content: {
+                'application/x-www-form-urlencoded': {
+                  schema: {
+                    $ref: '#/components/schemas/SubscribeRequest',
+                  },
+                },
+              },
+            },
+            responses: {},
+          },
+        },
+      },
+    }
+
+    const result = createUrlMap({ '': schema })
+
+    expect(result['']!.subscribe).toEqual({
+      method: 'POST',
+      url: '/form',
+      bodyType: 'form',
+    })
+    expect(result['']!['/form']).toEqual({
+      method: 'POST',
+      url: '/form',
+      bodyType: 'form',
+    })
+  })
+
+  test('emits bodyType: multipart for multipart/form-data endpoint', () => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/upload': {
+          post: {
+            operationId: 'upload_file',
+            requestBody: {
+              content: {
+                'multipart/form-data': {
+                  schema: {
+                    type: 'object',
+                  },
+                },
+              },
+            },
+            responses: {},
+          },
+        },
+      },
+    }
+
+    const result = createUrlMap({ '': schema })
+
+    expect(result['']!.uploadFile).toEqual({
+      method: 'POST',
+      url: '/upload',
+      bodyType: 'multipart',
+    })
+    expect(result['']!['/upload']).toEqual({
+      method: 'POST',
+      url: '/upload',
+      bodyType: 'multipart',
+    })
+  })
+
+  test('does NOT emit bodyType for application/json endpoint', () => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/users': {
+          post: {
+            operationId: 'create_user',
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/CreateUserRequest',
+                  },
+                },
+              },
+            },
+            responses: {},
+          },
+        },
+      },
+    }
+
+    const result = createUrlMap({ '': schema })
+
+    expect(result['']!.createUser).toEqual({
+      method: 'POST',
+      url: '/users',
+    })
+    expect(result['']!.createUser).not.toHaveProperty('bodyType')
+    expect(result['']!['/users']).not.toHaveProperty('bodyType')
+  })
+
+  test('does NOT emit bodyType for GET endpoint without requestBody', () => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/users': {
+          get: {
+            operationId: 'get_users',
+            responses: {},
+          },
+        },
+      },
+    }
+
+    const result = createUrlMap({ '': schema })
+
+    expect(result['']!.getUsers).toEqual({
+      method: 'GET',
+      url: '/users',
+    })
+    expect(result['']!.getUsers).not.toHaveProperty('bodyType')
+  })
+
+  test('resolves $ref in requestBody to detect content type', () => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/form': {
+          post: {
+            operationId: 'submit_form',
+            requestBody: {
+              $ref: '#/components/requestBodies/FormBody',
+            },
+            responses: {},
+          },
+        },
+      },
+      components: {
+        requestBodies: {
+          FormBody: {
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: 'string' },
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+
+    const result = createUrlMap({ '': schema })
+
+    expect(result['']!.submitForm).toEqual({
+      method: 'POST',
+      url: '/form',
+      bodyType: 'form',
+    })
+  })
+
+  test('resolves $ref in requestBody for multipart content type', () => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/upload': {
+          post: {
+            operationId: 'upload_file',
+            requestBody: {
+              $ref: '#/components/requestBodies/UploadBody',
+            },
+            responses: {},
+          },
+        },
+      },
+      components: {
+        requestBodies: {
+          UploadBody: {
+            content: {
+              'multipart/form-data': {
+                schema: {
+                  type: 'object',
+                },
+              },
+            },
+          },
+        },
+      },
+    }
+
+    const result = createUrlMap({ '': schema })
+
+    expect(result['']!.uploadFile).toEqual({
+      method: 'POST',
+      url: '/upload',
+      bodyType: 'multipart',
+    })
+  })
+
+  test('handles mixed endpoints with different body types', () => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/users': {
+          post: {
+            operationId: 'create_user',
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: { $ref: '#/components/schemas/User' },
+                },
+              },
+            },
+            responses: {},
+          },
+        },
+        '/form': {
+          post: {
+            operationId: 'subscribe',
+            requestBody: {
+              content: {
+                'application/x-www-form-urlencoded': {
+                  schema: { $ref: '#/components/schemas/SubscribeRequest' },
+                },
+              },
+            },
+            responses: {},
+          },
+        },
+        '/upload': {
+          post: {
+            operationId: 'upload_file',
+            requestBody: {
+              content: {
+                'multipart/form-data': {
+                  schema: { type: 'object' },
+                },
+              },
+            },
+            responses: {},
+          },
+        },
+      },
+    }
+
+    const result = createUrlMap({ '': schema })
+
+    // JSON endpoint: no bodyType
+    expect(result['']!.createUser).not.toHaveProperty('bodyType')
+    // Form endpoint: bodyType = 'form'
+    expect(result['']!.subscribe!.bodyType).toBe('form')
+    // Multipart endpoint: bodyType = 'multipart'
+    expect(result['']!.uploadFile!.bodyType).toBe('multipart')
+  })
+})
+
+describe('getBodyType', () => {
+  const emptyDoc: OpenAPIV3_1.Document = {
+    openapi: '3.1.0',
+    info: { title: 'Test', version: '1.0.0' },
+    paths: {},
+  }
+
+  test('returns undefined when no requestBody', () => {
+    expect(getBodyType({ responses: {} }, emptyDoc)).toBeUndefined()
+  })
+
+  test('returns undefined for JSON content', () => {
+    expect(
+      getBodyType(
+        {
+          requestBody: {
+            content: {
+              'application/json': { schema: { type: 'object' } },
+            },
+          },
+          responses: {},
+        },
+        emptyDoc,
+      ),
+    ).toBeUndefined()
+  })
+
+  test('returns form for urlencoded content', () => {
+    expect(
+      getBodyType(
+        {
+          requestBody: {
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: { type: 'object' },
+              },
+            },
+          },
+          responses: {},
+        },
+        emptyDoc,
+      ),
+    ).toBe('form')
+  })
+
+  test('returns multipart for multipart/form-data content', () => {
+    expect(
+      getBodyType(
+        {
+          requestBody: {
+            content: {
+              'multipart/form-data': { schema: { type: 'object' } },
+            },
+          },
+          responses: {},
+        },
+        emptyDoc,
+      ),
+    ).toBe('multipart')
+  })
+
+  test('returns undefined when requestBody has no content', () => {
+    expect(
+      getBodyType(
+        {
+          requestBody: { content: {} },
+          responses: {},
+        },
+        emptyDoc,
+      ),
+    ).toBeUndefined()
+  })
+
+  test('prefers urlencoded over multipart when both present', () => {
+    expect(
+      getBodyType(
+        {
+          requestBody: {
+            content: {
+              'application/x-www-form-urlencoded': {
+                schema: { type: 'object' },
+              },
+              'multipart/form-data': { schema: { type: 'object' } },
+            },
+          },
+          responses: {},
+        },
+        emptyDoc,
+      ),
+    ).toBe('form')
+  })
 })
