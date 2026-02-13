@@ -306,6 +306,13 @@ export function getTypeFromSchema(
 
     // Handle primitive types
     if (actualType === 'string') {
+      // Handle binary format for file upload fields
+      if (schemaObj.format === 'binary') {
+        return {
+          type: nullable ? 'File | Blob | null' : 'File | Blob',
+          default: schemaObj.default,
+        }
+      }
       return {
         type: nullable ? 'string | null' : 'string',
         default: schemaObj.default,
@@ -723,6 +730,23 @@ export function extractParameters(
   return { pathParams, queryParams, headerParams }
 }
 
+// Priority order: json > urlencoded > multipart
+const CONTENT_TYPE_PRIORITY = [
+  'application/json',
+  'application/x-www-form-urlencoded',
+  'multipart/form-data',
+] as const
+
+export function getRequestBodyContent(
+  content: OpenAPIV3_1.RequestBodyObject['content'] | undefined,
+): OpenAPIV3_1.MediaTypeObject | undefined {
+  if (!content) return undefined
+  for (const ct of CONTENT_TYPE_PRIORITY) {
+    if (content[ct]) return content[ct]
+  }
+  return undefined
+}
+
 /**
  * Extract request body from OpenAPI operation
  */
@@ -742,9 +766,9 @@ export function extractRequestBody(
     if (resolved && 'content' in resolved && resolved.content) {
       const content =
         resolved.content as OpenAPIV3_1.RequestBodyObject['content']
-      const jsonContent = content['application/json']
-      if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
-        return getTypeFromSchema(jsonContent.schema, document, {
+      const bodyContent = getRequestBodyContent(content)
+      if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
+        return getTypeFromSchema(bodyContent.schema, document, {
           defaultNonNullable: false,
         }).type
       }
@@ -754,9 +778,9 @@ export function extractRequestBody(
 
   const content = requestBody.content
   if (content) {
-    const jsonContent = content['application/json']
-    if (jsonContent && 'schema' in jsonContent && jsonContent.schema) {
-      return getTypeFromSchema(jsonContent.schema, document, {
+    const bodyContent = getRequestBodyContent(content)
+    if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
+      return getTypeFromSchema(bodyContent.schema, document, {
         defaultNonNullable: false,
       }).type
     }

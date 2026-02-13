@@ -158,6 +158,11 @@ function schemaToZod(
 
   // Handle primitive types
   if (primaryType === 'string') {
+    // Handle binary format for file upload fields
+    if (schemaObj.format === 'binary') {
+      return wrapNullable('z.instanceof(File)')
+    }
+
     // Zod 4.0: Use top-level format validators instead of z.string().format()
     // Check format first to use top-level validators
     if (schemaObj.format === 'email') {
@@ -401,6 +406,9 @@ function schemaToZodType(
 
   // Handle primitive types
   if (primaryType === 'string') {
+    if (schemaObj.format === 'binary') {
+      return wrapNullable('z.ZodType<File>')
+    }
     return wrapNullable('z.ZodString')
   }
 
@@ -564,9 +572,15 @@ function collectSchemaUsage(
       return extractSchemaNameFromRef(requestBody.$ref)
     }
     const content = requestBody.content
-    const jsonContent = content?.['application/json']
-    if (jsonContent?.schema && '$ref' in jsonContent.schema) {
-      return extractSchemaNameFromRef(jsonContent.schema.$ref)
+    for (const ct of [
+      'application/json',
+      'application/x-www-form-urlencoded',
+      'multipart/form-data',
+    ]) {
+      const bodyContent = content?.[ct]
+      if (bodyContent?.schema && '$ref' in bodyContent.schema) {
+        return extractSchemaNameFromRef(bodyContent.schema.$ref)
+      }
     }
     return null
   }
@@ -604,9 +618,16 @@ function collectSchemaUsage(
             }
           } else {
             const content = operation.requestBody.content
-            const jsonContent = content?.['application/json']
-            if (jsonContent?.schema) {
-              collectSchemaNames(jsonContent.schema, requestSchemaNames)
+            for (const ct of [
+              'application/json',
+              'application/x-www-form-urlencoded',
+              'multipart/form-data',
+            ]) {
+              const bodyContent = content?.[ct]
+              if (bodyContent?.schema) {
+                collectSchemaNames(bodyContent.schema, requestSchemaNames)
+                break
+              }
             }
           }
         }
