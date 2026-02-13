@@ -1,65 +1,14 @@
 import type { DevupApiTypeGeneratorOptions } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
+import {
+  CONTENT_TYPE_PRIORITY,
+  extractSchemaNameFromRef,
+  isErrorStatusCode,
+  normalizeServerName,
+  resolveRef,
+} from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
-
-// =============================================================================
-// Helper Functions
-// =============================================================================
-
-/**
- * Normalize server name by removing ./ prefix
- */
-function normalizeServerName(serverName: string): string {
-  return serverName.replace(/^\.\//, '')
-}
-
-/**
- * Resolve $ref reference in OpenAPI schema
- */
-function resolveSchemaRef<
-  T extends OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ParameterObject,
->(ref: string, document: OpenAPIV3_1.Document): T | null {
-  if (!ref.startsWith('#/')) {
-    return null
-  }
-
-  const parts = ref.slice(2).split('/')
-  let current: unknown = document
-
-  for (const part of parts) {
-    if (current && typeof current === 'object' && part in current) {
-      current = (current as Record<string, unknown>)[part]
-    } else {
-      return null
-    }
-  }
-
-  if (current && typeof current === 'object' && !('$ref' in current)) {
-    return current as T
-  }
-
-  return null
-}
-
-/**
- * Extract schema name from $ref
- */
-function extractSchemaNameFromRef(ref: string): string | null {
-  if (ref.startsWith('#/components/schemas/')) {
-    return ref.replace('#/components/schemas/', '')
-  }
-  return null
-}
-
-/**
- * Check if status code is an error response
- */
-function isErrorStatusCode(statusCode: string): boolean {
-  if (statusCode === 'default') return true
-  const code = parseInt(statusCode, 10)
-  return code >= 400 && code < 600
-}
 
 // =============================================================================
 // OpenAPI to Zod Conversion
@@ -83,10 +32,7 @@ function schemaToZod(
       // Return lazy reference for circular dependencies
       return `z.lazy(() => ${schemaRefs.get(schemaName)})`
     }
-    const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
-      schema.$ref,
-      document,
-    )
+    const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(schema.$ref, document)
     if (resolved) {
       return schemaToZod(resolved, document, schemaRefs, options)
     }
@@ -262,7 +208,7 @@ function schemaToZod(
         // Check for default value
         let hasDefault = false
         if ('$ref' in value) {
-          const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+          const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
             value.$ref,
             document,
           )
@@ -328,10 +274,7 @@ function schemaToZodType(
       // Return a lazy type reference
       return `z.ZodLazy<z.ZodTypeAny>`
     }
-    const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
-      schema.$ref,
-      document,
-    )
+    const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(schema.$ref, document)
     if (resolved) {
       return schemaToZodType(resolved, document, options)
     }
@@ -442,7 +385,7 @@ function schemaToZodType(
         // Check for default value
         let hasDefault = false
         if ('$ref' in value) {
-          const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+          const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
             value.$ref,
             document,
           )
@@ -572,11 +515,7 @@ function collectSchemaUsage(
       return extractSchemaNameFromRef(requestBody.$ref)
     }
     const content = requestBody.content
-    for (const ct of [
-      'application/json',
-      'application/x-www-form-urlencoded',
-      'multipart/form-data',
-    ]) {
+    for (const ct of CONTENT_TYPE_PRIORITY) {
       const bodyContent = content?.[ct]
       if (bodyContent?.schema && '$ref' in bodyContent.schema) {
         return extractSchemaNameFromRef(bodyContent.schema.$ref)
@@ -618,11 +557,7 @@ function collectSchemaUsage(
             }
           } else {
             const content = operation.requestBody.content
-            for (const ct of [
-              'application/json',
-              'application/x-www-form-urlencoded',
-              'multipart/form-data',
-            ]) {
+            for (const ct of CONTENT_TYPE_PRIORITY) {
               const bodyContent = content?.[ct]
               if (bodyContent?.schema) {
                 collectSchemaNames(bodyContent.schema, requestSchemaNames)

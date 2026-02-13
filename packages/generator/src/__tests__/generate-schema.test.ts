@@ -5,9 +5,9 @@ import {
   extractParameters,
   extractRequestBody,
   formatTypeValue,
-  getRequestBodyContent,
   getTypeFromSchema,
 } from '../generate-schema'
+import { getRequestBodyContent } from '../openapi-utils'
 
 const createDocument = (
   document: Partial<OpenAPIV3_1.Document> = {},

@@ -1,20 +1,7 @@
 import type { DevupApiTypeGeneratorOptions, UrlMapValue } from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
-
-function resolveRequestBodyRef(
-  ref: string,
-  document: OpenAPIV3_1.Document,
-): OpenAPIV3_1.RequestBodyObject | undefined {
-  // Expected format: #/components/requestBodies/Name
-  const parts = ref.replace('#/', '').split('/')
-  let current: unknown = document
-  for (const part of parts) {
-    if (current == null || typeof current !== 'object') return undefined
-    current = (current as Record<string, unknown>)[part]
-  }
-  return current as OpenAPIV3_1.RequestBodyObject | undefined
-}
+import { resolveRef } from './openapi-utils'
 
 export function getBodyType(
   operation: OpenAPIV3_1.OperationObject,
@@ -25,7 +12,10 @@ export function getBodyType(
 
   let content: OpenAPIV3_1.RequestBodyObject['content'] | undefined
   if ('$ref' in requestBody) {
-    const resolved = resolveRequestBodyRef(requestBody.$ref, document)
+    const resolved = resolveRef<OpenAPIV3_1.RequestBodyObject>(
+      requestBody.$ref,
+      document,
+    )
     content = resolved?.content
   } else {
     content = requestBody.content

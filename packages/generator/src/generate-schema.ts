@@ -1,5 +1,6 @@
 import type { OpenAPIV3_1 } from 'openapi-types'
 import type { ParameterDefinition } from './generate-interface'
+import { getRequestBodyContent, resolveRef } from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 /**
@@ -112,34 +113,6 @@ function getNonNullType(
 }
 
 /**
- * Resolve $ref reference in OpenAPI schema
- */
-function resolveSchemaRef<
-  T extends OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ParameterObject,
->(ref: string, document: OpenAPIV3_1.Document): T | null {
-  if (!ref.startsWith('#/')) {
-    return null
-  }
-
-  const parts = ref.slice(2).split('/')
-  let current: unknown = document
-
-  for (const part of parts) {
-    if (current && typeof current === 'object' && part in current) {
-      current = (current as Record<string, unknown>)[part]
-    } else {
-      return null
-    }
-  }
-
-  if (current && typeof current === 'object' && !('$ref' in current)) {
-    return current as T
-  }
-
-  return null
-}
-
-/**
  * Options for component reference handling
  */
 export interface ComponentRefOptions {
@@ -179,7 +152,7 @@ export function getTypeFromSchema(
         ? schema.$ref.replace('#/components/schemas/', '')
         : undefined
 
-      const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+      const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
         schema.$ref,
         document,
       )
@@ -369,7 +342,7 @@ export function getTypeFromSchema(
           // Need to resolve $ref if present to check for default
           let hasDefault = false
           if ('$ref' in value) {
-            const resolved = resolveSchemaRef<OpenAPIV3_1.SchemaObject>(
+            const resolved = resolveRef<OpenAPIV3_1.SchemaObject>(
               value.$ref,
               document,
             )
@@ -672,7 +645,7 @@ export function extractParameters(
   for (const param of allParams) {
     if ('$ref' in param) {
       // Resolve $ref parameter
-      const resolved = resolveSchemaRef<OpenAPIV3_1.ParameterObject>(
+      const resolved = resolveRef<OpenAPIV3_1.ParameterObject>(
         param.$ref,
         document,
       )
@@ -730,23 +703,6 @@ export function extractParameters(
   return { pathParams, queryParams, headerParams }
 }
 
-// Priority order: json > urlencoded > multipart
-const CONTENT_TYPE_PRIORITY = [
-  'application/json',
-  'application/x-www-form-urlencoded',
-  'multipart/form-data',
-] as const
-
-export function getRequestBodyContent(
-  content: OpenAPIV3_1.RequestBodyObject['content'] | undefined,
-): OpenAPIV3_1.MediaTypeObject | undefined {
-  if (!content) return undefined
-  for (const ct of CONTENT_TYPE_PRIORITY) {
-    if (content[ct]) return content[ct]
-  }
-  return undefined
-}
-
 /**
  * Extract request body from OpenAPI operation
  */
@@ -762,7 +718,7 @@ export function extractRequestBody(
   }
 
   if ('$ref' in requestBody) {
-    const resolved = resolveSchemaRef(requestBody.$ref, document)
+    const resolved = resolveRef(requestBody.$ref, document)
     if (resolved && 'content' in resolved && resolved.content) {
       const content =
         resolved.content as OpenAPIV3_1.RequestBodyObject['content']

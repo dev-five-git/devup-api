@@ -8,9 +8,9 @@ import {
   extractParameters,
   extractRequestBody,
   formatTypeValue,
-  getRequestBodyContent,
   getTypeFromSchema,
 } from './generate-schema'
+import { getRequestBodyContent } from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 export interface ParameterDefinition
