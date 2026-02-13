@@ -10,7 +10,12 @@ import {
   formatTypeValue,
   getTypeFromSchema,
 } from './generate-schema'
-import { getRequestBodyContent } from './openapi-utils'
+import {
+  extractSchemaNameFromRef,
+  getRequestBodyContent,
+  isErrorStatusCode,
+  normalizeServerName,
+} from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
 export interface ParameterDefinition
@@ -27,17 +32,88 @@ export interface EndpointDefinition {
   error?: unknown
 }
 
-// Helper function to extract schema names from $ref
-function extractSchemaNameFromRef(ref: string): string | null {
-  if (ref.startsWith('#/components/schemas/')) {
-    return ref.replace('#/components/schemas/', '')
+// Extract schema type from a response/error object's JSON content.
+// Shared logic for both success response and error response extraction.
+function extractContentType(
+  responseObj:
+    | OpenAPIV3_1.ResponseObject
+    | OpenAPIV3_1.ReferenceObject
+    | undefined,
+  componentType: 'response' | 'error',
+  schemaNames: Set<string>,
+  schema: OpenAPIV3_1.Document,
+  serverName: string,
+  enumContext: ReturnType<typeof createSchemaContext>,
+  options?: DevupApiTypeGeneratorOptions,
+): unknown {
+  if (!responseObj) return undefined
+  if ('$ref' in responseObj) {
+    // ResponseObject reference - skip for now
+    return undefined
   }
-  return null
-}
+  if (!('content' in responseObj)) return undefined
 
-// Helper function to normalize server name by removing ./ prefix
-function normalizeServerName(serverName: string): string {
-  return serverName.replace(/^\.\//, '')
+  const content = responseObj.content
+  const jsonContent = content?.['application/json']
+  if (!jsonContent || !('schema' in jsonContent) || !jsonContent.schema) {
+    return undefined
+  }
+
+  const contextLabel = componentType === 'response' ? 'Response' : 'Error'
+  const responseDefaultNonNullable = options?.responseDefaultNonNullable ?? true
+
+  const extractInlineType = (
+    schemaRef: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+  ): unknown => {
+    const inlineContext = createSchemaContext(contextLabel)
+    const { type: schemaType } = getTypeFromSchema(schemaRef, schema, {
+      defaultNonNullable: responseDefaultNonNullable,
+      context: inlineContext,
+      serverName,
+      componentType,
+      usedSchemaNames: schemaNames,
+    })
+    for (const [enumName, enumDef] of inlineContext.enums) {
+      if (!enumContext.enums.has(enumName)) {
+        enumContext.enums.set(enumName, enumDef)
+      }
+    }
+    return schemaType
+  }
+
+  // Check if schema is a direct reference to components.schemas
+  if ('$ref' in jsonContent.schema) {
+    const schemaName = extractSchemaNameFromRef(jsonContent.schema.$ref)
+    if (
+      schemaName &&
+      schema.components?.schemas?.[schemaName] &&
+      schemaNames.has(schemaName)
+    ) {
+      return `DevupObject<'${componentType}', '${serverName}'>['${schemaName}']`
+    }
+    return extractInlineType(jsonContent.schema)
+  }
+
+  // Check if it's an array with items referencing a component schema
+  const schemaObj = jsonContent.schema as OpenAPIV3_1.SchemaObject
+  if (
+    schemaObj.type === 'array' &&
+    schemaObj.items &&
+    '$ref' in schemaObj.items
+  ) {
+    const schemaName = extractSchemaNameFromRef(schemaObj.items.$ref)
+    if (
+      schemaName &&
+      schema.components?.schemas?.[schemaName] &&
+      schemaNames.has(schemaName)
+    ) {
+      return `Array<DevupObject<'${componentType}', '${serverName}'>['${schemaName}']>`
+    }
+    return extractInlineType(jsonContent.schema)
+  }
+
+  // Extract schema type (inline schema)
+  return extractInlineType(jsonContent.schema)
 }
 
 // Generate interface for a single schema
@@ -141,13 +217,6 @@ function generateSchemaInterface(
   const requestSchemaNames = new Set<string>()
   const responseSchemaNames = new Set<string>()
   const errorSchemaNames = new Set<string>()
-
-  // Helper function to check if a status code is an error response
-  const isErrorStatusCode = (statusCode: string): boolean => {
-    if (statusCode === 'default') return true
-    const code = parseInt(statusCode, 10)
-    return code >= 400 && code < 600
-  }
 
   // First, collect schema names used in request body and responses
   if (schema.paths) {
@@ -332,7 +401,6 @@ function generateSchemaInterface(
 
         // Extract response
         // Check if response uses a component schema
-        let responseType: unknown
         if (operation.responses) {
           // Prefer 200 response, fallback to first available response
           const successResponse =
@@ -340,135 +408,22 @@ function generateSchemaInterface(
             operation.responses['201'] ||
             Object.values(operation.responses)[0]
 
-          if (successResponse) {
-            if ('$ref' in successResponse) {
-              // ResponseObject reference - skip for now
-              // Could resolve if needed
-            } else if ('content' in successResponse) {
-              const content = successResponse.content
-              const jsonContent = content?.['application/json']
-              if (
-                jsonContent &&
-                'schema' in jsonContent &&
-                jsonContent.schema
-              ) {
-                // Check if schema is a direct reference to components.schemas
-                if ('$ref' in jsonContent.schema) {
-                  const schemaName = extractSchemaNameFromRef(
-                    jsonContent.schema.$ref,
-                  )
-                  // Check if schema exists in components.schemas and is used in response
-                  if (
-                    schemaName &&
-                    schema.components?.schemas?.[schemaName] &&
-                    responseSchemaNames.has(schemaName)
-                  ) {
-                    // Use component reference
-                    responseType = `DevupObject<'response', '${serverName}'>['${schemaName}']`
-                  } else {
-                    // Extract schema type with response options
-                    const responseDefaultNonNullable =
-                      options?.responseDefaultNonNullable ?? true
-                    const inlineContext = createSchemaContext('Response')
-                    const { type: schemaType } = getTypeFromSchema(
-                      jsonContent.schema,
-                      schema,
-                      {
-                        defaultNonNullable: responseDefaultNonNullable,
-                        context: inlineContext,
-                        serverName,
-                        componentType: 'response',
-                        usedSchemaNames: responseSchemaNames,
-                      },
-                    )
-                    // Merge enums
-                    for (const [enumName, enumDef] of inlineContext.enums) {
-                      if (!enumContext.enums.has(enumName)) {
-                        enumContext.enums.set(enumName, enumDef)
-                      }
-                    }
-                    responseType = schemaType
-                  }
-                } else {
-                  // Check if it's an array with items referencing a component schema
-                  const schemaObj =
-                    jsonContent.schema as OpenAPIV3_1.SchemaObject
-                  if (
-                    schemaObj.type === 'array' &&
-                    schemaObj.items &&
-                    '$ref' in schemaObj.items
-                  ) {
-                    const schemaName = extractSchemaNameFromRef(
-                      schemaObj.items.$ref,
-                    )
-                    // Check if schema exists in components.schemas and is used in response
-                    if (
-                      schemaName &&
-                      schema.components?.schemas?.[schemaName] &&
-                      responseSchemaNames.has(schemaName)
-                    ) {
-                      // Use component reference for array items
-                      responseType = `Array<DevupObject<'response', '${serverName}'>['${schemaName}']>`
-                    } else {
-                      // Extract schema type with response options
-                      const responseDefaultNonNullable =
-                        options?.responseDefaultNonNullable ?? true
-                      const inlineContext = createSchemaContext('Response')
-                      const { type: schemaType } = getTypeFromSchema(
-                        jsonContent.schema,
-                        schema,
-                        {
-                          defaultNonNullable: responseDefaultNonNullable,
-                          context: inlineContext,
-                          serverName,
-                          componentType: 'response',
-                          usedSchemaNames: responseSchemaNames,
-                        },
-                      )
-                      // Merge enums
-                      for (const [enumName, enumDef] of inlineContext.enums) {
-                        if (!enumContext.enums.has(enumName)) {
-                          enumContext.enums.set(enumName, enumDef)
-                        }
-                      }
-                      responseType = schemaType
-                    }
-                  } else {
-                    // Extract schema type with response options
-                    const responseDefaultNonNullable =
-                      options?.responseDefaultNonNullable ?? true
-                    const inlineContext = createSchemaContext('Response')
-                    const { type: schemaType } = getTypeFromSchema(
-                      jsonContent.schema,
-                      schema,
-                      {
-                        defaultNonNullable: responseDefaultNonNullable,
-                        context: inlineContext,
-                        serverName,
-                        componentType: 'response',
-                        usedSchemaNames: responseSchemaNames,
-                      },
-                    )
-                    // Merge enums
-                    for (const [enumName, enumDef] of inlineContext.enums) {
-                      if (!enumContext.enums.has(enumName)) {
-                        enumContext.enums.set(enumName, enumDef)
-                      }
-                    }
-                    responseType = schemaType
-                  }
-                }
-              }
-            }
+          const responseType = extractContentType(
+            successResponse,
+            'response',
+            responseSchemaNames,
+            schema,
+            serverName,
+            enumContext,
+            options,
+          )
+          if (responseType !== undefined) {
+            endpoint.response = responseType
           }
-        }
-        if (responseType !== undefined) {
-          endpoint.response = responseType
         }
 
         // Extract error
         // Check if error uses a component schema
-        let errorType: unknown
         if (operation.responses) {
           // Find error responses (4xx, 5xx, or default)
           const errorResponse =
@@ -483,130 +438,18 @@ function generateSchemaInterface(
               isErrorStatusCode(statusCode),
             )?.[1]
 
-          if (errorResponse) {
-            if ('$ref' in errorResponse) {
-              // ResponseObject reference - skip for now
-              // Could resolve if needed
-            } else if ('content' in errorResponse) {
-              const content = errorResponse.content
-              const jsonContent = content?.['application/json']
-              if (
-                jsonContent &&
-                'schema' in jsonContent &&
-                jsonContent.schema
-              ) {
-                // Check if schema is a direct reference to components.schemas
-                if ('$ref' in jsonContent.schema) {
-                  const schemaName = extractSchemaNameFromRef(
-                    jsonContent.schema.$ref,
-                  )
-                  // Check if schema exists in components.schemas and is used in error
-                  if (
-                    schemaName &&
-                    schema.components?.schemas?.[schemaName] &&
-                    errorSchemaNames.has(schemaName)
-                  ) {
-                    // Use component reference
-                    errorType = `DevupObject<'error', '${serverName}'>['${schemaName}']`
-                  } else {
-                    // Extract schema type with response options
-                    const responseDefaultNonNullable =
-                      options?.responseDefaultNonNullable ?? true
-                    const inlineContext = createSchemaContext('Error')
-                    const { type: schemaType } = getTypeFromSchema(
-                      jsonContent.schema,
-                      schema,
-                      {
-                        defaultNonNullable: responseDefaultNonNullable,
-                        context: inlineContext,
-                        serverName,
-                        componentType: 'error',
-                        usedSchemaNames: errorSchemaNames,
-                      },
-                    )
-                    // Merge enums
-                    for (const [enumName, enumDef] of inlineContext.enums) {
-                      if (!enumContext.enums.has(enumName)) {
-                        enumContext.enums.set(enumName, enumDef)
-                      }
-                    }
-                    errorType = schemaType
-                  }
-                } else {
-                  // Check if it's an array with items referencing a component schema
-                  const schemaObj =
-                    jsonContent.schema as OpenAPIV3_1.SchemaObject
-                  if (
-                    schemaObj.type === 'array' &&
-                    schemaObj.items &&
-                    '$ref' in schemaObj.items
-                  ) {
-                    const schemaName = extractSchemaNameFromRef(
-                      schemaObj.items.$ref,
-                    )
-                    // Check if schema exists in components.schemas and is used in error
-                    if (
-                      schemaName &&
-                      schema.components?.schemas?.[schemaName] &&
-                      errorSchemaNames.has(schemaName)
-                    ) {
-                      // Use component reference for array items
-                      errorType = `Array<DevupObject<'error', '${serverName}'>['${schemaName}']>`
-                    } else {
-                      // Extract schema type with response options
-                      const responseDefaultNonNullable =
-                        options?.responseDefaultNonNullable ?? true
-                      const inlineContext = createSchemaContext('Error')
-                      const { type: schemaType } = getTypeFromSchema(
-                        jsonContent.schema,
-                        schema,
-                        {
-                          defaultNonNullable: responseDefaultNonNullable,
-                          context: inlineContext,
-                          serverName,
-                          componentType: 'error',
-                          usedSchemaNames: errorSchemaNames,
-                        },
-                      )
-                      // Merge enums
-                      for (const [enumName, enumDef] of inlineContext.enums) {
-                        if (!enumContext.enums.has(enumName)) {
-                          enumContext.enums.set(enumName, enumDef)
-                        }
-                      }
-                      errorType = schemaType
-                    }
-                  } else {
-                    // Extract schema type with response options
-                    const responseDefaultNonNullable =
-                      options?.responseDefaultNonNullable ?? true
-                    const inlineContext = createSchemaContext('Error')
-                    const { type: schemaType } = getTypeFromSchema(
-                      jsonContent.schema,
-                      schema,
-                      {
-                        defaultNonNullable: responseDefaultNonNullable,
-                        context: inlineContext,
-                        serverName,
-                        componentType: 'error',
-                        usedSchemaNames: errorSchemaNames,
-                      },
-                    )
-                    // Merge enums
-                    for (const [enumName, enumDef] of inlineContext.enums) {
-                      if (!enumContext.enums.has(enumName)) {
-                        enumContext.enums.set(enumName, enumDef)
-                      }
-                    }
-                    errorType = schemaType
-                  }
-                }
-              }
-            }
+          const errorType = extractContentType(
+            errorResponse,
+            'error',
+            errorSchemaNames,
+            schema,
+            serverName,
+            enumContext,
+            options,
+          )
+          if (errorType !== undefined) {
+            endpoint.error = errorType
           }
-        }
-        if (errorType !== undefined) {
-          endpoint.error = errorType
         }
 
         // Generate path key (normalize path by replacing {param} with converted param and removing slashes)
