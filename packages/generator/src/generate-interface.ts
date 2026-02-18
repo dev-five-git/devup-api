@@ -16,6 +16,7 @@ import {
   getRequestBodyContent,
   isErrorStatusCode,
   normalizeServerName,
+  resolveRef,
 } from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
@@ -115,6 +116,30 @@ function extractContentType(
 
   // Extract schema type (inline schema)
   return extractInlineType(jsonContent.schema)
+}
+
+/**
+ * Check if a request body uses form or multipart content type.
+ */
+function isFormOrMultipartRequestBody(
+  requestBody: OpenAPIV3_1.RequestBodyObject | OpenAPIV3_1.ReferenceObject,
+  document: OpenAPIV3_1.Document,
+): boolean {
+  let content: OpenAPIV3_1.RequestBodyObject['content'] | undefined
+  if ('$ref' in requestBody) {
+    const resolved = resolveRef<OpenAPIV3_1.RequestBodyObject>(
+      requestBody.$ref,
+      document,
+    )
+    content = resolved?.content
+  } else {
+    content = requestBody.content
+  }
+  if (!content) return false
+  return (
+    content['multipart/form-data'] !== undefined ||
+    content['application/x-www-form-urlencoded'] !== undefined
+  )
 }
 
 // Generate interface for a single schema
@@ -346,6 +371,22 @@ function generateSchemaInterface(
           }
         }
         if (requestBodyType !== undefined) {
+          // For form/multipart endpoints, also allow FormData as body type
+          if (operation.requestBody) {
+            const isFormMultipart = isFormOrMultipartRequestBody(
+              operation.requestBody,
+              schema,
+            )
+            if (isFormMultipart) {
+              const bodyStr =
+                typeof requestBodyType === 'string'
+                  ? requestBodyType
+                  : formatTypeValue(requestBodyType)
+              if (!bodyStr.includes('FormData')) {
+                requestBodyType = `${bodyStr} | FormData`
+              }
+            }
+          }
           endpoint.body = requestBodyType
         }
 
