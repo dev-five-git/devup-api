@@ -1834,13 +1834,13 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     'openapi.json': {
       '/form': {
-        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'] | FormData;
         response?: {
           ok?: boolean;
         };
       };
       subscribe: {
-        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'] | FormData;
         response?: {
           ok?: boolean;
         };
@@ -1875,19 +1875,19 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     'openapi.json': {
       '/form/contact': {
-        body?: {
-          name?: string;
-          email?: string;
-          message?: string;
-        };
+        body: {
+  name?: string;
+  email?: string;
+  message?: string;
+} | FormData;
         response?: {};
       };
       contact: {
-        body?: {
-          name?: string;
-          email?: string;
-          message?: string;
-        };
+        body: {
+  name?: string;
+  email?: string;
+  message?: string;
+} | FormData;
         response?: {};
       };
     }
@@ -1913,13 +1913,13 @@ declare module "@devup-api/fetch" {
   interface DevupPostApiStruct {
     'openapi.json': {
       '/typed-form': {
-        body: DevupObject<'request', 'openapi.json'>['CreateFileUploadRequest'];
+        body: DevupObject<'request', 'openapi.json'>['CreateFileUploadRequest'] | FormData;
         response?: {
           id?: string;
         };
       };
       createFileUpload: {
-        body: DevupObject<'request', 'openapi.json'>['CreateFileUploadRequest'];
+        body: DevupObject<'request', 'openapi.json'>['CreateFileUploadRequest'] | FormData;
         response?: {
           id?: string;
         };
@@ -1993,14 +1993,14 @@ declare module "@devup-api/fetch" {
         params: {
           id: string;
         };
-        body: DevupObject<'request', 'openapi.json'>['UpdateFileUploadRequest'];
+        body: DevupObject<'request', 'openapi.json'>['UpdateFileUploadRequest'] | FormData;
         response?: {};
       };
       updateFileUpload: {
         params: {
           id: string;
         };
-        body: DevupObject<'request', 'openapi.json'>['UpdateFileUploadRequest'];
+        body: DevupObject<'request', 'openapi.json'>['UpdateFileUploadRequest'] | FormData;
         response?: {};
       };
     }
@@ -2012,14 +2012,14 @@ declare module "@devup-api/fetch" {
         params: {
           id: string;
         };
-        body: DevupObject<'request', 'openapi.json'>['PatchFileUploadRequest'];
+        body: DevupObject<'request', 'openapi.json'>['PatchFileUploadRequest'] | FormData;
         response?: {};
       };
       patchFileUpload: {
         params: {
           id: string;
         };
-        body: DevupObject<'request', 'openapi.json'>['PatchFileUploadRequest'];
+        body: DevupObject<'request', 'openapi.json'>['PatchFileUploadRequest'] | FormData;
         response?: {};
       };
     }
@@ -2064,11 +2064,11 @@ declare module "@devup-api/fetch" {
         response?: {};
       };
       '/form': {
-        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'] | FormData;
         response?: {};
       };
       subscribe: {
-        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'];
+        body: DevupObject<'request', 'openapi.json'>['SubscribeRequest'] | FormData;
         response?: {};
       };
       '/form/upload': {

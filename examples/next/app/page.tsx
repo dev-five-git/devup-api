@@ -97,6 +97,10 @@ export default function Home() {
         tags: 'tag1,tag2',
       },
     })
+
+    api3.POST('/typed-form', {
+      body: new FormData(),
+    })
   }, [mutateAsync])
   return (
     <Box>
