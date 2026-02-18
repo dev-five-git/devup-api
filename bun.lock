@@ -95,7 +95,7 @@
     },
     "packages/core": {
       "name": "@devup-api/core",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "devDependencies": {
         "@types/node": "^25.2",
         "typescript": "^5.9",
@@ -103,7 +103,7 @@
     },
     "packages/fetch": {
       "name": "@devup-api/fetch",
-      "version": "0.1.15",
+      "version": "0.1.16",
       "dependencies": {
         "@devup-api/core": "workspace:^",
       },
@@ -114,7 +114,7 @@
     },
     "packages/generator": {
       "name": "@devup-api/generator",
-      "version": "0.1.16",
+      "version": "0.1.18",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/utils": "workspace:^",
@@ -127,7 +127,7 @@
     },
     "packages/hookform": {
       "name": "@devup-api/hookform",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@devup-api/fetch": "workspace:^",
         "@devup-api/zod": "workspace:^",
@@ -158,7 +158,7 @@
     },
     "packages/next-plugin": {
       "name": "@devup-api/next-plugin",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -177,7 +177,7 @@
     },
     "packages/react-query": {
       "name": "@devup-api/react-query",
-      "version": "0.1.8",
+      "version": "0.1.9",
       "dependencies": {
         "@devup-api/fetch": "workspace:^",
         "@tanstack/react-query": ">=5.90",
@@ -196,7 +196,7 @@
     },
     "packages/rsbuild-plugin": {
       "name": "@devup-api/rsbuild-plugin",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -213,7 +213,7 @@
     },
     "packages/ui": {
       "name": "@devup-api/ui",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@devup-api/hookform": "workspace:^",
       },
@@ -232,7 +232,7 @@
     },
     "packages/utils": {
       "name": "@devup-api/utils",
-      "version": "0.1.7",
+      "version": "0.1.8",
       "devDependencies": {
         "@types/node": "^25.2",
         "openapi-types": "^12.1",
@@ -241,7 +241,7 @@
     },
     "packages/vite-plugin": {
       "name": "@devup-api/vite-plugin",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -259,7 +259,7 @@
     },
     "packages/webpack-plugin": {
       "name": "@devup-api/webpack-plugin",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -276,7 +276,7 @@
     },
     "packages/zod": {
       "name": "@devup-api/zod",
-      "version": "0.1.0",
+      "version": "0.1.1",
       "dependencies": {
         "@devup-api/fetch": "workspace:^",
         "zod": ">=4",
