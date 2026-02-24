@@ -56,10 +56,13 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
         queryClient?: Parameters<typeof useQuery<D, E>>[1],
       ]
     >
-  ): ReturnType<typeof useQuery<D, E>> {
-    return useQuery<D, E>(
+  ): ReturnType<typeof useQuery<D, E>> & {
+    queryKey: [M, T, ...unknown[]]
+  } {
+    const queryKey = getQueryKey(method, path, options[0])
+    const result = useQuery<D, E>(
       {
-        queryKey: getQueryKey(method, path, options[0]),
+        queryKey,
         queryFn: ({
           queryKey: [method, path, ...options],
           signal,
@@ -78,6 +81,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
       },
       options[2],
     )
+    return Object.assign(result, { queryKey })
   }
 
   useMutation<
@@ -134,10 +138,13 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
         queryClient?: Parameters<typeof useSuspenseQuery<D, E>>[1],
       ]
     >
-  ): ReturnType<typeof useSuspenseQuery<D, E>> {
-    return useSuspenseQuery<D, E, D>(
+  ): ReturnType<typeof useSuspenseQuery<D, E>> & {
+    queryKey: [M, T, ...unknown[]]
+  } {
+    const queryKey = getQueryKey(method, path, options[0])
+    const result = useSuspenseQuery<D, E, D>(
       {
-        queryKey: getQueryKey(method, path, options[0]),
+        queryKey,
         queryFn: ({
           queryKey: [method, path, ...options],
           signal,
@@ -156,6 +163,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
       },
       options[2],
     )
+    return Object.assign(result, { queryKey })
   }
 
   useInfiniteQuery<
@@ -180,13 +188,16 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
       >,
       queryClient?: Parameters<typeof useInfiniteQuery<D, E>>[1],
     ]
-  ): ReturnType<typeof useInfiniteQuery<D, E>> {
+  ): ReturnType<typeof useInfiniteQuery<D, E>> & {
+    queryKey: [M, T, ...unknown[]]
+  } {
     const { getNextPageParam, initialPageParam, ...apiOptions } = options[0]
-    return useInfiniteQuery<D, E>(
+    const queryKey = getQueryKey(method, path, apiOptions)
+    const result = useInfiniteQuery<D, E>(
       {
         getNextPageParam,
         initialPageParam,
-        queryKey: getQueryKey(method, path, apiOptions),
+        queryKey,
         queryFn: ({ queryKey, pageParam, signal }): Promise<D> => {
           const [methodKey, pathKey, ...restOptions] = queryKey
           const apiOptions = restOptions[0] as DevupApiRequestInit | undefined
@@ -212,6 +223,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
       } as Parameters<typeof useInfiniteQuery<D, E>>[0],
       options[2],
     )
+    return Object.assign(result, { queryKey })
   }
 
   useQueries<

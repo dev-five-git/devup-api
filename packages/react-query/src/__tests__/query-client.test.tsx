@@ -53,6 +53,7 @@ test('DevupQueryClient useQuery with GET method', async () => {
   )
 
   expect(result.current.data).toEqual({ id: 1, name: 'test' })
+  expect(result.current.queryKey).toEqual(['get', '/test'])
 })
 
 test('DevupQueryClient useQuery with options', async () => {
@@ -75,6 +76,11 @@ test('DevupQueryClient useQuery with options', async () => {
   )
 
   expect(result.current.data).toEqual({ id: 1, name: 'test' })
+  expect(result.current.queryKey).toEqual([
+    'get',
+    '/test',
+    { params: { id: '123' } },
+  ])
 })
 
 test('DevupQueryClient useQuery with queryOptions', async () => {
@@ -97,6 +103,7 @@ test('DevupQueryClient useQuery with queryOptions', async () => {
   )
 
   expect(result.current.data).toEqual({ id: 1, name: 'test' })
+  expect(result.current.queryKey).toEqual(['get', '/test'])
 })
 
 test('DevupQueryClient useMutation with POST method', async () => {
@@ -176,6 +183,7 @@ test('DevupQueryClient useSuspenseQuery with GET method', async () => {
   )
 
   expect(result.current.data).toEqual({ id: 1, name: 'test' })
+  expect(result.current.queryKey).toEqual(['get', '/test'])
 })
 
 test('DevupQueryClient useSuspenseQuery with options', async () => {
@@ -198,6 +206,11 @@ test('DevupQueryClient useSuspenseQuery with options', async () => {
   )
 
   expect(result.current.data).toEqual({ id: 1, name: 'test' })
+  expect(result.current.queryKey).toEqual([
+    'get',
+    '/test',
+    { params: { id: '123' } },
+  ])
 })
 
 test('DevupQueryClient useInfiniteQuery with GET method', async () => {
@@ -224,6 +237,7 @@ test('DevupQueryClient useInfiniteQuery with GET method', async () => {
     pages: [{ id: 1, name: 'test' }],
     pageParams: [1],
   })
+  expect(result.current.queryKey).toEqual(['get', '/test', {}])
 })
 
 test('DevupQueryClient useInfiniteQuery with options', async () => {
@@ -251,6 +265,11 @@ test('DevupQueryClient useInfiniteQuery with options', async () => {
     pages: [{ id: 1, name: 'test' }],
     pageParams: [1],
   })
+  expect(result.current.queryKey).toEqual([
+    'get',
+    '/test',
+    { query: { page: 1 } },
+  ])
 })
 
 test('DevupQueryClient useQuery with different HTTP methods', async () => {
