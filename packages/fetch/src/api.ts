@@ -223,7 +223,12 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   ): Promise<
     DevupApiResponse<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
   > {
-    const { method, url, bodyType } = getApiEndpointInfo(path, this.serverName)
+    const { method, url, bodyType } = getApiEndpointInfo(
+      path,
+      this.serverName,
+      (options[0]?.method as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH') ||
+        'GET',
+    )
     const {
       middleware = [],
       query,
