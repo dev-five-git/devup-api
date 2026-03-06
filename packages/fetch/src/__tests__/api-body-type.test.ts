@@ -3,23 +3,28 @@ import { afterEach, beforeEach, describe, expect, mock, test } from 'bun:test'
 import type { UrlMapValue } from '@devup-api/core'
 
 // Mock the url-map module to return custom bodyType values
-const mockUrlMap: Record<string, Record<string, UrlMapValue>> = {
+const mockUrlMap: Record<
+  string,
+  Record<string, Partial<Record<string, Omit<UrlMapValue, 'method'>>>>
+> = {
   'openapi.json': {
-    submitForm: { method: 'POST', url: '/submit', bodyType: 'form' },
-    uploadFile: { method: 'POST', url: '/upload', bodyType: 'multipart' },
-    jsonEndpoint: { method: 'POST', url: '/json', bodyType: 'json' },
+    submitForm: { POST: { url: '/submit', bodyType: 'form' } },
+    uploadFile: {
+      POST: { url: '/upload', bodyType: 'multipart' },
+    },
+    jsonEndpoint: { POST: { url: '/json', bodyType: 'json' } },
   },
 }
 
 mock.module('../url-map', () => ({
   DEVUP_API_URL_MAP: mockUrlMap,
-  getApiEndpointInfo: (key: string, serverName: string): UrlMapValue => {
-    const result = mockUrlMap[serverName]?.[key] ?? {
-      method: 'GET' as const,
-      url: key,
-    }
-    result.url ||= key
-    return result
+  getApiEndpointInfo: (
+    key: string,
+    serverName: string,
+    method: string,
+  ): UrlMapValue => {
+    const stored = mockUrlMap[serverName]?.[key]?.[method]
+    return { method: method as 'GET', url: key, ...stored }
   },
 }))
 
