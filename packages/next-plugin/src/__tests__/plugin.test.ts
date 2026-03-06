@@ -41,12 +41,10 @@ const mockSchema = {
 
 const mockUrlMap = {
   getUsers: {
-    method: 'GET' as const,
-    url: '/users',
+    GET: { url: '/users' },
   },
   '/users': {
-    method: 'GET' as const,
-    url: '/users',
+    GET: { url: '/users' },
   },
 }
 

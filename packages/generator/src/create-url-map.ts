@@ -1,4 +1,9 @@
-import type { DevupApiTypeGeneratorOptions, UrlMapValue } from '@devup-api/core'
+import type {
+  DevupApiTypeGeneratorOptions,
+  HttpMethod,
+  UrlMapEntry,
+  UrlMapStoredValue,
+} from '@devup-api/core'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { convertCase } from './convert-case'
 import { resolveRef } from './openapi-utils'
@@ -30,12 +35,12 @@ function getBodyType(
 export function createUrlMap(
   schemas: Record<string, OpenAPIV3_1.Document>,
   options?: DevupApiTypeGeneratorOptions,
-): Record<string, Record<string, UrlMapValue>> {
+): Record<string, Record<string, UrlMapEntry>> {
   const convertCaseType = options?.convertCase ?? 'camel'
-  const urlMaps: Record<string, Record<string, UrlMapValue>> = {}
+  const urlMaps: Record<string, Record<string, UrlMapEntry>> = {}
 
   for (const [serverName, schema] of Object.entries(schemas)) {
-    const urlMap: Record<string, UrlMapValue> = {}
+    const urlMap: Record<string, UrlMapEntry> = {}
     for (const [path, pathItem] of Object.entries(schema.paths ?? {})) {
       if (!pathItem) continue
       for (const method of ['get', 'post', 'put', 'delete', 'patch'] as const) {
@@ -46,20 +51,19 @@ export function createUrlMap(
           return `{${convertCase(param, convertCaseType)}}`
         })
         const bodyType = getBodyType(operation, schema)
-        const value: UrlMapValue = {
-          method: method.toUpperCase() as
-            | 'GET'
-            | 'POST'
-            | 'PUT'
-            | 'DELETE'
-            | 'PATCH',
+        const methodKey = method.toUpperCase() as HttpMethod
+        const value: UrlMapStoredValue = {
           url: normalizedPath,
           ...(bodyType && { bodyType }),
         }
         if (operation.operationId) {
-          urlMap[convertCase(operation.operationId, convertCaseType)] = value
+          const opKey = convertCase(operation.operationId, convertCaseType)
+          urlMap[opKey] = { ...urlMap[opKey], [methodKey]: value }
         }
-        urlMap[normalizedPath] = value
+        urlMap[normalizedPath] = {
+          ...urlMap[normalizedPath],
+          [methodKey]: value,
+        }
       }
     }
     urlMaps[serverName] = urlMap

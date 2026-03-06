@@ -2,10 +2,10 @@ import { beforeEach, expect, test } from 'bun:test'
 
 const urlMap = {
   foo: {
-    getUsers: { method: 'GET' as const, url: '/users' },
-    createUser: { method: 'POST' as const, url: '/users' },
-    updateUser: { method: 'PUT' as const, url: '/users/{id}' },
-    deleteUser: { method: 'DELETE' as const, url: '/users/{id}' },
+    getUsers: { GET: { url: '/users' } },
+    createUser: { POST: { url: '/users' } },
+    updateUser: { PUT: { url: '/users/{id}' } },
+    deleteUser: { DELETE: { url: '/users/{id}' } },
   },
 }
 
@@ -15,41 +15,52 @@ beforeEach(() => {
 const random = Math.random()
 
 test.each([
-  ['getUsers', '/users', JSON.stringify(urlMap)],
-  ['createUser', '/users', JSON.stringify(urlMap)],
-  ['updateUser', '/users/{id}', JSON.stringify(urlMap)],
-  ['deleteUser', '/users/{id}', JSON.stringify(urlMap)],
-] as const)('getApiEndpointInfo returns url for existing key: %s -> %s', async (key, expected, envValue) => {
+  ['getUsers', '/users', 'GET', JSON.stringify(urlMap)],
+  ['createUser', '/users', 'POST', JSON.stringify(urlMap)],
+  ['updateUser', '/users/{id}', 'PUT', JSON.stringify(urlMap)],
+  ['deleteUser', '/users/{id}', 'DELETE', JSON.stringify(urlMap)],
+] as const)('getApiEndpointInfo returns url for existing key: %s -> %s', async (key, expected, method, envValue) => {
   process.env.DEVUP_API_URL_MAP = envValue
   // Add query parameter to bypass module cache and reload
   const { getApiEndpointInfo } = await import(`../url-map?t=${random}`)
-  expect(getApiEndpointInfo(key, 'foo')?.url).toBe(expected)
+  expect(getApiEndpointInfo(key, 'foo', method)?.url).toBe(expected)
 })
 
 test.each([
-  ['nonExistentKey', 'nonExistentKey', JSON.stringify(urlMap)],
-  ['unknown', 'unknown', JSON.stringify(urlMap)],
-  ['', '', JSON.stringify(urlMap)],
-  ['/users', '/users', JSON.stringify(urlMap)],
-] as const)('getApiEndpointInfo returns key itself when key does not exist: %s -> %s', async (key, expected, envValue) => {
+  ['nonExistentKey', 'nonExistentKey', 'GET', JSON.stringify(urlMap)],
+  ['unknown', 'unknown', 'GET', JSON.stringify(urlMap)],
+  ['', '', 'GET', JSON.stringify(urlMap)],
+  ['/users', '/users', 'GET', JSON.stringify(urlMap)],
+] as const)('getApiEndpointInfo returns key itself when key does not exist: %s -> %s', async (key, expected, method, envValue) => {
   process.env.DEVUP_API_URL_MAP = envValue
   const { getApiEndpointInfo } = await import(`../url-map?t=${random}`)
-  expect(getApiEndpointInfo(key, 'foo').url).toBe(expected)
+  expect(getApiEndpointInfo(key, 'foo', method).url).toBe(expected)
 })
 
 test.each([
-  ['getUsers', { method: 'GET', url: '/users' }, JSON.stringify(urlMap)],
-  ['createUser', { method: 'POST', url: '/users' }, JSON.stringify(urlMap)],
-  ['updateUser', { method: 'PUT', url: '/users/{id}' }, JSON.stringify(urlMap)],
+  ['getUsers', { method: 'GET', url: '/users' }, 'GET', JSON.stringify(urlMap)],
+  [
+    'createUser',
+    { method: 'POST', url: '/users' },
+    'POST',
+    JSON.stringify(urlMap),
+  ],
+  [
+    'updateUser',
+    { method: 'PUT', url: '/users/{id}' },
+    'PUT',
+    JSON.stringify(urlMap),
+  ],
   [
     'deleteUser',
     { method: 'DELETE', url: '/users/{id}' },
+    'DELETE',
     JSON.stringify(urlMap),
   ],
-] as const)('getApiEndpointInfo returns UrlMapValue for existing key: %s -> %s', async (key, expected, envValue) => {
+] as const)('getApiEndpointInfo returns UrlMapValue for existing key: %s -> %s', async (key, expected, method, envValue) => {
   process.env.DEVUP_API_URL_MAP = envValue
   const { getApiEndpointInfo } = await import(`../url-map?t=${random}`)
-  expect(getApiEndpointInfo(key, 'foo')).toEqual(expected)
+  expect(getApiEndpointInfo(key, 'foo', method)).toEqual(expected)
 })
 
 test.each([

@@ -10,8 +10,8 @@ test.each([
     undefined,
     'get_users',
     {
-      getUsers: { method: 'GET', url: '/users' },
-      '/users': { method: 'GET', url: '/users' },
+      getUsers: { GET: { url: '/users' } },
+      '/users': { GET: { url: '/users' } },
     },
   ],
   [
@@ -19,8 +19,8 @@ test.each([
     { convertCase: 'snake' as const },
     'getUsers',
     {
-      get_users: { method: 'GET', url: '/users' },
-      '/users': { method: 'GET', url: '/users' },
+      get_users: { GET: { url: '/users' } },
+      '/users': { GET: { url: '/users' } },
     },
   ],
   [
@@ -28,8 +28,8 @@ test.each([
     { convertCase: 'pascal' as const },
     'get_users',
     {
-      GetUsers: { method: 'GET', url: '/users' },
-      '/users': { method: 'GET', url: '/users' },
+      GetUsers: { GET: { url: '/users' } },
+      '/users': { GET: { url: '/users' } },
     },
   ],
   [
@@ -37,8 +37,8 @@ test.each([
     { convertCase: 'maintain' as const },
     'get_users',
     {
-      get_users: { method: 'GET', url: '/users' },
-      '/users': { method: 'GET', url: '/users' },
+      get_users: { GET: { url: '/users' } },
+      '/users': { GET: { url: '/users' } },
     },
   ],
 ])('creates url map with %s case conversion', (_, options, operationId, expected) => {
@@ -82,12 +82,14 @@ test('converts path parameters based on convertCase', () => {
   expect(result).toEqual({
     '': {
       getUserPost: {
-        method: 'GET',
-        url: '/users/{userId}/posts/{postId}',
+        GET: {
+          url: '/users/{userId}/posts/{postId}',
+        },
       },
       '/users/{userId}/posts/{postId}': {
-        method: 'GET',
-        url: '/users/{userId}/posts/{postId}',
+        GET: {
+          url: '/users/{userId}/posts/{postId}',
+        },
       },
     },
   })
@@ -116,13 +118,17 @@ test.each([
   const result = createUrlMap({ '': schema })
 
   expect(result['']).toHaveProperty(expectedKey)
-  expect(result['']![expectedKey]?.method).toBe(
-    expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
-  )
+  expect(
+    result['']![expectedKey]?.[
+      expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+    ],
+  ).toBeDefined()
   expect(result['']).toHaveProperty('/users')
-  expect(result['']!['/users']?.method).toBe(
-    expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH',
-  )
+  expect(
+    result['']!['/users']?.[
+      expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+    ],
+  ).toBeDefined()
 })
 
 test('handles operation without operationId', () => {
@@ -143,8 +149,9 @@ test('handles operation without operationId', () => {
   expect(result).toEqual({
     '': {
       '/users': {
-        method: 'GET',
-        url: '/users',
+        GET: {
+          url: '/users',
+        },
       },
     },
   })
@@ -238,12 +245,14 @@ test('skips operations that do not exist', () => {
   expect(result).toEqual({
     '': {
       getUsers: {
-        method: 'GET',
-        url: '/users',
+        GET: {
+          url: '/users',
+        },
       },
       '/users': {
-        method: 'GET',
-        url: '/users',
+        GET: {
+          url: '/users',
+        },
       },
     },
   })
@@ -268,12 +277,14 @@ test('handles complex path with multiple parameters', () => {
   expect(result).toEqual({
     '': {
       get_user_post_comment: {
-        method: 'GET',
-        url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
+        GET: {
+          url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
+        },
       },
       '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}': {
-        method: 'GET',
-        url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
+        GET: {
+          url: '/api/v1/users/{user_id}/posts/{post_id}/comments/{comment_id}',
+        },
       },
     },
   })
@@ -304,7 +315,7 @@ test.each([
     },
   )
 
-  expect(result[''][expectedPath]?.url).toBe(expectedUrl)
+  expect(result[''][expectedPath]?.GET?.url).toBe(expectedUrl)
 })
 
 test.each([
@@ -361,13 +372,11 @@ describe('bodyType emission', () => {
 
     const result = createUrlMap({ '': schema })
 
-    expect(result['']!.subscribe).toEqual({
-      method: 'POST',
+    expect(result['']!.subscribe!.POST).toEqual({
       url: '/form',
       bodyType: 'form',
     })
-    expect(result['']!['/form']).toEqual({
-      method: 'POST',
+    expect(result['']!['/form']!.POST).toEqual({
       url: '/form',
       bodyType: 'form',
     })
@@ -398,13 +407,11 @@ describe('bodyType emission', () => {
 
     const result = createUrlMap({ '': schema })
 
-    expect(result['']!.uploadFile).toEqual({
-      method: 'POST',
+    expect(result['']!.uploadFile!.POST).toEqual({
       url: '/upload',
       bodyType: 'multipart',
     })
-    expect(result['']!['/upload']).toEqual({
-      method: 'POST',
+    expect(result['']!['/upload']!.POST).toEqual({
       url: '/upload',
       bodyType: 'multipart',
     })
@@ -435,12 +442,11 @@ describe('bodyType emission', () => {
 
     const result = createUrlMap({ '': schema })
 
-    expect(result['']!.createUser).toEqual({
-      method: 'POST',
+    expect(result['']!.createUser!.POST).toEqual({
       url: '/users',
     })
-    expect(result['']!.createUser).not.toHaveProperty('bodyType')
-    expect(result['']!['/users']).not.toHaveProperty('bodyType')
+    expect(result['']!.createUser!.POST).not.toHaveProperty('bodyType')
+    expect(result['']!['/users']!.POST).not.toHaveProperty('bodyType')
   })
 
   test('does NOT emit bodyType for GET endpoint without requestBody', () => {
@@ -459,11 +465,10 @@ describe('bodyType emission', () => {
 
     const result = createUrlMap({ '': schema })
 
-    expect(result['']!.getUsers).toEqual({
-      method: 'GET',
+    expect(result['']!.getUsers!.GET).toEqual({
       url: '/users',
     })
-    expect(result['']!.getUsers).not.toHaveProperty('bodyType')
+    expect(result['']!.getUsers!.GET).not.toHaveProperty('bodyType')
   })
 
   test('resolves $ref in requestBody to detect content type', () => {
@@ -501,8 +506,7 @@ describe('bodyType emission', () => {
 
     const result = createUrlMap({ '': schema })
 
-    expect(result['']!.submitForm).toEqual({
-      method: 'POST',
+    expect(result['']!.submitForm!.POST).toEqual({
       url: '/form',
       bodyType: 'form',
     })
@@ -540,8 +544,7 @@ describe('bodyType emission', () => {
 
     const result = createUrlMap({ '': schema })
 
-    expect(result['']!.uploadFile).toEqual({
-      method: 'POST',
+    expect(result['']!.uploadFile!.POST).toEqual({
       url: '/upload',
       bodyType: 'multipart',
     })
@@ -597,11 +600,11 @@ describe('bodyType emission', () => {
     const result = createUrlMap({ '': schema })
 
     // JSON endpoint: no bodyType
-    expect(result['']!.createUser).not.toHaveProperty('bodyType')
+    expect(result['']!.createUser!.POST).not.toHaveProperty('bodyType')
     // Form endpoint: bodyType = 'form'
-    expect(result['']!.subscribe!.bodyType).toBe('form')
+    expect(result['']!.subscribe!.POST!.bodyType).toBe('form')
     // Multipart endpoint: bodyType = 'multipart'
-    expect(result['']!.uploadFile!.bodyType).toBe('multipart')
+    expect(result['']!.uploadFile!.POST!.bodyType).toBe('multipart')
   })
 })
 
