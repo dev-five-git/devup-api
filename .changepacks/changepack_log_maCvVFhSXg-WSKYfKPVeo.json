@@ -1,1 +1,0 @@
-{"changes":{"packages/zod/package.json":"Patch","packages/core/package.json":"Patch","packages/react-query/package.json":"Patch","packages/hookform/package.json":"Patch","packages/generator/package.json":"Patch","packages/fetch/package.json":"Patch"},"note":"Impl pregen, Fix wrong path issue","date":"2026-03-25T12:54:53.475679Z"}
