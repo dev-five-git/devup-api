@@ -28,6 +28,14 @@ export interface DevupResponseComponentStruct {}
 // biome-ignore lint/suspicious/noEmptyInterface: empty interface
 export interface DevupErrorComponentStruct {}
 
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface for augmentation by generator
+export interface DevupPrecomputedMethodKeys {}
+
+// biome-ignore lint/suspicious/noEmptyInterface: empty interface for augmentation by generator
+export interface DevupPrecomputedScopes {}
+
+type LowercaseMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
+
 export type DevupObject<
   R extends 'response' | 'request' | 'error' = 'response',
   T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
@@ -105,7 +113,13 @@ export type DevupApiMethodScope<
 export type DevupApiMethodKey<
   S extends string,
   M extends DevupApiMethodKeys,
-> = ConditionalKeys<DevupApiMethodScope<S, M>>
+> = S extends keyof DevupPrecomputedMethodKeys
+  ? ExtractValue<
+      ExtractValue<DevupPrecomputedMethodKeys, S>,
+      Lowercase<M> & LowercaseMethod,
+      never
+    >
+  : ConditionalKeys<DevupApiMethodScope<S, M>>
 
 export type DevupApiStructScope<O extends string> = DevupGetApiStructScope<O> &
   DevupPostApiStructScope<O> &

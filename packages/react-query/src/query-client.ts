@@ -4,11 +4,13 @@ import type {
   ConditionalApiOption,
   ConditionalKeys,
   DevupApi,
+  DevupApiMethodKey,
   DevupApiMethodKeys,
   DevupApiMethodScope,
   DevupApiRequestInit,
   DevupApiResponse,
   DevupApiServers,
+  DevupPrecomputedScopes,
   ExtractValue,
 } from '@devup-api/fetch'
 import {
@@ -19,11 +21,32 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
+type LowercaseMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
+
+type ResolveScopePrecomputed<
+  S extends string,
+  M extends string,
+  P extends string,
+> = S extends keyof DevupPrecomputedScopes
+  ? P extends keyof ExtractValue<
+      ExtractValue<DevupPrecomputedScopes, S>,
+      M & LowercaseMethod
+    >
+    ? ExtractValue<
+        ExtractValue<DevupPrecomputedScopes, S>,
+        M & LowercaseMethod
+      >[P] &
+        object
+    : object
+  : never
+
 type ResolveScope<
   S extends ConditionalKeys<DevupApiServers>,
   M extends DevupApiMethodKeys,
   P extends string,
-> = Additional<P, DevupApiMethodScope<S, M>>
+> = S extends keyof DevupPrecomputedScopes
+  ? ResolveScopePrecomputed<S, Lowercase<M>, P>
+  : Additional<P, DevupApiMethodScope<S, M>>
 
 type UseQueryOptions<O> = Omit<
   Parameters<
@@ -43,10 +66,10 @@ type LowercaseMethodKeys = 'get' | 'post' | 'put' | 'delete' | 'patch'
 
 type UseQueriesEntry<S extends ConditionalKeys<DevupApiServers>> = {
   [M in LowercaseMethodKeys]: {
-    [P in ConditionalKeys<DevupApiMethodScope<S, M>>]:
+    [P in DevupApiMethodKey<S, M>]:
       | UseQueriesTuple<ResolveScope<S, M, P>, P, M>
       | UseQueriesTuple<ResolveScope<S, M, P>, P, Uppercase<M>>
-  }[ConditionalKeys<DevupApiMethodScope<S, M>>]
+  }[DevupApiMethodKey<S, M>]
 }[LowercaseMethodKeys]
 
 type InferUseQueryResult<
@@ -87,10 +110,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
     this.api = api
   }
 
-  useQuery<
-    M extends DevupApiMethodKeys,
-    T extends ConditionalKeys<DevupApiMethodScope<S, M>>,
-  >(
+  useQuery<M extends DevupApiMethodKeys, T extends DevupApiMethodKey<S, M>>(
     method: M,
     path: T,
     ...options: ApiOption<
@@ -138,10 +158,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
     return Object.assign(result, { queryKey }) as any
   }
 
-  useMutation<
-    M extends DevupApiMethodKeys,
-    T extends ConditionalKeys<DevupApiMethodScope<S, M>>,
-  >(
+  useMutation<M extends DevupApiMethodKeys, T extends DevupApiMethodKey<S, M>>(
     method: M,
     path: T,
     queryOptions?: Omit<
@@ -188,7 +205,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
 
   useSuspenseQuery<
     M extends DevupApiMethodKeys,
-    T extends ConditionalKeys<DevupApiMethodScope<S, M>>,
+    T extends DevupApiMethodKey<S, M>,
   >(
     method: M,
     path: T,
@@ -247,7 +264,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
 
   useInfiniteQuery<
     M extends DevupApiMethodKeys,
-    T extends ConditionalKeys<DevupApiMethodScope<S, M>>,
+    T extends DevupApiMethodKey<S, M>,
   >(
     method: M,
     path: T,

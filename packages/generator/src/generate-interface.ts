@@ -738,10 +738,60 @@ export function generateInterface(
     enumTypeAliases.push(`  type ${enumName} = ${values}`)
   }
 
+  // Generate DevupPrecomputedMethodKeys interface
+  const precomputedEntries: string[] = []
+  for (const serverName of serverNames) {
+    const methodKeyEntries: string[] = []
+    for (const method of methods) {
+      const endpoints = serverEndpoints[serverName]?.[method]
+      const keys = endpoints ? Object.keys(endpoints) : []
+      if (keys.length > 0) {
+        const keyUnion = keys.map((k) => `'${k}'`).join(' | ')
+        methodKeyEntries.push(`      ${method}: ${keyUnion}`)
+      } else {
+        methodKeyEntries.push(`      ${method}: never`)
+      }
+    }
+    const serverKey = wrapInterfaceKeyGuard(serverName)
+    precomputedEntries.push(
+      `    ${serverKey}: {\n${methodKeyEntries.join(';\n')};\n    }`,
+    )
+  }
+  const precomputedInterface =
+    precomputedEntries.length > 0
+      ? `  interface DevupPrecomputedMethodKeys {\n${precomputedEntries.join(';\n')}\n  }`
+      : ''
+
+  // Generate DevupPrecomputedScopes interface (direct struct references per server+method)
+  const precomputedScopeEntries: string[] = []
+  for (const serverName of serverNames) {
+    const methodScopeEntries: string[] = []
+    for (const method of methods) {
+      const endpoints = serverEndpoints[serverName]?.[method]
+      if (endpoints && Object.keys(endpoints).length > 0) {
+        const structName = `Devup${toPascal(method)}ApiStruct`
+        const serverKey = wrapInterfaceKeyGuard(serverName)
+        methodScopeEntries.push(`      ${method}: ${structName}[${serverKey}]`)
+      } else {
+        methodScopeEntries.push(`      ${method}: Record<string, never>`)
+      }
+    }
+    const serverKey = wrapInterfaceKeyGuard(serverName)
+    precomputedScopeEntries.push(
+      `    ${serverKey}: {\n${methodScopeEntries.join(';\n')};\n    }`,
+    )
+  }
+  const precomputedScopeInterface =
+    precomputedScopeEntries.length > 0
+      ? `  interface DevupPrecomputedScopes {\n${precomputedScopeEntries.join(';\n')}\n  }`
+      : ''
+
   // Combine all interfaces
   const allInterfaces = [
     serversInterface,
     ...methodInterfaces,
+    ...(precomputedInterface ? [precomputedInterface] : []),
+    ...(precomputedScopeInterface ? [precomputedScopeInterface] : []),
     requestComponentInterface,
     responseComponentInterface,
     errorComponentInterface,
