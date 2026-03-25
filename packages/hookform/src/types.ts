@@ -2,17 +2,9 @@ import type {
   Additional,
   ConditionalKeys,
   DevupApi,
+  DevupApiMethodKey,
+  DevupApiMethodScope,
   DevupApiServers,
-  DevupDeleteApiStructKey,
-  DevupDeleteApiStructScope,
-  DevupGetApiStructKey,
-  DevupGetApiStructScope,
-  DevupPatchApiStructKey,
-  DevupPatchApiStructScope,
-  DevupPostApiStructKey,
-  DevupPostApiStructScope,
-  DevupPutApiStructKey,
-  DevupPutApiStructScope,
   ExtractValue,
 } from '@devup-api/fetch'
 import type { QueryClient, UseMutationResult } from '@tanstack/react-query'
@@ -31,58 +23,22 @@ export type FetchMethod = 'get' | 'post' | 'put' | 'patch' | 'delete'
 export type MethodApiStructScope<
   S extends string,
   M extends HttpMethod,
-> = M extends 'post'
-  ? DevupPostApiStructScope<S>
-  : M extends 'put'
-    ? DevupPutApiStructScope<S>
-    : M extends 'patch'
-      ? DevupPatchApiStructScope<S>
-      : M extends 'delete'
-        ? DevupDeleteApiStructScope<S>
-        : never
+> = DevupApiMethodScope<S, M>
 
 export type MethodApiStructKey<
   S extends string,
   M extends HttpMethod,
-> = M extends 'post'
-  ? DevupPostApiStructKey<S>
-  : M extends 'put'
-    ? DevupPutApiStructKey<S>
-    : M extends 'patch'
-      ? DevupPatchApiStructKey<S>
-      : M extends 'delete'
-        ? DevupDeleteApiStructKey<S>
-        : never
+> = DevupApiMethodKey<S, M>
 
 export type FetchMethodApiStructScope<
   S extends string,
   M extends FetchMethod,
-> = M extends 'get'
-  ? DevupGetApiStructScope<S>
-  : M extends 'post'
-    ? DevupPostApiStructScope<S>
-    : M extends 'put'
-      ? DevupPutApiStructScope<S>
-      : M extends 'patch'
-        ? DevupPatchApiStructScope<S>
-        : M extends 'delete'
-          ? DevupDeleteApiStructScope<S>
-          : never
+> = DevupApiMethodScope<S, M>
 
 export type FetchMethodApiStructKey<
   S extends string,
   M extends FetchMethod,
-> = M extends 'get'
-  ? DevupGetApiStructKey<S>
-  : M extends 'post'
-    ? DevupPostApiStructKey<S>
-    : M extends 'put'
-      ? DevupPutApiStructKey<S>
-      : M extends 'patch'
-        ? DevupPatchApiStructKey<S>
-        : M extends 'delete'
-          ? DevupDeleteApiStructKey<S>
-          : never
+> = DevupApiMethodKey<S, M>
 
 /**
  * Configuration for auto-fetching default values
@@ -91,10 +47,6 @@ export interface FetchDefaultValuesConfig<
   S extends ConditionalKeys<DevupApiServers>,
   FM extends FetchMethod = 'get',
   FP extends FetchMethodApiStructKey<S, FM> = FetchMethodApiStructKey<S, FM>,
-  FO extends Additional<FP, FetchMethodApiStructScope<S, FM>> = Additional<
-    FP,
-    FetchMethodApiStructScope<S, FM>
-  >,
 > {
   /**
    * HTTP method for fetching default values
@@ -108,11 +60,16 @@ export interface FetchDefaultValuesConfig<
   /**
    * Request options for fetching (params, query, headers)
    */
-  options?: Omit<FO, 'body'>
+  options?: Omit<Additional<FP, FetchMethodApiStructScope<S, FM>>, 'body'>
   /**
    * Transform the fetched response to form default values
    */
-  transform?: (response: ExtractValue<FO, 'response'>) => unknown
+  transform?: (
+    response: ExtractValue<
+      Additional<FP, FetchMethodApiStructScope<S, FM>>,
+      'response'
+    >,
+  ) => unknown
 }
 
 /**

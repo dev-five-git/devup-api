@@ -3,19 +3,15 @@ import type {
   ApiOption,
   BoildApiOption,
   ConditionalKeys,
+  DevupApiMethodKey,
   DevupApiRequestInit,
   DevupApiServers,
   DevupApiStructKey,
   DevupApiStructScope,
-  DevupDeleteApiStructKey,
   DevupDeleteApiStructScope,
-  DevupGetApiStructKey,
   DevupGetApiStructScope,
-  DevupPatchApiStructKey,
   DevupPatchApiStructScope,
-  DevupPostApiStructKey,
   DevupPostApiStructScope,
-  DevupPutApiStructKey,
   DevupPutApiStructScope,
   ExtractValue,
   Middleware,
@@ -65,7 +61,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   get<
-    T extends DevupGetApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'get'>,
     O extends Additional<T, DevupGetApiStructScope<S>>,
   >(
     path: T,
@@ -80,7 +76,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   GET<
-    T extends DevupGetApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'get'>,
     O extends Additional<T, DevupGetApiStructScope<S>>,
   >(
     path: T,
@@ -95,7 +91,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   post<
-    T extends DevupPostApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'post'>,
     O extends Additional<T, DevupPostApiStructScope<S>>,
   >(
     path: T,
@@ -110,7 +106,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   POST<
-    T extends DevupPostApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'post'>,
     O extends Additional<T, DevupPostApiStructScope<S>>,
   >(
     path: T,
@@ -125,7 +121,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   put<
-    T extends DevupPutApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'put'>,
     O extends Additional<T, DevupPutApiStructScope<S>>,
   >(
     path: T,
@@ -140,7 +136,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   PUT<
-    T extends DevupPutApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'put'>,
     O extends Additional<T, DevupPutApiStructScope<S>>,
   >(
     path: T,
@@ -155,7 +151,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   delete<
-    T extends DevupDeleteApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'delete'>,
     O extends Additional<T, DevupDeleteApiStructScope<S>>,
   >(
     path: T,
@@ -170,7 +166,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   DELETE<
-    T extends DevupDeleteApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'delete'>,
     O extends Additional<T, DevupDeleteApiStructScope<S>>,
   >(
     path: T,
@@ -185,7 +181,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   patch<
-    T extends DevupPatchApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'patch'>,
     O extends Additional<T, DevupPatchApiStructScope<S>>,
   >(
     path: T,
@@ -200,7 +196,7 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   PATCH<
-    T extends DevupPatchApiStructKey<S>,
+    T extends DevupApiMethodKey<S, 'patch'>,
     O extends Additional<T, DevupPatchApiStructScope<S>>,
   >(
     path: T,

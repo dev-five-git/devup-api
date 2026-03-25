@@ -6,15 +6,10 @@ export type Additional<
   Target extends object,
 > = T extends keyof Target ? Target[T] & object : object
 
-export type RequiredOptions<T extends object> = keyof T extends undefined
+export type RequiredOptions<T extends object> = ('params' | 'query' | 'body') &
+  keyof T extends never
   ? never
-  : 'params' extends keyof T
-    ? T
-    : 'query' extends keyof T
-      ? T
-      : 'body' extends keyof T
-        ? T
-        : never
+  : T
 export type IsCold = keyof DevupApiServers extends never ? true : false
 export type DevupApiRequestInit = Omit<RequestInit, 'body'> & {
   body?: object | RequestInit['body']
@@ -40,9 +35,10 @@ export type ExtractValue<T, V extends string, F = any> = V extends keyof T
 
 export type BoildApiOption<O> = Omit<DevupApiRequestInit, 'params'> &
   Omit<O, 'response' | 'error'>
-export type ConditionalApiOption<O> = IsCold extends true
-  ? DevupApiRequestInit
-  : BoildApiOption<O>
+export type ConditionalApiOption<
+  O,
+  _Cold extends boolean = IsCold,
+> = _Cold extends true ? DevupApiRequestInit : BoildApiOption<O>
 
 export type ApiOption<O extends object, R extends unknown[] = []> = [
   RequiredOptions<O>,

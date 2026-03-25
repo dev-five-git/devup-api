@@ -39,6 +39,11 @@ export default function Home() {
   const _object2: DevupObject<'response', 'openapi2.json'>['User'] | undefined =
     data?.[0]
 
+  const _results = queryClient.useQueries([
+    ['GET', 'getUsers', { query: { name: 'John Doe' } }],
+    ['GET', '/users/{id}', { params: { id: 1 }, query: { name: 'John Doe' } }],
+  ])
+
   console.info(data, isLoading, error)
 
   const {
