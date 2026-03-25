@@ -31,14 +31,13 @@ export interface DevupErrorComponentStruct {}
 export type DevupObject<
   R extends 'response' | 'request' | 'error' = 'response',
   T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
-> = ExtractValue<
-  {
-    response: ExtractValue<DevupResponseComponentStruct, T>
-    request: ExtractValue<DevupRequestComponentStruct, T>
-    error: ExtractValue<DevupErrorComponentStruct, T>
-  },
-  R
->
+> = R extends 'response'
+  ? ExtractValue<DevupResponseComponentStruct, T>
+  : R extends 'request'
+    ? ExtractValue<DevupRequestComponentStruct, T>
+    : R extends 'error'
+      ? ExtractValue<DevupErrorComponentStruct, T>
+      : never
 
 export type DevupGetApiStructScope<O extends string> = ConditionalScope<
   DevupGetApiStruct,
@@ -91,18 +90,22 @@ export type DevupApiMethodKeys =
 export type DevupApiMethodScope<
   S extends string,
   M extends DevupApiMethodKeys,
-> = {
-  get: DevupGetApiStructScope<S>
-  post: DevupPostApiStructScope<S>
-  put: DevupPutApiStructScope<S>
-  delete: DevupDeleteApiStructScope<S>
-  patch: DevupPatchApiStructScope<S>
-  GET: DevupGetApiStructScope<S>
-  POST: DevupPostApiStructScope<S>
-  PUT: DevupPutApiStructScope<S>
-  DELETE: DevupDeleteApiStructScope<S>
-  PATCH: DevupPatchApiStructScope<S>
-}[M]
+> = M extends 'get' | 'GET'
+  ? DevupGetApiStructScope<S>
+  : M extends 'post' | 'POST'
+    ? DevupPostApiStructScope<S>
+    : M extends 'put' | 'PUT'
+      ? DevupPutApiStructScope<S>
+      : M extends 'delete' | 'DELETE'
+        ? DevupDeleteApiStructScope<S>
+        : M extends 'patch' | 'PATCH'
+          ? DevupPatchApiStructScope<S>
+          : never
+
+export type DevupApiMethodKey<
+  S extends string,
+  M extends DevupApiMethodKeys,
+> = ConditionalKeys<DevupApiMethodScope<S, M>>
 
 export type DevupApiStructScope<O extends string> = DevupGetApiStructScope<O> &
   DevupPostApiStructScope<O> &
@@ -110,6 +113,9 @@ export type DevupApiStructScope<O extends string> = DevupGetApiStructScope<O> &
   DevupDeleteApiStructScope<O> &
   DevupPatchApiStructScope<O>
 
-export type DevupApiStructKey<O extends string> = ConditionalKeys<
-  DevupApiStructScope<O>
->
+export type DevupApiStructKey<O extends string> =
+  | DevupGetApiStructKey<O>
+  | DevupPostApiStructKey<O>
+  | DevupPutApiStructKey<O>
+  | DevupDeleteApiStructKey<O>
+  | DevupPatchApiStructKey<O>

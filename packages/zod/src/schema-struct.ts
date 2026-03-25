@@ -28,23 +28,13 @@ export interface DevupZodErrorSchemas {}
 export type DevupZodSchema<
   Category extends 'response' | 'request' | 'error' = 'response',
   Server extends keyof DevupApiServers | (string & {}) = 'openapi.json',
-> = ExtractValue<
-  {
-    response: ExtractValue<
-      DevupZodResponseSchemas,
-      Server,
-      Record<string, z.ZodType>
-    >
-    request: ExtractValue<
-      DevupZodRequestSchemas,
-      Server,
-      Record<string, z.ZodType>
-    >
-    error: ExtractValue<DevupZodErrorSchemas, Server, Record<string, z.ZodType>>
-  },
-  Category,
-  Record<string, z.ZodType>
->
+> = Category extends 'response'
+  ? ExtractValue<DevupZodResponseSchemas, Server, Record<string, z.ZodType>>
+  : Category extends 'request'
+    ? ExtractValue<DevupZodRequestSchemas, Server, Record<string, z.ZodType>>
+    : Category extends 'error'
+      ? ExtractValue<DevupZodErrorSchemas, Server, Record<string, z.ZodType>>
+      : Record<string, z.ZodType>
 
 /**
  * Access Zod schemas by category for a specific server
@@ -75,36 +65,18 @@ export type DevupZodAllSchemas = {
  * @example
  * type User = DevupZodSchemaTypes['response']['User']
  */
+type InferZodSchemaMap<Schemas, T extends string> = {
+  [K in keyof ExtractValue<Schemas, T, Record<string, z.ZodType>>]: z.infer<
+    ExtractValue<Schemas, T, Record<string, z.ZodType>>[K]
+  >
+}
+
 export type DevupZodSchemaTypes<
   T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
 > = {
-  response: {
-    [K in keyof ExtractValue<
-      DevupZodResponseSchemas,
-      T,
-      Record<string, z.ZodType>
-    >]: z.infer<
-      ExtractValue<DevupZodResponseSchemas, T, Record<string, z.ZodType>>[K]
-    >
-  }
-  request: {
-    [K in keyof ExtractValue<
-      DevupZodRequestSchemas,
-      T,
-      Record<string, z.ZodType>
-    >]: z.infer<
-      ExtractValue<DevupZodRequestSchemas, T, Record<string, z.ZodType>>[K]
-    >
-  }
-  error: {
-    [K in keyof ExtractValue<
-      DevupZodErrorSchemas,
-      T,
-      Record<string, z.ZodType>
-    >]: z.infer<
-      ExtractValue<DevupZodErrorSchemas, T, Record<string, z.ZodType>>[K]
-    >
-  }
+  response: InferZodSchemaMap<DevupZodResponseSchemas, T & string>
+  request: InferZodSchemaMap<DevupZodRequestSchemas, T & string>
+  error: InferZodSchemaMap<DevupZodErrorSchemas, T & string>
 }
 
 // =============================================================================
