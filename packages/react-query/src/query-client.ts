@@ -19,6 +19,55 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
+type ResolveScope<
+  S extends ConditionalKeys<DevupApiServers>,
+  M extends DevupApiMethodKeys,
+  P extends string,
+> = Additional<P, DevupApiMethodScope<S, M>>
+
+type UseQueryOptions<O> = Omit<
+  Parameters<
+    typeof useQuery<ExtractValue<O, 'response'>, ExtractValue<O, 'error'>>
+  >[0],
+  'queryFn' | 'queryKey'
+>
+
+type UseQueriesTuple<O, P, M> = [
+  method: M,
+  path: P,
+  options?: ConditionalApiOption<O>,
+  queryOptions?: UseQueryOptions<O>,
+]
+
+type UseQueriesEntry<S extends ConditionalKeys<DevupApiServers>> = {
+  [M in DevupApiMethodKeys]: {
+    [P in ConditionalKeys<DevupApiMethodScope<S, M>>]: UseQueriesTuple<
+      ResolveScope<S, M, P>,
+      P,
+      M
+    >
+  }[ConditionalKeys<DevupApiMethodScope<S, M>>]
+}[DevupApiMethodKeys]
+
+type InferUseQueryResult<
+  S extends ConditionalKeys<DevupApiServers>,
+  Q,
+> = Q extends [infer M extends DevupApiMethodKeys, infer P, ...unknown[]]
+  ? P extends ConditionalKeys<DevupApiMethodScope<S, M>>
+    ? ReturnType<
+        typeof useQuery<
+          ExtractValue<ResolveScope<S, M, P>, 'response'>,
+          ExtractValue<ResolveScope<S, M, P>, 'error'>
+        >
+      >
+    : ReturnType<typeof useQuery>
+  : ReturnType<typeof useQuery>
+
+type UseQueriesResults<
+  S extends ConditionalKeys<DevupApiServers>,
+  T extends readonly unknown[],
+> = { -readonly [K in keyof T]: InferUseQueryResult<S, T[K]> }
+
 export function getQueryKey<M, P, OP>(
   method: M,
   path: P,
@@ -227,29 +276,12 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   }
 
   useQueries<
-    M extends DevupApiMethodKeys,
-    ST extends DevupApiMethodScope<S, M>,
-    T extends ConditionalKeys<ST>,
-    O extends Additional<T, ST>,
-    D extends ExtractValue<O, 'response'>,
-    E extends ExtractValue<O, 'error'>,
-    TCombinedResult = Array<ReturnType<typeof useQuery<D, E>>>,
+    T extends UseQueriesEntry<S>[],
+    TCombinedResult = UseQueriesResults<S, T>,
   >(
-    queries: Array<
-      [
-        method: M,
-        path: T,
-        options?: ConditionalApiOption<O>,
-        queryOptions?: Omit<
-          Parameters<typeof useQuery<D, E>>[0],
-          'queryFn' | 'queryKey'
-        >,
-      ]
-    >,
+    queries: [...T],
     options?: {
-      combine?: (
-        results: Array<ReturnType<typeof useQuery<D, E>>>,
-      ) => TCombinedResult
+      combine?: (results: UseQueriesResults<S, T>) => TCombinedResult
       queryClient?: Parameters<typeof useQueries>[1]
     },
   ): TCombinedResult {
@@ -261,19 +293,25 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
             queryKey: [methodKey, pathKey, ...restOptions],
             signal,
           }: {
-            queryKey: [M, T, ...unknown[]]
+            queryKey: [string, string, ...unknown[]]
             signal: AbortSignal
-          }): Promise<D> =>
+          }): Promise<unknown> =>
             // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
             (this.api as any)
               [methodKey as string](pathKey, {
                 signal,
                 ...(restOptions[0] as DevupApiRequestInit),
               })
-              .then(({ data, error, isError }: DevupApiResponse<D, E>) => {
-                if (isError) throw error
-                return data
-              }),
+              .then(
+                ({
+                  data,
+                  error,
+                  isError,
+                }: DevupApiResponse<unknown, unknown>) => {
+                  if (isError) throw error
+                  return data
+                },
+              ),
           ...queryOptions,
         })) as Parameters<typeof useQueries>[0]['queries'],
         combine: options?.combine as Parameters<
