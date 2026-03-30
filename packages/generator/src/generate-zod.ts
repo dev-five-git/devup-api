@@ -393,6 +393,8 @@ interface CollectedSchemas {
   requestSchemas: Record<string, SchemaInfo>
   responseSchemas: Record<string, SchemaInfo>
   errorSchemas: Record<string, SchemaInfo>
+  /** Schemas referenced via $ref within category schemas but not themselves a category schema */
+  dependencySchemas: Record<string, SchemaInfo>
   pathMappings: Record<
     'get' | 'post' | 'put' | 'delete' | 'patch',
     Record<string, PathSchemaMapping>
@@ -621,7 +623,45 @@ function generateSchemasForDocument(
     }
   }
 
-  return { requestSchemas, responseSchemas, errorSchemas, pathMappings }
+  // Collect all transitively referenced schemas from category schemas
+  const allCategoryNames = new Set([
+    ...requestSchemaNames,
+    ...responseSchemaNames,
+    ...errorSchemaNames,
+  ])
+  const allReferencedNames = new Set<string>()
+  for (const schemaName of allCategoryNames) {
+    const schemaDef = schema.components?.schemas?.[schemaName]
+    if (schemaDef) {
+      collectSchemaNames(
+        schemaDef as OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+        allReferencedNames,
+        { followComponentRefs: true, document: schema },
+      )
+    }
+  }
+
+  // Generate dependency schemas (referenced via $ref but need _Name variables)
+  const dependencySchemas: Record<string, SchemaInfo> = {}
+  for (const name of allReferencedNames) {
+    const schemaDef = schema.components?.schemas?.[name]
+    if (!schemaDef) continue
+    const schemaRef = schemaDef as
+      | OpenAPIV3_1.SchemaObject
+      | OpenAPIV3_1.ReferenceObject
+    dependencySchemas[name] = {
+      code: schemaToZod(schemaRef, schema, schemaRefs),
+      type: schemaToZodType(schemaRef, schema),
+    }
+  }
+
+  return {
+    requestSchemas,
+    responseSchemas,
+    errorSchemas,
+    dependencySchemas,
+    pathMappings,
+  }
 }
 
 // =============================================================================
@@ -656,6 +696,17 @@ export function generateZodSchemas(
   // Generate schema definitions for each server
   for (const [serverName, collected] of Object.entries(serverSchemas)) {
     const safeServerName = serverName.replace(/[^a-zA-Z0-9]/g, '_')
+
+    // Dependency schemas (referenced via $ref, need _Name variables for z.lazy)
+    if (Object.keys(collected.dependencySchemas).length > 0) {
+      lines.push(`// Shared dependency schemas for ${serverName}`)
+      for (const [name, schemaInfo] of Object.entries(
+        collected.dependencySchemas,
+      )) {
+        lines.push(`const _${name} = ${schemaInfo.code};`)
+      }
+      lines.push('')
+    }
 
     // Request schemas
     if (Object.keys(collected.requestSchemas).length > 0) {
