@@ -30,8 +30,8 @@
     "@devup-api/core": "*"
   },
   "devDependencies": {
-    "@types/node": "^25.2",
+    "@types/node": "^25.5",
     "@types/webpack": "^5.28",
-    "typescript": "^5.9"
+    "typescript": "^6.0"
   }
 }

@@ -539,3 +539,37 @@ test('request uses method from options when provided', async () => {
     expect(request.method).toBe('POST')
   }
 })
+
+test('resolveEndpoint returns key as url when no URL map entry exists', () => {
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
+  const result = api.resolveEndpoint('GET' as any, '/users' as any)
+  expect(result.url).toBe('/users')
+  expect(result.method).toBe('GET')
+})
+
+test('resolveEndpoint returns key as url for unknown operationId', () => {
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
+  const result = api.resolveEndpoint('POST' as any, 'unknownOp' as any)
+  expect(result.url).toBe('unknownOp')
+  expect(result.method).toBe('POST')
+})
+
+test('resolveEndpoint normalizes lowercase method to uppercase', () => {
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
+  const result = api.resolveEndpoint('get' as any, '/users' as any)
+  expect(result.method).toBe('GET')
+  expect(result.url).toBe('/users')
+})
+
+test.each([
+  ['GET', '/users'],
+  ['POST', '/users'],
+  ['PUT', '/users/{id}'],
+  ['DELETE', '/users/{id}'],
+  ['PATCH', '/users/{id}'],
+] as const)('resolveEndpoint preserves method %s for path %s', (method, path) => {
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
+  const result = api.resolveEndpoint(method as any, path as any)
+  expect(result.method).toBe(method)
+  expect(result.url).toBe(path)
+})

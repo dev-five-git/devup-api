@@ -7,6 +7,5 @@ test('index.ts exports', () => {
   expect({ ...indexModule }).toEqual({
     createQueryClient: expect.any(Function),
     DevupQueryClient: expect.any(Function),
-    getQueryKey: expect.any(Function),
   })
 })

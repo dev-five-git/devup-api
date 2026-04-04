@@ -4,6 +4,7 @@ import type {
   BoildApiOption,
   ConditionalKeys,
   DevupApiMethodKey,
+  DevupApiMethodKeys,
   DevupApiRequestInit,
   DevupApiServers,
   DevupApiStructKey,
@@ -14,6 +15,7 @@ import type {
   DevupPostApiStructScope,
   DevupPutApiStructScope,
   ExtractValue,
+  HttpMethod,
   Middleware,
 } from '@devup-api/core'
 import { convertResponse } from './response-converter'
@@ -382,5 +384,16 @@ export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {
 
   use(...middleware: Middleware[]): void {
     this.middleware.push(...middleware)
+  }
+
+  resolveEndpoint<M extends DevupApiMethodKeys>(
+    method: M,
+    key: DevupApiMethodKey<S, M>,
+  ) {
+    return getApiEndpointInfo(
+      key,
+      this.serverName,
+      method.toUpperCase() as HttpMethod,
+    )
   }
 }

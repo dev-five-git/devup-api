@@ -29,8 +29,8 @@
     "@devup-api/core": "*"
   },
   "devDependencies": {
-    "@types/node": "^25.2",
+    "@types/node": "^25.5",
     "openapi-types": "^12.1",
-    "typescript": "^5.9"
+    "typescript": "^6.0"
   }
 }
