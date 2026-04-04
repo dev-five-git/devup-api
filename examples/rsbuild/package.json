@@ -18,7 +18,7 @@
     "@rsbuild/plugin-react": "*",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^5",
+    "typescript": "^6",
     "@devup-api/rsbuild-plugin": "workspace:*"
   }
 }

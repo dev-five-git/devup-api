@@ -21,7 +21,7 @@
   },
   "dependencies": {
     "@devup-api/fetch": "workspace:^",
-    "@tanstack/react-query": ">=5.90"
+    "@tanstack/react-query": ">=5.96"
   },
   "peerDependencies": {
     "react": "*",
@@ -29,9 +29,9 @@
   },
   "devDependencies": {
     "@testing-library/react-hooks": "^8.0.1",
-    "@types/node": "^25.2",
+    "@types/node": "^25.5",
     "@types/react": "^19.2",
-    "happy-dom": "^20.6.1",
-    "typescript": "^5.9"
+    "happy-dom": "^20.8.9",
+    "typescript": "^6.0"
   }
 }
