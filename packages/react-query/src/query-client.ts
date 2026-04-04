@@ -21,7 +21,7 @@ import {
   useSuspenseQuery,
 } from '@tanstack/react-query'
 
-type LowercaseMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
+type LowercaseMethodKeys = 'get' | 'post' | 'put' | 'delete' | 'patch'
 
 type ResolveScopePrecomputed<
   S extends string,
@@ -30,11 +30,11 @@ type ResolveScopePrecomputed<
 > = S extends keyof DevupPrecomputedScopes
   ? P extends keyof ExtractValue<
       ExtractValue<DevupPrecomputedScopes, S>,
-      M & LowercaseMethod
+      M & LowercaseMethodKeys
     >
     ? ExtractValue<
         ExtractValue<DevupPrecomputedScopes, S>,
-        M & LowercaseMethod
+        M & LowercaseMethodKeys
       >[P] &
         object
     : object
@@ -61,8 +61,6 @@ type UseQueriesTuple<O, P, M> = [
   options?: ConditionalApiOption<O>,
   queryOptions?: UseQueryOptions<O>,
 ]
-
-type LowercaseMethodKeys = 'get' | 'post' | 'put' | 'delete' | 'patch'
 
 type UseQueriesEntry<S extends ConditionalKeys<DevupApiServers>> = {
   [M in LowercaseMethodKeys]: {
@@ -93,14 +91,30 @@ type UseQueriesResults<
   T extends readonly unknown[],
 > = { -readonly [K in keyof T]: InferUseQueryResult<S, T[K]> }
 
-export function getQueryKey<M, P, OP>(
+function getQueryKey<M extends string, P>(method: M, path: P): [string, P]
+function getQueryKey<M extends string, P, OP>(
   method: M,
   path: P,
   options: OP,
-): [M, P, NonNullable<OP>] | [M, P] {
+): [string, P, NonNullable<OP>]
+function getQueryKey<M extends string, P, OP>(
+  method: M,
+  path: P,
+  options?: OP,
+): [string, P, NonNullable<OP>] | [string, P] {
+  const normalizedMethod = method.toLowerCase()
   return options === undefined
-    ? ([method, path] as [M, P])
-    : ([method, path, options] as [M, P, NonNullable<OP>])
+    ? ([normalizedMethod, path] as [string, P])
+    : ([normalizedMethod, path, options] as [string, P, NonNullable<OP>])
+}
+
+function unwrapResponse({
+  data,
+  error,
+  isError,
+}: DevupApiResponse<unknown, unknown>) {
+  if (isError) throw error
+  return data
 }
 
 export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
@@ -108,6 +122,28 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
 
   constructor(api: DevupApi<S>) {
     this.api = api
+  }
+
+  private createQueryFn(queryKey: unknown[]) {
+    return ({ signal }: { signal: AbortSignal }) => {
+      const [method, path, ...rest] = queryKey
+      // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
+      return (this.api as any)
+        [method as string](path, {
+          signal,
+          ...(rest[0] as DevupApiRequestInit),
+        })
+        .then(unwrapResponse)
+    }
+  }
+
+  getQueryKey<M extends DevupApiMethodKeys, T extends DevupApiMethodKey<S, M>>(
+    method: M,
+    path: T,
+    options?: ConditionalApiOption<ResolveScope<S, M, T>>,
+  ) {
+    const resolved = this.api.resolveEndpoint(method, path)
+    return getQueryKey(method, resolved.url as T, options)
   }
 
   useQuery<M extends DevupApiMethodKeys, T extends DevupApiMethodKey<S, M>>(
@@ -128,28 +164,12 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   > & {
     queryKey: [M, T, ...unknown[]]
   } {
-    const queryKey = getQueryKey(method, path, options[0])
+    const queryKey = this.getQueryKey(method, path, options[0])
     // biome-ignore lint/suspicious/noExplicitAny: internal cast - type safety from signature
     const result = useQuery<any, any>(
       {
         queryKey,
-        queryFn: ({ queryKey: [method, path, ...options], signal }) =>
-          // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
-          (this.api as any)
-            [method as string](path, {
-              signal,
-              ...(options[0] as DevupApiRequestInit),
-            })
-            .then(
-              ({
-                data,
-                error,
-                isError,
-              }: DevupApiResponse<unknown, unknown>) => {
-                if (isError) throw error
-                return data
-              },
-            ),
+        queryFn: this.createQueryFn(queryKey),
         ...options[1],
       },
       options[2],
@@ -182,21 +202,12 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
     // biome-ignore lint/suspicious/noExplicitAny: internal cast - type safety from signature
     return useMutation<any, any, any>(
       {
-        mutationKey: [method, path],
+        mutationKey: this.getQueryKey(method, path),
         mutationFn: (variables, { mutationKey }) =>
           // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
           (this.api as any)
             [mutationKey?.[0] as string](mutationKey?.[1] as T, variables)
-            .then(
-              ({
-                data,
-                error,
-                isError,
-              }: DevupApiResponse<unknown, unknown>) => {
-                if (isError) throw error
-                return data
-              },
-            ),
+            .then(unwrapResponse),
         ...queryOptions,
       },
       queryClient,
@@ -232,28 +243,12 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   > & {
     queryKey: [M, T, ...unknown[]]
   } {
-    const queryKey = getQueryKey(method, path, options[0])
+    const queryKey = this.getQueryKey(method, path, options[0])
     // biome-ignore lint/suspicious/noExplicitAny: internal cast - type safety from signature
     const result = useSuspenseQuery<any, any, any>(
       {
         queryKey,
-        queryFn: ({ queryKey: [method, path, ...options], signal }) =>
-          // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
-          (this.api as any)
-            [method as string](path, {
-              signal,
-              ...(options[0] as DevupApiRequestInit),
-            })
-            .then(
-              ({
-                data,
-                error,
-                isError,
-              }: DevupApiResponse<unknown, unknown>) => {
-                if (isError) throw error
-                return data
-              },
-            ),
+        queryFn: this.createQueryFn(queryKey),
         ...options[1],
       },
       options[2],
@@ -299,7 +294,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
     queryKey: [M, T, ...unknown[]]
   } {
     const { getNextPageParam, initialPageParam, ...apiOptions } = options[0]
-    const queryKey = getQueryKey(method, path, apiOptions)
+    const queryKey = this.getQueryKey(method, path, apiOptions)
     // biome-ignore lint/suspicious/noExplicitAny: internal cast - type safety from signature
     const result = useInfiniteQuery<any, any>(
       {
@@ -330,16 +325,7 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
                 },
               } as DevupApiRequestInit,
             )
-            .then(
-              ({
-                data,
-                error,
-                isError,
-              }: DevupApiResponse<unknown, unknown>) => {
-                if (isError) throw error
-                return data
-              },
-            )
+            .then(unwrapResponse)
         },
         ...options[1],
         // biome-ignore lint/suspicious/noExplicitAny: internal cast - type safety from signature
@@ -362,33 +348,14 @@ export class DevupQueryClient<S extends ConditionalKeys<DevupApiServers>> {
   ): TCombinedResult {
     return useQueries(
       {
-        queries: queries.map(([method, path, apiOptions, queryOptions]) => ({
-          queryKey: getQueryKey(method, path, apiOptions),
-          queryFn: ({
-            queryKey: [methodKey, pathKey, ...restOptions],
-            signal,
-          }: {
-            queryKey: [string, string, ...unknown[]]
-            signal: AbortSignal
-          }): Promise<unknown> =>
-            // biome-ignore lint/suspicious/noExplicitAny: can't use method as a function
-            (this.api as any)
-              [methodKey as string](pathKey, {
-                signal,
-                ...(restOptions[0] as DevupApiRequestInit),
-              })
-              .then(
-                ({
-                  data,
-                  error,
-                  isError,
-                }: DevupApiResponse<unknown, unknown>) => {
-                  if (isError) throw error
-                  return data
-                },
-              ),
-          ...queryOptions,
-        })) as Parameters<typeof useQueries>[0]['queries'],
+        queries: queries.map(([method, path, apiOptions, queryOptions]) => {
+          const queryKey = this.getQueryKey(method, path, apiOptions)
+          return {
+            queryKey,
+            queryFn: this.createQueryFn(queryKey),
+            ...queryOptions,
+          }
+        }) as Parameters<typeof useQueries>[0]['queries'],
         combine: options?.combine as Parameters<
           typeof useQueries
         >[0]['combine'],
