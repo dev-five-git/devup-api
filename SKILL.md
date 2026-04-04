@@ -176,11 +176,33 @@ const { data, isLoading, error, refetch } = queryClient.useQuery(
 ```tsx
 const mutation = queryClient.useMutation('post', 'createUser', {
   onSuccess: (data) => {
-    tanstackQueryClient.invalidateQueries({ queryKey: ['get', 'getUsers'] })
+    client.invalidateQueries({
+      queryKey: queryClient.getQueryKey('get', 'getUsers'),
+    })
   }
 })
 
 mutation.mutate({ body: { name: 'John', email: 'john@example.com' } })
+```
+
+### getQueryKey (Cache Invalidation)
+
+Use `queryClient.getQueryKey()` to get type-safe query keys for cache invalidation:
+
+```tsx
+// By operationId
+queryClient.getQueryKey('get', 'getUsers')
+
+// By path with params
+queryClient.getQueryKey('get', '/users/{id}', { params: { id: '123' } })
+
+// Usage with TanStack Query client
+client.invalidateQueries({
+  queryKey: queryClient.getQueryKey(
+    'get',
+    '/project-subject/projects/{projectId}/companion',
+  ),
+})
 ```
 
 ### useSuspenseQuery
