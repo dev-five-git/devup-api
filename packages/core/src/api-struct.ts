@@ -45,10 +45,10 @@ type DevupComponentStructByRole = {
 type DevupObjectAll<T extends string> = ExtractValue<
   DevupResponseComponentStruct,
   T,
-  {}
+  unknown
 > &
-  ExtractValue<DevupRequestComponentStruct, T, {}> &
-  ExtractValue<DevupErrorComponentStruct, T, {}>
+  ExtractValue<DevupRequestComponentStruct, T, unknown> &
+  ExtractValue<DevupErrorComponentStruct, T, unknown>
 
 type DevupObjectSpecific<
   R extends keyof DevupComponentStructByRole,
