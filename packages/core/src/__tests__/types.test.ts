@@ -345,6 +345,55 @@ describe('DevupObject', () => {
     >().toEqualTypeOf<CreateUserRequest>()
     expectTypeOf<ReturnType<typeof createUser>>().toEqualTypeOf<User>()
   })
+
+  test('default (no R) accesses all component schemas merged', () => {
+    // DevupObject without R should merge response + request + error
+    type All = DevupObject<
+      keyof { response: never; request: never; error: never },
+      'test-api.json'
+    >
+
+    // response keys accessible
+    type User = All['User']
+    expectTypeOf<User>().toEqualTypeOf<{
+      id: number
+      name: string
+      email: string
+    }>()
+
+    // request keys accessible
+    type CreateUser = All['CreateUserRequest']
+    expectTypeOf<CreateUser>().toEqualTypeOf<{ name: string; email: string }>()
+
+    // error keys accessible
+    type ApiError = All['ApiError']
+    expectTypeOf<ApiError>().toEqualTypeOf<{ code: string; message: string }>()
+  })
+
+  test('default DevupObject includes all schemas from all contexts', () => {
+    // Verify that response, request, error keys all exist
+    type AllKeys = keyof DevupObject<
+      keyof { response: never; request: never; error: never },
+      'test-api.json'
+    >
+
+    // response keys
+    type HasUser = 'User' extends AllKeys ? true : false
+    type HasUserList = 'UserList' extends AllKeys ? true : false
+    // request keys
+    type HasCreateUser = 'CreateUserRequest' extends AllKeys ? true : false
+    type HasUpdateUser = 'UpdateUserRequest' extends AllKeys ? true : false
+    // error keys
+    type HasApiError = 'ApiError' extends AllKeys ? true : false
+    type HasNotFound = 'NotFoundError' extends AllKeys ? true : false
+
+    expectTypeOf<HasUser>().toEqualTypeOf<true>()
+    expectTypeOf<HasUserList>().toEqualTypeOf<true>()
+    expectTypeOf<HasCreateUser>().toEqualTypeOf<true>()
+    expectTypeOf<HasUpdateUser>().toEqualTypeOf<true>()
+    expectTypeOf<HasApiError>().toEqualTypeOf<true>()
+    expectTypeOf<HasNotFound>().toEqualTypeOf<true>()
+  })
 })
 
 // =============================================================================

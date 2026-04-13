@@ -36,16 +36,31 @@ export interface DevupPrecomputedScopes {}
 
 type LowercaseMethod = 'get' | 'post' | 'put' | 'delete' | 'patch'
 
+type DevupComponentStructByRole = {
+  response: DevupResponseComponentStruct
+  request: DevupRequestComponentStruct
+  error: DevupErrorComponentStruct
+}
+
+type DevupObjectAll<T extends string> = ExtractValue<
+  DevupResponseComponentStruct,
+  T,
+  {}
+> &
+  ExtractValue<DevupRequestComponentStruct, T, {}> &
+  ExtractValue<DevupErrorComponentStruct, T, {}>
+
+type DevupObjectSpecific<
+  R extends keyof DevupComponentStructByRole,
+  T extends string,
+> = ExtractValue<DevupComponentStructByRole[R], T>
+
 export type DevupObject<
-  R extends 'response' | 'request' | 'error' = 'response',
+  R extends keyof DevupComponentStructByRole = keyof DevupComponentStructByRole,
   T extends keyof DevupApiServers | (string & {}) = 'openapi.json',
-> = R extends 'response'
-  ? ExtractValue<DevupResponseComponentStruct, T>
-  : R extends 'request'
-    ? ExtractValue<DevupRequestComponentStruct, T>
-    : R extends 'error'
-      ? ExtractValue<DevupErrorComponentStruct, T>
-      : never
+> = [keyof DevupComponentStructByRole] extends [R]
+  ? DevupObjectAll<T & string>
+  : DevupObjectSpecific<R, T & string>
 
 export type DevupGetApiStructScope<O extends string> = ConditionalScope<
   DevupGetApiStruct,
