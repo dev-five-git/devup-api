@@ -2532,3 +2532,55 @@ test('generateInterface preserves JSON endpoints alongside form/multipart endpoi
   // Raw multipart should use FormData | Record<string, unknown>
   expect(result).toContain('FormData | Record<string, unknown>')
 })
+
+test('generateInterface emits index signature for additionalProperties (not quoted key)', () => {
+  const schema = {
+    paths: {
+      '/news-categories': {
+        post: {
+          operationId: 'createNewsCategory',
+          requestBody: {
+            content: {
+              'application/json': {
+                schema: {
+                  $ref: '#/components/schemas/NewsCategoryCreateRequest',
+                },
+              },
+            },
+          },
+          responses: {
+            '201': {
+              description: 'Created',
+              content: {
+                'application/json': {
+                  schema: { type: 'string' as const },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    components: {
+      schemas: {
+        NewsCategoryCreateRequest: {
+          type: 'object' as const,
+          properties: {
+            title: {
+              type: 'object' as const,
+              properties: {},
+              required: [],
+              additionalProperties: { type: 'string' as const },
+            },
+          },
+          required: ['title'],
+        },
+      },
+    },
+  }
+  const result = generateInterface(createSchemas(createDocument(schema as any)))
+  // Must emit a real TS index signature
+  expect(result).toContain('[key: string]: string')
+  // Must NOT emit a quoted literal key
+  expect(result).not.toContain("'[key: string]'")
+})

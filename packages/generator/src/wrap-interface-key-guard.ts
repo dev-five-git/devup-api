@@ -4,6 +4,11 @@ export function wrapInterfaceKeyGuard(key: string): string {
     return key
   }
 
+  // Preserve TypeScript index signature syntax (e.g., [key: string], [key: number])
+  if (/^\[.+:\s*.+\]$/.test(key)) {
+    return key
+  }
+
   // Check if key ends with '?' (optional marker in TypeScript)
   // If so, process the base key and add '?' back at the end
   const isOptional = key.endsWith('?')
