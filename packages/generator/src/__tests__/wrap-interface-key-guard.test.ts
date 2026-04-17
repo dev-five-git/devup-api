@@ -67,3 +67,11 @@ test.each([
 ] as const)('wrapInterfaceKeyGuard handles optional keys (ending with ?): %s -> %s', (key, expected) => {
   expect(wrapInterfaceKeyGuard(key)).toBe(expected)
 })
+
+test.each([
+  ['[key: string]', '[key: string]'],
+  ['[key: number]', '[key: number]'],
+  ['[k: string]', '[k: string]'],
+] as const)('wrapInterfaceKeyGuard preserves index signature syntax: %s -> %s', (key, expected) => {
+  expect(wrapInterfaceKeyGuard(key)).toBe(expected)
+})
