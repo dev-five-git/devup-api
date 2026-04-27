@@ -73,6 +73,16 @@ interface DevupApiOptions {
    * @default true
    */
   responseDefaultNonNullable?: boolean
+
+  /**
+   * Generate operationId-based Server Action wrappers.
+   * Disable with false or { enabled: false }.
+   * @default true
+   */
+  serverActions?: boolean | {
+    enabled?: boolean
+    baseUrl?: string
+  }
 }
 ```
 
@@ -81,7 +91,8 @@ interface DevupApiOptions {
 1. Reads your `openapi.json` file during build
 2. Generates TypeScript interface definitions (`api.d.ts`)
 3. Creates a URL map and injects it as `process.env.DEVUP_API_URL_MAP`
-4. Makes types available for use with `@devup-api/fetch`
+4. Generates Server Actions in `df/server.ts` by default
+5. Makes types available for use with `@devup-api/fetch`
 
 ## TypeScript Configuration
 

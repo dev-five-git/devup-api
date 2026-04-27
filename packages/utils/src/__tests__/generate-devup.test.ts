@@ -47,6 +47,8 @@ function createMockGenerators(): DevupGenerators<{
     generateZodTypeDeclarations: mock(() => 'zod-types-content'),
     generateCrudConfigCode: mock(() => 'crud-config-content'),
     generateCrudConfigTypes: mock(() => 'crud-types-content'),
+    generateServerActionCode: mock(() => 'server-actions-content'),
+    generateServerActionTypes: mock(() => 'server-actions-types-content'),
     createUrlMap: mock(() => mockUrlMap),
   }
 }
@@ -86,6 +88,8 @@ test('generateDevupArtifactsAsync returns correct artifacts', async () => {
   expect(result.files.zodTypes).toBe('zod-types-content')
   expect(result.files.crudConfig).toBe('crud-config-content')
   expect(result.files.crudTypes).toBe('crud-types-content')
+  expect(result.files.serverActions).toBe('server-actions-content')
+  expect(result.files.serverActionTypes).toBe('server-actions-types-content')
   expect(result.urlMap).toBe(mockUrlMap)
 })
 
@@ -122,16 +126,24 @@ test('generateDevupArtifactsAsync calls all generators with schemas and options'
   )
   expect(generators.generateCrudConfigCode).toHaveBeenCalledWith(mockSchemas)
   expect(generators.generateCrudConfigTypes).toHaveBeenCalledWith(mockSchemas)
+  expect(generators.generateServerActionCode).toHaveBeenCalledWith(
+    mockSchemas,
+    options,
+  )
+  expect(generators.generateServerActionTypes).toHaveBeenCalledWith(
+    mockSchemas,
+    options,
+  )
   expect(generators.createUrlMap).toHaveBeenCalledWith(mockSchemas, options)
 })
 
-test('generateDevupArtifactsAsync writes all 5 files to tempDir', async () => {
+test('generateDevupArtifactsAsync writes all 7 files to tempDir', async () => {
   const io = createMockIOAsync()
   const generators = createMockGenerators()
 
   await generateDevupArtifactsAsync(io, generators)
 
-  expect(io.writeInterfaceAsync).toHaveBeenCalledTimes(5)
+  expect(io.writeInterfaceAsync).toHaveBeenCalledTimes(7)
   expect(io.writeInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
     'interface-content',
@@ -151,6 +163,14 @@ test('generateDevupArtifactsAsync writes all 5 files to tempDir', async () => {
   expect(io.writeInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'ui.d.ts'),
     'crud-types-content',
+  )
+  expect(io.writeInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'server.ts'),
+    'server-actions-content',
+  )
+  expect(io.writeInterfaceAsync).toHaveBeenCalledWith(
+    join('df', 'server-module.d.ts'),
+    'server-actions-types-content',
   )
 })
 
@@ -186,6 +206,8 @@ test('generateDevupArtifacts returns correct artifacts', () => {
   expect(result.files.zodTypes).toBe('zod-types-content')
   expect(result.files.crudConfig).toBe('crud-config-content')
   expect(result.files.crudTypes).toBe('crud-types-content')
+  expect(result.files.serverActions).toBe('server-actions-content')
+  expect(result.files.serverActionTypes).toBe('server-actions-types-content')
   expect(result.urlMap).toBe(mockUrlMap)
 })
 
@@ -222,16 +244,24 @@ test('generateDevupArtifacts calls all generators with schemas and options', () 
   )
   expect(generators.generateCrudConfigCode).toHaveBeenCalledWith(mockSchemas)
   expect(generators.generateCrudConfigTypes).toHaveBeenCalledWith(mockSchemas)
+  expect(generators.generateServerActionCode).toHaveBeenCalledWith(
+    mockSchemas,
+    options,
+  )
+  expect(generators.generateServerActionTypes).toHaveBeenCalledWith(
+    mockSchemas,
+    options,
+  )
   expect(generators.createUrlMap).toHaveBeenCalledWith(mockSchemas, options)
 })
 
-test('generateDevupArtifacts writes all 5 files to tempDir', () => {
+test('generateDevupArtifacts writes all 7 files to tempDir', () => {
   const io = createMockIOSync()
   const generators = createMockGenerators()
 
   generateDevupArtifacts(io, generators)
 
-  expect(io.writeInterface).toHaveBeenCalledTimes(5)
+  expect(io.writeInterface).toHaveBeenCalledTimes(7)
   expect(io.writeInterface).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
     'interface-content',
@@ -251,6 +281,14 @@ test('generateDevupArtifacts writes all 5 files to tempDir', () => {
   expect(io.writeInterface).toHaveBeenCalledWith(
     join('df', 'ui.d.ts'),
     'crud-types-content',
+  )
+  expect(io.writeInterface).toHaveBeenCalledWith(
+    join('df', 'server.ts'),
+    'server-actions-content',
+  )
+  expect(io.writeInterface).toHaveBeenCalledWith(
+    join('df', 'server-module.d.ts'),
+    'server-actions-types-content',
   )
 })
 

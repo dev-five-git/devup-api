@@ -7,5 +7,6 @@ test('index.ts exports', () => {
   expect({ ...indexModule }).toEqual({
     DevupApi: expect.any(Function),
     createApi: expect.any(Function),
+    serializeApiResponse: expect.any(Function),
   })
 })

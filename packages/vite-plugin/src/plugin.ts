@@ -4,6 +4,8 @@ import {
   generateCrudConfigCode,
   generateCrudConfigTypes,
   generateInterface,
+  generateServerActionCode,
+  generateServerActionTypes,
   generateZodSchemas,
   generateZodTypeDeclarations,
 } from '@devup-api/generator'
@@ -25,6 +27,9 @@ const RESOLVED_VIRTUAL_ZOD_MODULE = `\0${VIRTUAL_ZOD_MODULE}`
 const VIRTUAL_UI_MODULE = '@devup-api/ui/crud'
 const RESOLVED_VIRTUAL_UI_MODULE = `\0${VIRTUAL_UI_MODULE}`
 
+const VIRTUAL_SERVER_MODULE = '@devup-api/fetch/server'
+const RESOLVED_VIRTUAL_SERVER_MODULE = `\0${VIRTUAL_SERVER_MODULE}`
+
 export function devupApi(options?: DevupApiOptions): Plugin {
   let artifacts: DevupArtifacts | null = null
 
@@ -41,6 +46,8 @@ export function devupApi(options?: DevupApiOptions): Plugin {
     generateZodTypeDeclarations,
     generateCrudConfigCode,
     generateCrudConfigTypes,
+    generateServerActionCode,
+    generateServerActionTypes,
     createUrlMap,
   }
 
@@ -62,6 +69,9 @@ export function devupApi(options?: DevupApiOptions): Plugin {
       if (id === VIRTUAL_UI_MODULE) {
         return RESOLVED_VIRTUAL_UI_MODULE
       }
+      if (id === VIRTUAL_SERVER_MODULE) {
+        return RESOLVED_VIRTUAL_SERVER_MODULE
+      }
       return null
     },
 
@@ -74,6 +84,10 @@ export function devupApi(options?: DevupApiOptions): Plugin {
       if (id === RESOLVED_VIRTUAL_UI_MODULE) {
         const { files } = await getArtifacts()
         return files.crudConfig
+      }
+      if (id === RESOLVED_VIRTUAL_SERVER_MODULE) {
+        const { files } = await getArtifacts()
+        return files.serverActions
       }
       return null
     },

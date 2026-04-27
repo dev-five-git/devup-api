@@ -33,6 +33,14 @@ export interface DevupGenerators<TOptions = unknown> {
   generateCrudConfigTypes: (
     schemas: Record<string, OpenAPIV3_1.Document>,
   ) => string
+  generateServerActionCode: (
+    schemas: Record<string, OpenAPIV3_1.Document>,
+    options?: TOptions,
+  ) => string
+  generateServerActionTypes: (
+    schemas: Record<string, OpenAPIV3_1.Document>,
+    options?: TOptions,
+  ) => string
   createUrlMap: (
     schemas: Record<string, OpenAPIV3_1.Document>,
     options?: TOptions,
@@ -70,6 +78,8 @@ export interface DevupGeneratedFiles {
   zodTypes: string
   crudConfig: string
   crudTypes: string
+  serverActions: string
+  serverActionTypes: string
 }
 
 /**
@@ -103,6 +113,8 @@ export async function generateDevupArtifactsAsync<
     zodTypes: generators.generateZodTypeDeclarations(schemas, options),
     crudConfig: generators.generateCrudConfigCode(schemas),
     crudTypes: generators.generateCrudConfigTypes(schemas),
+    serverActions: generators.generateServerActionCode(schemas, options),
+    serverActionTypes: generators.generateServerActionTypes(schemas, options),
   }
 
   await Promise.all([
@@ -111,6 +123,11 @@ export async function generateDevupArtifactsAsync<
     io.writeInterfaceAsync(join(tempDir, 'zod.d.ts'), files.zodTypes),
     io.writeInterfaceAsync(join(tempDir, 'crud-configs.jsx'), files.crudConfig),
     io.writeInterfaceAsync(join(tempDir, 'ui.d.ts'), files.crudTypes),
+    io.writeInterfaceAsync(join(tempDir, 'server.ts'), files.serverActions),
+    io.writeInterfaceAsync(
+      join(tempDir, 'server-module.d.ts'),
+      files.serverActionTypes,
+    ),
   ])
 
   const urlMap = generators.createUrlMap(schemas, options)
@@ -136,6 +153,8 @@ export function generateDevupArtifacts<TOptions extends GenerateDevupOptions>(
     zodTypes: generators.generateZodTypeDeclarations(schemas, options),
     crudConfig: generators.generateCrudConfigCode(schemas),
     crudTypes: generators.generateCrudConfigTypes(schemas),
+    serverActions: generators.generateServerActionCode(schemas, options),
+    serverActionTypes: generators.generateServerActionTypes(schemas, options),
   }
 
   io.writeInterface(join(tempDir, 'api.d.ts'), files.interface)
@@ -143,6 +162,11 @@ export function generateDevupArtifacts<TOptions extends GenerateDevupOptions>(
   io.writeInterface(join(tempDir, 'zod.d.ts'), files.zodTypes)
   io.writeInterface(join(tempDir, 'crud-configs.jsx'), files.crudConfig)
   io.writeInterface(join(tempDir, 'ui.d.ts'), files.crudTypes)
+  io.writeInterface(join(tempDir, 'server.ts'), files.serverActions)
+  io.writeInterface(
+    join(tempDir, 'server-module.d.ts'),
+    files.serverActionTypes,
+  )
 
   const urlMap = generators.createUrlMap(schemas, options)
   return { tempDir, schemas, files, urlMap }

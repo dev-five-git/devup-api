@@ -5,6 +5,8 @@ import {
   generateCrudConfigCode,
   generateCrudConfigTypes,
   generateInterface,
+  generateServerActionCode,
+  generateServerActionTypes,
   generateZodSchemas,
   generateZodTypeDeclarations,
 } from '@devup-api/generator'
@@ -38,6 +40,8 @@ export function devupApiRsbuildPlugin(
         generateZodTypeDeclarations,
         generateCrudConfigCode,
         generateCrudConfigTypes,
+        generateServerActionCode,
+        generateServerActionTypes,
         createUrlMap,
       }
 
@@ -50,6 +54,7 @@ export function devupApiRsbuildPlugin(
       // Get absolute paths for virtual modules
       const zodSchemasPath = resolve(tempDir, 'zod-schemas.js')
       const crudConfigsPath = resolve(tempDir, 'crud-configs.jsx')
+      const serverPath = resolve(tempDir, 'server.ts')
 
       build.modifyRsbuildConfig((config) => {
         config.source ??= {}
@@ -70,6 +75,9 @@ export function devupApiRsbuildPlugin(
         ;(config.resolve.alias as Record<string, string>)[
           '@devup-api/ui/crud'
         ] = crudConfigsPath
+        ;(config.resolve.alias as Record<string, string>)[
+          '@devup-api/fetch/server'
+        ] = serverPath
 
         return config
       })

@@ -15,6 +15,9 @@ test('index.ts exports', () => {
     extractPathParams: expect.any(Function),
     generateCrudConfigCode: expect.any(Function),
     generateCrudConfigTypes: expect.any(Function),
+    // Server Action generation
+    generateServerActionCode: expect.any(Function),
+    generateServerActionTypes: expect.any(Function),
     parseCrudConfigs: expect.any(Function),
     parseCrudConfigsFromMultiple: expect.any(Function),
     parseDevupOperations: expect.any(Function),
