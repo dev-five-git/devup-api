@@ -130,8 +130,8 @@ test.each([
     mockSchema,
     options,
   )
-  // 5 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(5)
+  // 7 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts, server.ts, server-module.d.ts
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(7)
   expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
     join('df', 'api.d.ts'),
     mockInterfaceContent,
@@ -165,6 +165,7 @@ test('devupApiRsbuildPlugin setup hook modifies config with urlMap and alias', a
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
         '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
+        '@devup-api/fetch/server': resolve('df', 'server.ts'),
       },
     },
     source: {
@@ -192,6 +193,7 @@ test('devupApiRsbuildPlugin setup hook handles config without source', async () 
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
         '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
+        '@devup-api/fetch/server': resolve('df', 'server.ts'),
       },
     },
     source: {
@@ -221,6 +223,7 @@ test('devupApiRsbuildPlugin setup hook handles config without define', async () 
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
         '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
+        '@devup-api/fetch/server': resolve('df', 'server.ts'),
       },
     },
     source: {
@@ -251,6 +254,7 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is null',
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
         '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
+        '@devup-api/fetch/server': resolve('df', 'server.ts'),
       },
     },
     source: {
@@ -277,6 +281,7 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is undefi
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
         '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
+        '@devup-api/fetch/server': resolve('df', 'server.ts'),
       },
     },
     source: {
@@ -303,6 +308,7 @@ test('devupApiRsbuildPlugin setup hook does not add urlMap when urlMap is empty 
       alias: {
         '@devup-api/zod': resolve('df', 'zod-schemas.js'),
         '@devup-api/ui/crud': resolve('df', 'crud-configs.jsx'),
+        '@devup-api/fetch/server': resolve('df', 'server.ts'),
       },
     },
     source: {

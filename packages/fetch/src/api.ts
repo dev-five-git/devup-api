@@ -29,20 +29,20 @@ import {
 } from './utils'
 
 // biome-ignore lint/suspicious/noExplicitAny: any is used to allow for flexibility in the type
-export type DevupApiResponse<T, E = any> =
+export type DevupApiResponse<T, E = any, TResponse = Response> =
   | {
       data: T
       error?: undefined
       isOk: true
       isError: false
-      response: Response
+      response: TResponse
     }
   | {
       data?: undefined
       error: E
       isOk: false
       isError: true
-      response: Response
+      response: TResponse
     }
 
 export class DevupApi<S extends ConditionalKeys<DevupApiServers>> {

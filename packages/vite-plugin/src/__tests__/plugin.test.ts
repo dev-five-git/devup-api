@@ -14,6 +14,7 @@ let mockGenerateZodSchemas: ReturnType<typeof spyOn>
 let mockGenerateZodTypeDeclarations: ReturnType<typeof spyOn>
 let mockGenerateCrudConfigCode: ReturnType<typeof spyOn>
 let mockGenerateCrudConfigTypes: ReturnType<typeof spyOn>
+let mockGenerateServerActionCode: ReturnType<typeof spyOn>
 
 const mockSchema = {
   openapi: '3.1.0',
@@ -53,6 +54,7 @@ const mockZodSchemasContent = 'export const schemas = {}'
 const mockZodTypeDeclarationsContent = 'declare module "@devup-api/zod" {}'
 const mockCrudConfigCodeContent = 'export function UserCrud() {}'
 const mockCrudConfigTypesContent = 'declare module "@devup-api/ui/crud" {}'
+const mockServerActionsContent = "'use server'"
 
 beforeEach(() => {
   mockCreateTmpDirAsync = spyOn(utils, 'createTmpDirAsync').mockResolvedValue(
@@ -87,6 +89,10 @@ beforeEach(() => {
     generator,
     'generateCrudConfigTypes',
   ).mockReturnValue(mockCrudConfigTypesContent)
+  mockGenerateServerActionCode = spyOn(
+    generator,
+    'generateServerActionCode',
+  ).mockReturnValue(mockServerActionsContent)
 })
 
 test('devupApi returns plugin with correct name', () => {
@@ -292,6 +298,34 @@ test('devupApi resolveId returns null for partial ui module path', () => {
 
   expect(resolveId('@devup-api/ui')).toBeNull()
   expect(resolveId('@devup-api/ui/other')).toBeNull()
+})
+
+// =============================================================================
+// Virtual Server Module Tests
+// =============================================================================
+
+test('devupApi resolveId returns resolved virtual module for @devup-api/fetch/server', () => {
+  const plugin = devupApi()
+  const resolveId = plugin.resolveId as (id: string) => string | null
+
+  const result = resolveId('@devup-api/fetch/server')
+  expect(result).toBe('\0@devup-api/fetch/server')
+})
+
+test('devupApi load returns server action code for virtual server module', async () => {
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  const result = await load('\0@devup-api/fetch/server')
+  expect(result).toBe(mockServerActionsContent)
+  expect(mockGenerateServerActionCode).toHaveBeenCalled()
+})
+
+test('devupApi load returns null for non-resolved server module', async () => {
+  const plugin = devupApi()
+  const load = plugin.load as (id: string) => Promise<string | null>
+
+  expect(await load('@devup-api/fetch/server')).toBeNull()
 })
 
 test('devupApi load returns crud config code for virtual ui module', async () => {

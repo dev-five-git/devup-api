@@ -8,13 +8,18 @@
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js",
       "require": "./dist/index.cjs"
+    },
+    "./server": {
+      "types": "./dist/server.d.ts",
+      "import": "./dist/server.js",
+      "require": "./dist/server.cjs"
     }
   },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc && bun build --target node --outfile=dist/index.js src/index.ts --production --packages=external && bun build --target node --outfile=dist/index.cjs --format=cjs src/index.ts --production --packages=external"
+    "build": "tsc && bun -e \"await Bun.write('dist/server.d.ts', await Bun.file('src/server.d.ts').text())\" && bun build --target node --outfile=dist/index.js src/index.ts --production --packages=external && bun build --target node --outfile=dist/index.cjs --format=cjs src/index.ts --production --packages=external && bun build --target node --outfile=dist/server.js src/server.ts --production --packages=external && bun build --target node --outfile=dist/server.cjs --format=cjs src/server.ts --production --packages=external"
   },
   "publishConfig": {
     "access": "public"

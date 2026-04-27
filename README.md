@@ -33,6 +33,7 @@ Just write API calls — the types are already there.
 - [Packages](#-packages)
 - [API Usage](#-api-usage)
 - [Multiple API Servers](#-multiple-api-servers)
+- [Next.js Server Actions](#-nextjs-server-actions)
 - [React Query Integration](#-react-query-integration)
 - [Advanced Usage](#-advanced-usage)
 - [Configuration Options](#-configuration-options)
@@ -63,6 +64,11 @@ devup-api feels like using `fetch`, but with superpowers:
 - Works seamlessly with Vite, Next.js, Webpack, and Rsbuild
 - Automatic type generation during build time
 - Zero runtime overhead
+
+### **⚡ Generated Next.js Server Actions**
+- Generate top-level Server Action functions from OpenAPI operationIds
+- Import actions from `@devup-api/fetch/server` instead of reaching into `df`
+- Cold typing works before generated files exist, then becomes fully typed after the plugin runs
 
 ---
 
@@ -711,6 +717,57 @@ const products = await api2.get('getProducts', {})
 type User = DevupObject['User']  // From openapi.json
 type Product = DevupObject<'response', 'openapi2.json'>['Product']  // From openapi2.json
 ```
+
+---
+
+## ⚡ Next.js Server Actions
+
+devup-api generates named Server Action wrappers for operationId-based API calls by default. This is useful in Next.js App Router projects when you want to call server-side API functions from Client Components without manually writing one action per endpoint.
+
+Set `serverActions.baseUrl` when generated actions should call a specific API origin:
+
+```ts
+// next.config.ts
+import devupApi from '@devup-api/next-plugin'
+
+export default devupApi({
+  reactStrictMode: true,
+  serverActions: {
+    baseUrl: 'https://api.example.com',
+  },
+})
+```
+
+Then import generated actions from the virtual server module:
+
+```tsx
+'use client'
+
+import { getUser } from '@devup-api/fetch/server'
+
+export function UserButton() {
+  return (
+    <button
+      type="button"
+      onClick={async () => {
+        const result = await getUser({ params: { id: '123' } })
+        console.log(result.data)
+        console.log(result.response.status)
+      }}
+    >
+      Load user
+    </button>
+  )
+}
+```
+
+The generated `df/server.ts` file contains `'use server'` and exports one named async function for every operationId in your OpenAPI schemas. You should import from `@devup-api/fetch/server`, not from `df/server.ts` directly; the build plugin aliases that module to the generated file.
+
+Generated actions return `DevupApiResponse<T, E, SerializedResponse>`. This keeps the same `data` / `error` / `isOk` / `isError` shape as normal `api.get()` calls, while replacing the native `Response` instance with a plain serializable response object that can cross the Server Action boundary.
+
+During cold typing, `@devup-api/fetch/server` is still importable before `df` exists. The fallback keeps initial setup from failing, and the generated module replaces it with strict operation-specific types after `dev` or `build` runs.
+
+Server Actions are enabled by default. Disable generation explicitly with `serverActions: false` or `serverActions: { enabled: false }`.
 
 ---
 
@@ -1531,6 +1588,16 @@ interface DevupApiOptions {
    * @default true
    */
   responseDefaultNonNullable?: boolean
+
+  /**
+   * Generate operationId-based Server Action wrappers and expose them via
+   * @devup-api/fetch/server.
+   * @default true
+   */
+  serverActions?: boolean | {
+    enabled?: boolean
+    baseUrl?: string
+  }
 }
 ```
 
@@ -1542,7 +1609,8 @@ interface DevupApiOptions {
 2. Extracts paths, methods, schemas, parameters, and request bodies
 3. Generates TypeScript interface definitions automatically
 4. Creates a URL map for operationId-based API calls
-5. Builds a typed wrapper around `fetch()` with full type safety
+5. Generates named Server Actions in `df/server.ts` by default
+6. Builds a typed wrapper around `fetch()` with full type safety
 
 ---
 

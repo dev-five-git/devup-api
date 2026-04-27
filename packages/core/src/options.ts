@@ -28,4 +28,16 @@ export interface DevupApiOptions extends DevupApiTypeGeneratorOptions {
    * @default {'openapi.json'}
    */
   openapiFiles?: string[] | string
+
+  /**
+   * Generate Server Action wrappers for operationId-based API calls.
+   *
+   * @default {true}
+   */
+  serverActions?:
+    | boolean
+    | {
+        enabled?: boolean
+        baseUrl?: string
+      }
 }

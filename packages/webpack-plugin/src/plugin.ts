@@ -5,6 +5,8 @@ import {
   generateCrudConfigCode,
   generateCrudConfigTypes,
   generateInterface,
+  generateServerActionCode,
+  generateServerActionTypes,
   generateZodSchemas,
   generateZodTypeDeclarations,
 } from '@devup-api/generator'
@@ -54,6 +56,8 @@ export class devupApiWebpackPlugin {
             generateZodTypeDeclarations,
             generateCrudConfigCode,
             generateCrudConfigTypes,
+            generateServerActionCode,
+            generateServerActionTypes,
             createUrlMap,
           }
 
@@ -88,6 +92,12 @@ export class devupApiWebpackPlugin {
           new compiler.webpack.NormalModuleReplacementPlugin(
             /^@devup-api\/ui\/crud$/,
             crudConfigPath,
+          ).apply(compiler)
+
+          const serverPath = resolve(tempDir, 'server.ts')
+          new compiler.webpack.NormalModuleReplacementPlugin(
+            /^@devup-api\/fetch\/server$/,
+            serverPath,
           ).apply(compiler)
 
           callback()

@@ -1,6 +1,7 @@
 'use client'
 
 import { createApi, type DevupObject } from '@devup-api/fetch'
+import { getUserById } from '@devup-api/fetch/server'
 import { createQueryClient } from '@devup-api/react-query'
 import { ApiCrud } from '@devup-api/ui'
 import { schemas } from '@devup-api/zod'
@@ -113,6 +114,18 @@ export default function Home() {
       <Box>
         <ApiCrud api={'user'} apiClient={api} />
         <Box>
+          <Box
+            onClick={() => {
+              getUserById({
+                params: { id: 1 },
+                query: { name: 'John Doe' },
+              }).then((res) => {
+                console.log(res)
+              })
+            }}
+          >
+            hello
+          </Box>
           <Box>
             <Box>
               {(() => {

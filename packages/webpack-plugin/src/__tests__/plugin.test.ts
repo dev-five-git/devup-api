@@ -231,8 +231,8 @@ test.each([
     join('df', 'zod.d.ts'),
     mockZodTypeDeclarationsContent,
   )
-  // 5 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(5)
+  // 7 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts, server.ts, server-module.d.ts
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(7)
   expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options || {})
   expect(definePluginApplySpy).toHaveBeenCalled()
   expect(normalModuleReplacementPluginApplySpy).toHaveBeenCalled()
@@ -322,8 +322,8 @@ test('devupApiWebpackPlugin beforeCompile hook only runs once when called multip
   expect(mockGenerateInterface).toHaveBeenCalledTimes(1)
   expect(mockGenerateZodSchemas).toHaveBeenCalledTimes(1)
   expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledTimes(1)
-  // 5 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(5)
+  // 7 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts, server.ts, server-module.d.ts
+  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(7)
   expect(mockCreateUrlMap).toHaveBeenCalledTimes(1)
   expect(mockCallback1).toHaveBeenCalled()
   expect(mockCallback2).toHaveBeenCalled()

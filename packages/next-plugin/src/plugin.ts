@@ -5,6 +5,8 @@ import {
   generateCrudConfigCode,
   generateCrudConfigTypes,
   generateInterface,
+  generateServerActionCode,
+  generateServerActionTypes,
   generateZodSchemas,
   generateZodTypeDeclarations,
 } from '@devup-api/generator'
@@ -47,6 +49,8 @@ export function devupApi(
       generateZodTypeDeclarations,
       generateCrudConfigCode,
       generateCrudConfigTypes,
+      generateServerActionCode,
+      generateServerActionTypes,
       createUrlMap,
     }
 
@@ -69,6 +73,7 @@ export function devupApi(
       '@devup-api/ui/crud': toRelativePath(
         resolve(tempDir, 'crud-configs.jsx'),
       ),
+      '@devup-api/fetch/server': toRelativePath(resolve(tempDir, 'server.ts')),
     })
 
     return config

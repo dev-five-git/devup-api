@@ -7,6 +7,9 @@ const config = devupApi(
   },
   {
     openapiFiles: ['./openapi.json', './openapi2.json', './openapi3.json'],
+    serverActions: {
+      baseUrl: 'https://api.example.com',
+    },
   },
 )
 

@@ -129,6 +129,26 @@ describe('DevupApiResponse', () => {
     }>()
     expectTypeOf<ErrorData>().toEqualTypeOf<{ message: string; code: number }>()
   })
+
+  test('response metadata type can be customized', () => {
+    type SerializableResponse = {
+      status: number
+      headers: Record<string, string>
+    }
+    type Response = DevupApiResponse<
+      { id: number },
+      { message: string },
+      SerializableResponse
+    >
+
+    type SuccessCase = Extract<Response, { data: { id: number } }>
+    type ErrorCase = Extract<Response, { error: { message: string } }>
+
+    expectTypeOf<
+      SuccessCase['response']
+    >().toEqualTypeOf<SerializableResponse>()
+    expectTypeOf<ErrorCase['response']>().toEqualTypeOf<SerializableResponse>()
+  })
 })
 
 // =============================================================================

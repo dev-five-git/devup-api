@@ -72,6 +72,16 @@ interface DevupApiOptions {
    * @default true
    */
   responseDefaultNonNullable?: boolean
+
+  /**
+   * Generate operationId-based Server Action wrappers.
+   * Disable with false or { enabled: false }.
+   * @default true
+   */
+  serverActions?: boolean | {
+    enabled?: boolean
+    baseUrl?: string
+  }
 }
 ```
 
@@ -83,14 +93,16 @@ When using Turbopack (Next.js 13+), the plugin:
 1. Reads your `openapi.json` file
 2. Generates TypeScript interface definitions
 3. Creates a URL map and sets it as `process.env.DEVUP_API_URL_MAP`
-4. Makes types available for use with `@devup-api/fetch`
+4. Generates Server Actions in `df/server.ts` by default
+5. Makes types available for use with `@devup-api/fetch`
 
 ### Webpack Mode
 
 When using Webpack, the plugin uses `@devup-api/webpack-plugin` internally to:
 1. Generate types during build time
 2. Inject URL map via webpack DefinePlugin
-3. Make types available for use with `@devup-api/fetch`
+3. Generate Server Actions in `df/server.ts` by default
+4. Make types available for use with `@devup-api/fetch`
 
 ## TypeScript Configuration
 
