@@ -27,6 +27,7 @@ Just write API calls — the types are already there.
 
 ## 📖 Table of Contents
 
+
 - [Features](#-features)
 - [Quick Start](#-quick-start)
 - [Cold Typing vs Boild Typing](#-cold-typing-vs-boild-typing)
