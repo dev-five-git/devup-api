@@ -20,14 +20,14 @@
     "access": "public"
   },
   "dependencies": {
-    "@devup-api/fetch": "workspace:^",
-    "@tanstack/react-query": ">=5.96"
+    "@devup-api/fetch": "workspace:^"
   },
   "peerDependencies": {
     "react": "*",
-    "@tanstack/react-query": "*"
+    "@tanstack/react-query": ">=5.0.0"
   },
   "devDependencies": {
+    "@tanstack/react-query": "^5",
     "@testing-library/react-hooks": "^8.0.1",
     "@types/node": "^25.5",
     "@types/react": "^19.2",

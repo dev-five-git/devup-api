@@ -96,7 +96,7 @@
     },
     "packages/core": {
       "name": "@devup-api/core",
-      "version": "0.1.17",
+      "version": "0.1.18",
       "devDependencies": {
         "@types/node": "^25.5",
         "typescript": "^6.0",
@@ -104,7 +104,7 @@
     },
     "packages/fetch": {
       "name": "@devup-api/fetch",
-      "version": "0.1.20",
+      "version": "0.1.21",
       "dependencies": {
         "@devup-api/core": "workspace:^",
       },
@@ -115,7 +115,7 @@
     },
     "packages/generator": {
       "name": "@devup-api/generator",
-      "version": "0.1.23",
+      "version": "0.1.24",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/utils": "workspace:^",
@@ -136,7 +136,7 @@
         "react-hook-form": ">=7.72.1",
       },
       "devDependencies": {
-        "@tanstack/react-query": "^5.96",
+        "@tanstack/react-query": "^5",
         "@testing-library/react": "^16.3",
         "@types/node": "^25.5",
         "@types/react": "^19.2",
@@ -159,7 +159,7 @@
     },
     "packages/next-plugin": {
       "name": "@devup-api/next-plugin",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -181,9 +181,9 @@
       "version": "0.1.13",
       "dependencies": {
         "@devup-api/fetch": "workspace:^",
-        "@tanstack/react-query": ">=5.96",
       },
       "devDependencies": {
+        "@tanstack/react-query": "^5",
         "@testing-library/react-hooks": "^8.0.1",
         "@types/node": "^25.5",
         "@types/react": "^19.2",
@@ -191,13 +191,13 @@
         "typescript": "^6.0",
       },
       "peerDependencies": {
-        "@tanstack/react-query": "*",
+        "@tanstack/react-query": ">=5.0.0",
         "react": "*",
       },
     },
     "packages/rsbuild-plugin": {
       "name": "@devup-api/rsbuild-plugin",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -233,7 +233,7 @@
     },
     "packages/utils": {
       "name": "@devup-api/utils",
-      "version": "0.1.9",
+      "version": "0.1.10",
       "devDependencies": {
         "@types/node": "^25.5",
         "openapi-types": "^12.1",
@@ -242,7 +242,7 @@
     },
     "packages/vite-plugin": {
       "name": "@devup-api/vite-plugin",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -260,7 +260,7 @@
     },
     "packages/webpack-plugin": {
       "name": "@devup-api/webpack-plugin",
-      "version": "0.1.12",
+      "version": "0.1.13",
       "dependencies": {
         "@devup-api/core": "workspace:^",
         "@devup-api/generator": "workspace:^",
@@ -601,9 +601,9 @@
 
     "@swc/helpers": ["@swc/helpers@0.5.15", "", { "dependencies": { "tslib": "^2.8.0" } }, "sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g=="],
 
-    "@tanstack/query-core": ["@tanstack/query-core@5.96.2", "", {}, "sha512-hzI6cTVh4KNRk8UtoIBS7Lv9g6BnJPXvBKsvYH1aGWvv0347jT3BnSvztOE+kD76XGvZnRC/t6qdW1CaIfwCeA=="],
+    "@tanstack/query-core": ["@tanstack/query-core@5.101.2", "", {}, "sha512-hH5MLoJhF7KaIGd7q3xTXGXvslI+GYlM1Z/35aSHHWaCJWB7XvTSHYuV3eM7tw+aE0mT/xMro4M4Q9rCGHT0lw=="],
 
-    "@tanstack/react-query": ["@tanstack/react-query@5.96.2", "", { "dependencies": { "@tanstack/query-core": "5.96.2" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-sYyzzJT4G0g02azzJ8o55VFFV31XvFpdUpG+unxS0vSaYsJnSPKGoI6WdPwUucJL1wpgGfwfmntNX/Ub1uOViA=="],
+    "@tanstack/react-query": ["@tanstack/react-query@5.101.2", "", { "dependencies": { "@tanstack/query-core": "5.101.2" }, "peerDependencies": { "react": "^18 || ^19" } }, "sha512-seDkr6kzGzX1okaaTtZPtgA688CDPlXUz1C6xSg0ESqn04Vuc8tlrYms1s3de+znBqhPVxFRfpAfUf+6XvfPWg=="],
 
     "@testing-library/dom": ["@testing-library/dom@10.4.1", "", { "dependencies": { "@babel/code-frame": "^7.10.4", "@babel/runtime": "^7.12.5", "@types/aria-query": "^5.0.1", "aria-query": "5.3.0", "dom-accessibility-api": "^0.5.9", "lz-string": "^1.5.0", "picocolors": "1.1.1", "pretty-format": "^27.0.2" } }, "sha512-o4PXJQidqJl82ckFaXUeoAW+XysPLauYI43Abki5hABd853iMhitooc6znOnczgbTYmEP6U6/y1ZyKAIsvMKGg=="],
 
