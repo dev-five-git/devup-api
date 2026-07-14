@@ -843,7 +843,7 @@ function UserList() {
     {
       // React Query options
       staleTime: 5 * 60 * 1000, // 5 minutes
-      cacheTime: 10 * 60 * 1000, // 10 minutes
+      gcTime: 10 * 60 * 1000, // 10 minutes
       refetchOnWindowFocus: false,
       retry: 3,
     }
@@ -892,8 +892,8 @@ function CreateUserForm() {
     <form onSubmit={handleSubmit}>
       <input name="name" placeholder="Name" required />
       <input name="email" type="email" placeholder="Email" required />
-      <button type="submit" disabled={mutation.isLoading}>
-        {mutation.isLoading ? 'Creating...' : 'Create User'}
+      <button type="submit" disabled={mutation.isPending}>
+        {mutation.isPending ? 'Creating...' : 'Create User'}
       </button>
       {mutation.isError && <div>Error: {mutation.error.message}</div>}
       {mutation.isSuccess && <div>User created successfully!</div>}
