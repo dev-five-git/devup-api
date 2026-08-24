@@ -4,15 +4,15 @@
   "type": "module",
   "private": true,
   "devDependencies": {
-    "@biomejs/biome": "^2.4",
+    "@biomejs/biome": "^2.5",
     "@devup-api/react-query": "workspace:*",
     "@testing-library/react": "^16.3.2",
     "@testing-library/react-hooks": "^8.0.1",
     "@types/bun": "latest",
     "bun-test-env-dom": "^1.0.3",
     "husky": "^9",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8"
   },
   "author": "JeongMin Oh",
   "license": "Apache-2.0",

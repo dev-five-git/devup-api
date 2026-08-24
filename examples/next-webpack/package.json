@@ -9,18 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "next": "^16.2.2",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "next": "^16.3.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "@devup-api/next-plugin": "workspace:*",
     "@devup-api/fetch": "workspace:*",
     "@devup-ui/react": "^1"
   },
   "devDependencies": {
     "@devup-ui/next-plugin": "^1",
-    "@types/node": "^25",
+    "@types/node": "^26",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^6"
+    "typescript": "^7"
   }
 }

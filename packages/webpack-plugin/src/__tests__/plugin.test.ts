@@ -161,11 +161,14 @@ test.each([
       convertCase: 'snake' as const,
     },
   ],
-] as const)('devupApiWebpackPlugin constructor initializes with options: %s', (options: DevupApiOptions) => {
-  const plugin = new devupApiWebpackPlugin(options)
-  expect(plugin.options).toEqual(options)
-  expect(plugin.initialized).toBe(false)
-})
+] as const)(
+  'devupApiWebpackPlugin constructor initializes with options: %s',
+  (options: DevupApiOptions) => {
+    const plugin = new devupApiWebpackPlugin(options)
+    expect(plugin.options).toEqual(options)
+    expect(plugin.initialized).toBe(false)
+  },
+)
 
 test('devupApiWebpackPlugin apply method registers beforeCompile hook', () => {
   const plugin = new devupApiWebpackPlugin()
@@ -190,57 +193,64 @@ test.each([
     },
     ['custom-openapi.json'],
   ],
-] as const)('devupApiWebpackPlugin beforeCompile hook executes correctly: %s', async (options:
-  | DevupApiOptions
-  | undefined, expectedFiles: string[]) => {
-  const plugin = new devupApiWebpackPlugin(options)
-  const compiler = createMockCompiler()
-  const definePluginApplySpy = spyOn(
-    compiler.webpack.DefinePlugin.prototype,
-    'apply',
-  ).mockImplementation(() => {})
-  const normalModuleReplacementPluginApplySpy = spyOn(
-    compiler.webpack.NormalModuleReplacementPlugin.prototype,
-    'apply',
-  ).mockImplementation(() => {})
-  plugin.apply(compiler)
+] as const)(
+  'devupApiWebpackPlugin beforeCompile hook executes correctly: %s',
+  async (options: DevupApiOptions | undefined, expectedFiles: string[]) => {
+    const plugin = new devupApiWebpackPlugin(options)
+    const compiler = createMockCompiler()
+    const definePluginApplySpy = spyOn(
+      compiler.webpack.DefinePlugin.prototype,
+      'apply',
+    ).mockImplementation(() => {})
+    const normalModuleReplacementPluginApplySpy = spyOn(
+      compiler.webpack.NormalModuleReplacementPlugin.prototype,
+      'apply',
+    ).mockImplementation(() => {})
+    plugin.apply(compiler)
 
-  const callback = compiler._storedCallback
-  expect(callback).toBeDefined()
+    const callback = compiler._storedCallback
+    expect(callback).toBeDefined()
 
-  const mockCallback = mock(() => {})
-  await callback?.(null, mockCallback)
+    const mockCallback = mock(() => {})
+    await callback?.(null, mockCallback)
 
-  expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
-  expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options || {})
-  expect(mockGenerateZodSchemas).toHaveBeenCalledWith(mockSchema, options || {})
-  expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledWith(
-    mockSchema,
-    options || {},
-  )
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
-    join('df', 'api.d.ts'),
-    mockInterfaceContent,
-  )
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
-    join('df', 'zod-schemas.js'),
-    mockZodSchemasContent,
-  )
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
-    join('df', 'zod.d.ts'),
-    mockZodTypeDeclarationsContent,
-  )
-  // 7 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts, server.ts, server-module.d.ts
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(7)
-  expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options || {})
-  expect(definePluginApplySpy).toHaveBeenCalled()
-  expect(normalModuleReplacementPluginApplySpy).toHaveBeenCalled()
-  expect(mockCallback).toHaveBeenCalled()
-  expect(plugin.initialized).toBe(true)
-  definePluginApplySpy.mockRestore()
-  normalModuleReplacementPluginApplySpy.mockRestore()
-})
+    expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
+    expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
+    expect(mockGenerateInterface).toHaveBeenCalledWith(
+      mockSchema,
+      options || {},
+    )
+    expect(mockGenerateZodSchemas).toHaveBeenCalledWith(
+      mockSchema,
+      options || {},
+    )
+    expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledWith(
+      mockSchema,
+      options || {},
+    )
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+      join('df', 'api.d.ts'),
+      mockInterfaceContent,
+    )
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+      join('df', 'zod-schemas.js'),
+      mockZodSchemasContent,
+    )
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+      join('df', 'zod.d.ts'),
+      mockZodTypeDeclarationsContent,
+    )
+    // 7 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts, server.ts, server-module.d.ts
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(7)
+    expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options || {})
+    expect(definePluginApplySpy).toHaveBeenCalled()
+    expect(normalModuleReplacementPluginApplySpy).toHaveBeenCalled()
+    expect(mockCallback).toHaveBeenCalled()
+    expect(plugin.initialized).toBe(true)
+    definePluginApplySpy.mockRestore()
+    normalModuleReplacementPluginApplySpy.mockRestore()
+  },
+)
 
 test('devupApiWebpackPlugin beforeCompile hook does not add DefinePlugin when urlMap is null', async () => {
   mockCreateUrlMap.mockReturnValueOnce(null as never)

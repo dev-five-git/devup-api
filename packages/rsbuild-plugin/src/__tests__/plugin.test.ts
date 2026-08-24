@@ -112,41 +112,42 @@ test.each([
     },
     ['custom-openapi.json'],
   ],
-] as const)('devupApiRsbuildPlugin returns plugin with setup hook: %s', async (options:
-  | DevupApiOptions
-  | undefined, expectedFiles: string[]) => {
-  const plugin = devupApiRsbuildPlugin(options)
-  expect(plugin.setup).toBeDefined()
-  expect(typeof plugin.setup).toBe('function')
+] as const)(
+  'devupApiRsbuildPlugin returns plugin with setup hook: %s',
+  async (options: DevupApiOptions | undefined, expectedFiles: string[]) => {
+    const plugin = devupApiRsbuildPlugin(options)
+    expect(plugin.setup).toBeDefined()
+    expect(typeof plugin.setup).toBe('function')
 
-  const build = createMockBuild()
-  await plugin.setup?.(build as never)
+    const build = createMockBuild()
+    await plugin.setup?.(build as never)
 
-  expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
-  expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
-  expect(mockGenerateZodSchemas).toHaveBeenCalledWith(mockSchema, options)
-  expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledWith(
-    mockSchema,
-    options,
-  )
-  // 7 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts, server.ts, server-module.d.ts
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(7)
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
-    join('df', 'api.d.ts'),
-    mockInterfaceContent,
-  )
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
-    join('df', 'zod-schemas.js'),
-    mockZodSchemasContent,
-  )
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
-    join('df', 'zod.d.ts'),
-    mockZodTypeDeclarationsContent,
-  )
-  expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
-  expect(build.modifyRsbuildConfig).toHaveBeenCalled()
-})
+    expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
+    expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
+    expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
+    expect(mockGenerateZodSchemas).toHaveBeenCalledWith(mockSchema, options)
+    expect(mockGenerateZodTypeDeclarations).toHaveBeenCalledWith(
+      mockSchema,
+      options,
+    )
+    // 7 files written: api.d.ts, zod-schemas.js, zod.d.ts, crud-config.js, ui.d.ts, server.ts, server-module.d.ts
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledTimes(7)
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+      join('df', 'api.d.ts'),
+      mockInterfaceContent,
+    )
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+      join('df', 'zod-schemas.js'),
+      mockZodSchemasContent,
+    )
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+      join('df', 'zod.d.ts'),
+      mockZodTypeDeclarationsContent,
+    )
+    expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
+    expect(build.modifyRsbuildConfig).toHaveBeenCalled()
+  },
+)
 
 test('devupApiRsbuildPlugin setup hook modifies config with urlMap and alias', async () => {
   const plugin = devupApiRsbuildPlugin()

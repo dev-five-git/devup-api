@@ -24,8 +24,8 @@
     "@devup-api/utils": "workspace:^"
   },
   "devDependencies": {
-    "@types/node": "^25.5",
-    "typescript": "^6.0",
+    "@types/node": "^26.2",
+    "typescript": "^7.0",
     "openapi-types": "^12.1"
   }
 }

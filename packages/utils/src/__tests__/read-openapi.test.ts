@@ -114,11 +114,14 @@ test.each([
   ['./openapi.json', 'openapi.json'],
   ['/absolute/path/openapi.json', '/absolute/path/openapi.json'],
   ['src/schemas/api.json', 'src/schemas/api.json'],
-])('readOpenapiAsync reads file from custom path: %s', async (filePath, expected) => {
-  const result = await readOpenapiAsync([filePath])
-  expect(mockReadFile).toHaveBeenCalledWith(filePath, 'utf8')
-  expect(result).toEqual({ [expected]: mockOpenApiDoc })
-})
+])(
+  'readOpenapiAsync reads file from custom path: %s',
+  async (filePath, expected) => {
+    const result = await readOpenapiAsync([filePath])
+    expect(mockReadFile).toHaveBeenCalledWith(filePath, 'utf8')
+    expect(result).toEqual({ [expected]: mockOpenApiDoc })
+  },
+)
 
 test('readOpenapiAsync parses valid JSON content', async () => {
   const customDoc: OpenAPIV3_1.Document = {

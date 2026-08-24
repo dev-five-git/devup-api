@@ -29,9 +29,12 @@ test.each([
   ['hello world', 'helloWorld'],
   ['my variable name', 'myVariableName'],
   ['space separated string', 'spaceSeparatedString'],
-])('converts space-separated strings to camelCase: %s -> %s', (input, expected) => {
-  expect(toCamel(input)).toBe(expected)
-})
+])(
+  'converts space-separated strings to camelCase: %s -> %s',
+  (input, expected) => {
+    expect(toCamel(input)).toBe(expected)
+  },
+)
 
 test.each([
   ['helloWorld', 'helloWorld'],
@@ -82,9 +85,12 @@ test.each([
   ['', ''],
   ['a', 'a'],
   ['A', 'a'],
-])('handles empty string and single characters: %s -> %s', (input, expected) => {
-  expect(toCamel(input)).toBe(expected)
-})
+])(
+  'handles empty string and single characters: %s -> %s',
+  (input, expected) => {
+    expect(toCamel(input)).toBe(expected)
+  },
+)
 
 test.each([
   ['HelloWorld-123_test', 'helloWorld123Test'],

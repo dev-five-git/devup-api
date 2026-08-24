@@ -5,27 +5,32 @@ test.each([
   ['json', 'json'],
   ['text', 'text'],
   ['stream', 'stream'],
-] as const)('convertResponse parses successful response with parseAs=%s', async (parseAs) => {
-  const request = new Request('https://api.example.com/test', { method: 'GET' })
-  const response = new Response(JSON.stringify({ id: 1, name: 'test' }), {
-    status: 200,
-    headers: { 'Content-Type': 'application/json' },
-  })
+] as const)(
+  'convertResponse parses successful response with parseAs=%s',
+  async (parseAs) => {
+    const request = new Request('https://api.example.com/test', {
+      method: 'GET',
+    })
+    const response = new Response(JSON.stringify({ id: 1, name: 'test' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
 
-  const result = await convertResponse(request, response, parseAs)
+    const result = await convertResponse(request, response, parseAs)
 
-  expect('data' in result).toBe(true)
-  if ('data' in result) {
-    if (parseAs === 'stream') {
-      expect(result.data).toBeDefined()
-    } else if (parseAs === 'text') {
-      expect(typeof result.data).toBe('string')
-    } else {
-      expect(result.data).toEqual({ id: 1, name: 'test' })
+    expect('data' in result).toBe(true)
+    if ('data' in result) {
+      if (parseAs === 'stream') {
+        expect(result.data).toBeDefined()
+      } else if (parseAs === 'text') {
+        expect(typeof result.data).toBe('string')
+      } else {
+        expect(result.data).toEqual({ id: 1, name: 'test' })
+      }
     }
-  }
-  expect(result.response).toBe(response)
-})
+    expect(result.response).toBe(response)
+  },
+)
 
 test('convertResponse handles 204 No Content with success', async () => {
   const request = new Request('https://api.example.com/test', {

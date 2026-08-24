@@ -112,28 +112,29 @@ test.each([
     },
     ['custom-openapi.json'],
   ],
-] as const)('devupApi returns plugin with config hook: %s', async (options:
-  | DevupApiOptions
-  | undefined, expectedFiles: string[]) => {
-  const plugin = devupApi(options)
-  expect(plugin.config).toBeDefined()
-  expect(typeof plugin.config).toBe('function')
+] as const)(
+  'devupApi returns plugin with config hook: %s',
+  async (options: DevupApiOptions | undefined, expectedFiles: string[]) => {
+    const plugin = devupApi(options)
+    expect(plugin.config).toBeDefined()
+    expect(typeof plugin.config).toBe('function')
 
-  const result = await (
-    plugin as unknown as {
-      config?: () => Promise<{ define: Record<string, string> }>
-    }
-  ).config?.()
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
-  expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
-  expect(result).toEqual({
-    define: {
-      'process.env.DEVUP_API_URL_MAP': JSON.stringify(
-        JSON.stringify(mockUrlMap),
-      ),
-    },
-  })
-})
+    const result = await (
+      plugin as unknown as {
+        config?: () => Promise<{ define: Record<string, string> }>
+      }
+    ).config?.()
+    expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
+    expect(mockCreateUrlMap).toHaveBeenCalledWith(mockSchema, options)
+    expect(result).toEqual({
+      define: {
+        'process.env.DEVUP_API_URL_MAP': JSON.stringify(
+          JSON.stringify(mockUrlMap),
+        ),
+      },
+    })
+  },
+)
 
 test('devupApi config hook returns empty define when urlMap is null', async () => {
   mockCreateUrlMap.mockReturnValue(null as never)
@@ -186,24 +187,25 @@ test.each([
     },
     ['custom-openapi.json'],
   ],
-] as const)('devupApi returns plugin with configResolved hook: %s', async (options:
-  | DevupApiOptions
-  | undefined, expectedFiles: string[]) => {
-  const plugin = devupApi(options)
-  expect(plugin.configResolved).toBeDefined()
-  expect(typeof plugin.configResolved).toBe('function')
+] as const)(
+  'devupApi returns plugin with configResolved hook: %s',
+  async (options: DevupApiOptions | undefined, expectedFiles: string[]) => {
+    const plugin = devupApi(options)
+    expect(plugin.configResolved).toBeDefined()
+    expect(typeof plugin.configResolved).toBe('function')
 
-  await (
-    plugin as unknown as { configResolved?: () => Promise<void> }
-  ).configResolved?.()
-  expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
-  expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
-  expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
-  expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
-    join('df', 'api.d.ts'),
-    mockInterfaceContent,
-  )
-})
+    await (
+      plugin as unknown as { configResolved?: () => Promise<void> }
+    ).configResolved?.()
+    expect(mockCreateTmpDirAsync).toHaveBeenCalledWith(options?.tempDir)
+    expect(mockReadOpenapiAsync).toHaveBeenCalledWith(expectedFiles)
+    expect(mockGenerateInterface).toHaveBeenCalledWith(mockSchema, options)
+    expect(mockWriteInterfaceAsync).toHaveBeenCalledWith(
+      join('df', 'api.d.ts'),
+      mockInterfaceContent,
+    )
+  },
+)
 
 test('devupApi plugin has both config and configResolved hooks', () => {
   const plugin = devupApi()

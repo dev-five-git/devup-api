@@ -41,27 +41,30 @@ test.each([
       '/users': { GET: { url: '/users' } },
     },
   ],
-])('creates url map with %s case conversion', (_, options, operationId, expected) => {
-  const schema: OpenAPIV3_1.Document = {
-    openapi: '3.1.0',
-    info: { title: 'Test API', version: '1.0.0' },
-    paths: {
-      '/users': {
-        get: {
-          operationId,
-          responses: {},
+])(
+  'creates url map with %s case conversion',
+  (_, options, operationId, expected) => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/users': {
+          get: {
+            operationId,
+            responses: {},
+          },
         },
       },
-    },
-  }
+    }
 
-  const result = createUrlMap({ '': schema }, options)
+    const result = createUrlMap({ '': schema }, options)
 
-  expect(result).toEqual({ '': expected } as Record<
-    string,
-    Record<string, UrlMapValue>
-  >)
-})
+    expect(result).toEqual({ '': expected } as Record<
+      string,
+      Record<string, UrlMapValue>
+    >)
+  },
+)
 
 test('converts path parameters based on convertCase', () => {
   const schema: OpenAPIV3_1.Document = {
@@ -101,35 +104,38 @@ test.each([
   ['put', 'update_user', 'updateUser', 'PUT'],
   ['delete', 'delete_user', 'deleteUser', 'DELETE'],
   ['patch', 'patch_user', 'patchUser', 'PATCH'],
-])('handles %s HTTP method', (method, operationId, expectedKey, expectedMethod) => {
-  const schema: OpenAPIV3_1.Document = {
-    openapi: '3.1.0',
-    info: { title: 'Test API', version: '1.0.0' },
-    paths: {
-      '/users': {
-        [method]: {
-          operationId,
-          responses: {},
+])(
+  'handles %s HTTP method',
+  (method, operationId, expectedKey, expectedMethod) => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/users': {
+          [method]: {
+            operationId,
+            responses: {},
+          },
         },
       },
-    },
-  }
+    }
 
-  const result = createUrlMap({ '': schema })
+    const result = createUrlMap({ '': schema })
 
-  expect(result['']).toHaveProperty(expectedKey)
-  expect(
-    result['']![expectedKey]?.[
-      expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
-    ],
-  ).toBeDefined()
-  expect(result['']).toHaveProperty('/users')
-  expect(
-    result['']!['/users']?.[
-      expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
-    ],
-  ).toBeDefined()
-})
+    expect(result['']).toHaveProperty(expectedKey)
+    expect(
+      result['']![expectedKey]?.[
+        expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+      ],
+    ).toBeDefined()
+    expect(result['']).toHaveProperty('/users')
+    expect(
+      result['']!['/users']?.[
+        expectedMethod as 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'
+      ],
+    ).toBeDefined()
+  },
+)
 
 test('handles operation without operationId', () => {
   const schema: OpenAPIV3_1.Document = {
@@ -294,29 +300,32 @@ test.each([
   ['camel', '/users/{userId}', '/users/{userId}'],
   ['snake', '/users/{user_id}', '/users/{user_id}'],
   ['pascal', '/users/{UserId}', '/users/{UserId}'],
-])('converts path parameters with %s case: %s', (caseType, expectedPath, expectedUrl) => {
-  const schema: OpenAPIV3_1.Document = {
-    openapi: '3.1.0',
-    info: { title: 'Test API', version: '1.0.0' },
-    paths: {
-      '/users/{user_id}': {
-        get: {
-          operationId: 'get_user',
-          responses: {},
+])(
+  'converts path parameters with %s case: %s',
+  (caseType, expectedPath, expectedUrl) => {
+    const schema: OpenAPIV3_1.Document = {
+      openapi: '3.1.0',
+      info: { title: 'Test API', version: '1.0.0' },
+      paths: {
+        '/users/{user_id}': {
+          get: {
+            operationId: 'get_user',
+            responses: {},
+          },
         },
       },
-    },
-  }
+    }
 
-  const result = createUrlMap(
-    { '': schema },
-    {
-      convertCase: caseType as 'camel' | 'snake' | 'pascal',
-    },
-  )
+    const result = createUrlMap(
+      { '': schema },
+      {
+        convertCase: caseType as 'camel' | 'snake' | 'pascal',
+      },
+    )
 
-  expect(result[''][expectedPath]?.GET?.url).toBe(expectedUrl)
-})
+    expect(result[''][expectedPath]?.GET?.url).toBe(expectedUrl)
+  },
+)
 
 test.each([
   ['camel', 'getUserList'],

@@ -9,16 +9,16 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "@devup-api/fetch": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "@vitejs/plugin-react": "^6.0.1",
-    "typescript": "^6",
-    "vite": "^8.0.3",
+    "@vitejs/plugin-react": "^6.1.0",
+    "typescript": "^7",
+    "vite": "^8.2.2",
     "@devup-api/vite-plugin": "workspace:*"
   }
 }
