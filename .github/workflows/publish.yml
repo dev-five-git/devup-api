@@ -51,6 +51,9 @@ jobs:
       - check
     steps:
       - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          fetch-tags: true
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: 1.4.0
