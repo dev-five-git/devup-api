@@ -24,10 +24,13 @@ test.each([
   ['https://api.example.com/', 'https://api.example.com'],
   ['http://localhost:3000', 'http://localhost:3000'],
   ['http://localhost:3000/', 'http://localhost:3000'],
-] as const)('constructor removes trailing slash: %s -> %s', (baseUrl, expected) => {
-  const api = new DevupApi(baseUrl, undefined, 'openapi.json')
-  expect(api.getBaseUrl()).toBe(expected)
-})
+] as const)(
+  'constructor removes trailing slash: %s -> %s',
+  (baseUrl, expected) => {
+    const api = new DevupApi(baseUrl, undefined, 'openapi.json')
+    expect(api.getBaseUrl()).toBe(expected)
+  },
+)
 
 test.each([
   [undefined, {}],
@@ -36,14 +39,17 @@ test.each([
     { headers: { Authorization: 'Bearer token' } },
     { headers: { Authorization: 'Bearer token' } },
   ],
-] as const)('constructor accepts defaultOptions: %s -> %s', (defaultOptions, expected) => {
-  const api = new DevupApi(
-    'https://api.example.com',
-    defaultOptions,
-    'openapi.json',
-  )
-  expect(api.getDefaultOptions()).toEqual(expected)
-})
+] as const)(
+  'constructor accepts defaultOptions: %s -> %s',
+  (defaultOptions, expected) => {
+    const api = new DevupApi(
+      'https://api.example.com',
+      defaultOptions,
+      'openapi.json',
+    )
+    expect(api.getDefaultOptions()).toEqual(expected)
+  },
+)
 
 test.each([
   [{}, {}],
@@ -51,11 +57,18 @@ test.each([
     { headers: { 'Content-Type': 'application/json' } },
     { headers: { 'Content-Type': 'application/json' } },
   ],
-] as const)('setDefaultOptions updates defaultOptions: %s -> %s', (options, expected) => {
-  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
-  api.setDefaultOptions(options)
-  expect(api.getDefaultOptions()).toEqual(expected)
-})
+] as const)(
+  'setDefaultOptions updates defaultOptions: %s -> %s',
+  (options, expected) => {
+    const api = new DevupApi(
+      'https://api.example.com',
+      undefined,
+      'openapi.json',
+    )
+    api.setDefaultOptions(options)
+    expect(api.getDefaultOptions()).toEqual(expected)
+  },
+)
 
 test.each([
   ['GET', 'get'],
@@ -68,20 +81,27 @@ test.each([
   ['DELETE', 'DELETE'],
   ['PATCH', 'patch'],
   ['PATCH', 'PATCH'],
-] as const)('HTTP method %s calls request with correct method', async (expectedMethod, methodName) => {
-  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
-  const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
+] as const)(
+  'HTTP method %s calls request with correct method',
+  async (expectedMethod, methodName) => {
+    const api = new DevupApi(
+      'https://api.example.com',
+      undefined,
+      'openapi.json',
+    )
+    const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
 
-  await (api as any)[methodName]('/test' as never)
+    await (api as any)[methodName]('/test' as never)
 
-  expect(mockFetch).toHaveBeenCalledTimes(1)
-  const call = mockFetch.mock.calls[0]
-  expect(call).toBeDefined()
-  if (call) {
-    const request = call[0] as Request
-    expect(request.method).toBe(expectedMethod)
-  }
-})
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const call = mockFetch.mock.calls[0]
+    expect(call).toBeDefined()
+    if (call) {
+      const request = call[0] as Request
+      expect(request.method).toBe(expectedMethod)
+    }
+  },
+)
 
 test('request serializes plain object body to JSON', async () => {
   const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
@@ -567,9 +587,16 @@ test.each([
   ['PUT', '/users/{id}'],
   ['DELETE', '/users/{id}'],
   ['PATCH', '/users/{id}'],
-] as const)('resolveEndpoint preserves method %s for path %s', (method, path) => {
-  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
-  const result = api.resolveEndpoint(method as any, path as any)
-  expect(result.method).toBe(method)
-  expect(result.url).toBe(path)
-})
+] as const)(
+  'resolveEndpoint preserves method %s for path %s',
+  (method, path) => {
+    const api = new DevupApi(
+      'https://api.example.com',
+      undefined,
+      'openapi.json',
+    )
+    const result = api.resolveEndpoint(method as any, path as any)
+    expect(result.method).toBe(method)
+    expect(result.url).toBe(path)
+  },
+)

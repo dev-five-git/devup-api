@@ -24,11 +24,11 @@
   "dependencies": {
     "@devup-api/fetch": "workspace:^",
     "@devup-api/zod": "workspace:^",
-    "@hookform/resolvers": ">=5.2.2",
-    "react-hook-form": ">=7.72.1"
+    "@hookform/resolvers": ">=5.9.1",
+    "react-hook-form": ">=7.86.0"
   },
   "peerDependencies": {
-    "@tanstack/react-query": ">=5.0.0",
+    "@tanstack/react-query": ">=5.102.2",
     "react": "*",
     "react-hook-form": "*",
     "zod": "*"
@@ -36,16 +36,17 @@
   "devDependencies": {
     "@tanstack/react-query": "^5",
     "@testing-library/react": "^16.3",
-    "@types/node": "^25.5",
+    "@typescript/typescript6": "^6.0",
+    "@types/node": "^26.2",
     "@types/react": "^19.2",
     "bun-test-env-dom": "^1.0",
-    "happy-dom": "^20.8",
+    "happy-dom": "^20.11",
     "react": "^19.2",
     "react-dom": "^19.2",
-    "typescript": "^6.0",
-    "zod": "^4.3",
+    "typescript": "^7.0",
+    "zod": "^4.4",
     "rollup-plugin-preserve-directives": "^0.4",
-    "vite": "^8.0",
-    "vite-plugin-dts": "^4.5"
+    "vite": "^8.2",
+    "vite-plugin-dts": "^5.0"
   }
 }

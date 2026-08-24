@@ -29,9 +29,12 @@ test.each([
   ['hello world', 'HelloWorld'],
   ['my variable name', 'MyVariableName'],
   ['space separated string', 'SpaceSeparatedString'],
-])('converts space-separated strings to PascalCase: %s -> %s', (input, expected) => {
-  expect(toPascal(input)).toBe(expected)
-})
+])(
+  'converts space-separated strings to PascalCase: %s -> %s',
+  (input, expected) => {
+    expect(toPascal(input)).toBe(expected)
+  },
+)
 
 test.each([
   ['HelloWorld', 'HelloWorld'],
@@ -82,9 +85,12 @@ test.each([
   ['', ''],
   ['a', 'A'],
   ['A', 'A'],
-])('handles empty string and single characters: %s -> %s', (input, expected) => {
-  expect(toPascal(input)).toBe(expected)
-})
+])(
+  'handles empty string and single characters: %s -> %s',
+  (input, expected) => {
+    expect(toPascal(input)).toBe(expected)
+  },
+)
 
 test.each([
   ['HelloWorld-123_test', 'HelloWorld123Test'],

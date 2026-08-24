@@ -101,10 +101,13 @@ test.each([
   ['types/api.ts', 'export interface Api {}'],
   ['src/interfaces/user.ts', 'export interface User {}'],
   ['/absolute/path/output.ts', 'export interface Output {}'],
-])('writeInterfaceAsync writes content to custom path: %s', async (filePath, content) => {
-  await writeInterfaceAsync(filePath, content)
-  expect(mockWriteFile).toHaveBeenCalledWith(filePath, content, 'utf8')
-})
+])(
+  'writeInterfaceAsync writes content to custom path: %s',
+  async (filePath, content) => {
+    await writeInterfaceAsync(filePath, content)
+    expect(mockWriteFile).toHaveBeenCalledWith(filePath, content, 'utf8')
+  },
+)
 
 test('writeInterfaceAsync writes empty content', async () => {
   const filePath = 'empty.ts'

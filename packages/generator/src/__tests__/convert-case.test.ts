@@ -13,17 +13,23 @@ test.each([
   ['HelloWorld', 'snake', 'hello_world'],
   ['MyVariableName', 'snake', 'my_variable_name'],
   ['PascalCaseString', 'snake', 'pascal_case_string'],
-])('converts PascalCase to snake_case: %s -> %s', (input, caseType, expected) => {
-  expect(convertCase(input, caseType as 'snake')).toBe(expected)
-})
+])(
+  'converts PascalCase to snake_case: %s -> %s',
+  (input, caseType, expected) => {
+    expect(convertCase(input, caseType as 'snake')).toBe(expected)
+  },
+)
 
 test.each([
   ['helloWorld', 'snake', 'hello_world'],
   ['myVariableName', 'snake', 'my_variable_name'],
   ['camelCaseString', 'snake', 'camel_case_string'],
-])('converts camelCase to snake_case: %s -> %s', (input, caseType, expected) => {
-  expect(convertCase(input, caseType as 'snake')).toBe(expected)
-})
+])(
+  'converts camelCase to snake_case: %s -> %s',
+  (input, caseType, expected) => {
+    expect(convertCase(input, caseType as 'snake')).toBe(expected)
+  },
+)
 
 test.each([
   ['hello_world', 'camel', 'helloWorld'],
@@ -37,17 +43,23 @@ test.each([
   ['HelloWorld', 'camel', 'helloWorld'],
   ['MyVariableName', 'camel', 'myVariableName'],
   ['PascalCaseString', 'camel', 'pascalCaseString'],
-])('converts PascalCase to camelCase: %s -> %s', (input, caseType, expected) => {
-  expect(convertCase(input, caseType as 'camel')).toBe(expected)
-})
+])(
+  'converts PascalCase to camelCase: %s -> %s',
+  (input, caseType, expected) => {
+    expect(convertCase(input, caseType as 'camel')).toBe(expected)
+  },
+)
 
 test.each([
   ['helloWorld', 'camel', 'helloWorld'],
   ['myVariableName', 'camel', 'myVariableName'],
   ['camelCaseString', 'camel', 'camelCaseString'],
-])('returns camelCase strings unchanged: %s -> %s', (input, caseType, expected) => {
-  expect(convertCase(input, caseType as 'camel')).toBe(expected)
-})
+])(
+  'returns camelCase strings unchanged: %s -> %s',
+  (input, caseType, expected) => {
+    expect(convertCase(input, caseType as 'camel')).toBe(expected)
+  },
+)
 
 test.each([
   ['hello_world', 'pascal', 'HelloWorld'],
@@ -61,17 +73,23 @@ test.each([
   ['helloWorld', 'pascal', 'HelloWorld'],
   ['myVariableName', 'pascal', 'MyVariableName'],
   ['camelCaseString', 'pascal', 'CamelCaseString'],
-])('converts camelCase to PascalCase: %s -> %s', (input, caseType, expected) => {
-  expect(convertCase(input, caseType as 'pascal')).toBe(expected)
-})
+])(
+  'converts camelCase to PascalCase: %s -> %s',
+  (input, caseType, expected) => {
+    expect(convertCase(input, caseType as 'pascal')).toBe(expected)
+  },
+)
 
 test.each([
   ['HelloWorld', 'pascal', 'HelloWorld'],
   ['MyVariableName', 'pascal', 'MyVariableName'],
   ['PascalCaseString', 'pascal', 'PascalCaseString'],
-])('returns PascalCase strings unchanged: %s -> %s', (input, caseType, expected) => {
-  expect(convertCase(input, caseType as 'pascal')).toBe(expected)
-})
+])(
+  'returns PascalCase strings unchanged: %s -> %s',
+  (input, caseType, expected) => {
+    expect(convertCase(input, caseType as 'pascal')).toBe(expected)
+  },
+)
 
 test.each([
   ['hello_world', 'maintain', 'hello_world'],
@@ -86,26 +104,35 @@ test.each([
   ['hello_world', undefined, 'helloWorld'],
   ['my_variable_name', undefined, 'myVariableName'],
   ['snake_case_string', undefined, 'snakeCaseString'],
-])('defaults to camelCase when caseType is undefined: %s -> %s', (input, caseType, expected) => {
-  // biome-ignore lint/suspicious/noExplicitAny: Testing default behavior with undefined caseType
-  expect(convertCase(input, caseType as any)).toBe(expected)
-})
+])(
+  'defaults to camelCase when caseType is undefined: %s -> %s',
+  (input, caseType, expected) => {
+    // biome-ignore lint/suspicious/noExplicitAny: Testing default behavior with undefined caseType
+    expect(convertCase(input, caseType as any)).toBe(expected)
+  },
+)
 
 test.each([
   ['hello_world', 'helloWorld'],
   ['my_variable_name', 'myVariableName'],
   ['snake_case_string', 'snakeCaseString'],
-])('defaults to camelCase when caseType is not provided: %s -> %s', (input, expected) => {
-  expect(convertCase(input)).toBe(expected)
-})
+])(
+  'defaults to camelCase when caseType is not provided: %s -> %s',
+  (input, expected) => {
+    expect(convertCase(input)).toBe(expected)
+  },
+)
 
 test.each([
   ['', 'camel', ''],
   ['a', 'camel', 'a'],
   ['A', 'camel', 'a'],
-])('handles empty string and single characters: %s -> %s', (input, caseType, expected) => {
-  expect(convertCase(input, caseType as 'camel')).toBe(expected)
-})
+])(
+  'handles empty string and single characters: %s -> %s',
+  (input, caseType, expected) => {
+    expect(convertCase(input, caseType as 'camel')).toBe(expected)
+  },
+)
 
 test.each([
   ['hello_world123', 'camel', 'helloWorld123'],
@@ -119,7 +146,10 @@ test.each([
   ['hello_world', 'invalid', 'hello_world'],
   ['myVariableName', 'unknown', 'myVariableName'],
   ['HelloWorld', 'wrong', 'HelloWorld'],
-])('default case returns original string for invalid caseType: %s -> %s', (input, caseType, expected) => {
-  // biome-ignore lint/suspicious/noExplicitAny: Testing default case with invalid caseType values
-  expect(convertCase(input, caseType as any)).toBe(expected)
-})
+])(
+  'default case returns original string for invalid caseType: %s -> %s',
+  (input, caseType, expected) => {
+    // biome-ignore lint/suspicious/noExplicitAny: Testing default case with invalid caseType values
+    expect(convertCase(input, caseType as any)).toBe(expected)
+  },
+)

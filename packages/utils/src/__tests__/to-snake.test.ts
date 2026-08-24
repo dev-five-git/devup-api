@@ -29,9 +29,12 @@ test.each([
   ['hello world', 'hello_world'],
   ['my variable name', 'my_variable_name'],
   ['space separated string', 'space_separated_string'],
-])('converts space-separated strings to snake_case: %s -> %s', (input, expected) => {
-  expect(toSnake(input)).toBe(expected)
-})
+])(
+  'converts space-separated strings to snake_case: %s -> %s',
+  (input, expected) => {
+    expect(toSnake(input)).toBe(expected)
+  },
+)
 
 test.each([
   ['hello_world', 'hello_world'],
@@ -82,9 +85,12 @@ test.each([
   ['', ''],
   ['a', 'a'],
   ['A', 'a'],
-])('handles empty string and single characters: %s -> %s', (input, expected) => {
-  expect(toSnake(input)).toBe(expected)
-})
+])(
+  'handles empty string and single characters: %s -> %s',
+  (input, expected) => {
+    expect(toSnake(input)).toBe(expected)
+  },
+)
 
 test.each([
   ['HelloWorld-123_test', 'hello_world_123_test'],

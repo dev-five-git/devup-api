@@ -18,14 +18,17 @@ test.each([
   ['test-dir-2'],
   ['custom/path/to/dir'],
   ['nested/deep/path'],
-] as const)('createTmpDir creates directory when it does not exist: %s', (tempDir) => {
-  mockExistsSync.mockReturnValue(false)
-  mockMkdirSync.mockClear()
-  const result = createTmpDir(tempDir)
-  expect(result).toBe(tempDir)
-  expect(mockExistsSync).toHaveBeenCalledWith(tempDir)
-  expect(mockMkdirSync).toHaveBeenCalledWith(tempDir, { recursive: true })
-})
+] as const)(
+  'createTmpDir creates directory when it does not exist: %s',
+  (tempDir) => {
+    mockExistsSync.mockReturnValue(false)
+    mockMkdirSync.mockClear()
+    const result = createTmpDir(tempDir)
+    expect(result).toBe(tempDir)
+    expect(mockExistsSync).toHaveBeenCalledWith(tempDir)
+    expect(mockMkdirSync).toHaveBeenCalledWith(tempDir, { recursive: true })
+  },
+)
 
 test('createTmpDir uses default value when no argument provided', () => {
   const defaultDir = 'df'
@@ -52,13 +55,16 @@ test.each([
   ['async-test-dir-2'],
   ['async/custom/path'],
   ['async/nested/deep'],
-] as const)('createTmpDirAsync creates directory when it does not exist: %s', async (tempDir) => {
-  mockMkdir.mockClear()
-  mockMkdir.mockResolvedValue(undefined)
-  const result = await createTmpDirAsync(tempDir)
-  expect(result).toBe(tempDir)
-  expect(mockMkdir).toHaveBeenCalledWith(tempDir, { recursive: true })
-})
+] as const)(
+  'createTmpDirAsync creates directory when it does not exist: %s',
+  async (tempDir) => {
+    mockMkdir.mockClear()
+    mockMkdir.mockResolvedValue(undefined)
+    const result = await createTmpDirAsync(tempDir)
+    expect(result).toBe(tempDir)
+    expect(mockMkdir).toHaveBeenCalledWith(tempDir, { recursive: true })
+  },
+)
 
 test('createTmpDirAsync uses default value when no argument provided', async () => {
   const defaultDir = 'df'

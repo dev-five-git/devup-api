@@ -109,9 +109,12 @@ test.each([
     { id: '123' },
     'https://api.example.com/users/123/profile',
   ],
-])('getApiEndpoint: baseUrl=%s, path=%s, params=%s -> %s', (baseUrl, path, params, expected) => {
-  expect(getApiEndpoint(baseUrl, path, params)).toBe(expected)
-})
+])(
+  'getApiEndpoint: baseUrl=%s, path=%s, params=%s -> %s',
+  (baseUrl, path, params, expected) => {
+    expect(getApiEndpoint(baseUrl, path, params)).toBe(expected)
+  },
+)
 
 test.each([
   ['a=1&b=2', 'a=1&b=2'],

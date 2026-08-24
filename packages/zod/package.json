@@ -24,11 +24,11 @@
     "zod": ">=4"
   },
   "peerDependencies": {
-    "zod": "^4.0"
+    "zod": "^4.4"
   },
   "devDependencies": {
-    "@types/node": "^25.5",
-    "typescript": "^6.0",
-    "zod": "^4.3"
+    "@types/node": "^26.2",
+    "typescript": "^7.0",
+    "zod": "^4.4"
   }
 }

@@ -93,37 +93,40 @@ test.each([
     { openapiFiles: 'custom-openapi.json' },
     ['custom-openapi.json'],
   ],
-] as const)('devupApi handles turbo mode: config=%s, options=%s', (config: NextConfig, options:
-  | DevupApiOptions
-  | undefined, expectedFiles: string[]) => {
-  const originalEnv = process.env.TURBOPACK
-  process.env.TURBOPACK = '1'
+] as const)(
+  'devupApi handles turbo mode: config=%s, options=%s',
+  (config: NextConfig, options:
+    | DevupApiOptions
+    | undefined, expectedFiles: string[]) => {
+    const originalEnv = process.env.TURBOPACK
+    process.env.TURBOPACK = '1'
 
-  try {
-    const result = devupApi(config, options)
+    try {
+      const result = devupApi(config, options)
 
-    expect(mockCreateTmpDir).toHaveBeenCalledWith(options?.tempDir)
-    expect(mockReadOpenapis).toHaveBeenCalledWith(expectedFiles)
-    expect(mockGenerateInterface).toHaveBeenCalledWith(
-      { 'openapi.json': mockSchema },
-      options || {},
-    )
-    expect(mockWriteInterface).toHaveBeenCalledWith(
-      join('df', 'api.d.ts'),
-      mockInterfaceContent,
-    )
-    expect(mockCreateUrlMap).toHaveBeenCalledWith(
-      { 'openapi.json': mockSchema },
-      options || {},
-    )
-    expect(result.env).toEqual({
-      DEVUP_API_URL_MAP: JSON.stringify(mockUrlMap),
-    })
-    expect(result).toBe(config)
-  } finally {
-    process.env.TURBOPACK = originalEnv
-  }
-})
+      expect(mockCreateTmpDir).toHaveBeenCalledWith(options?.tempDir)
+      expect(mockReadOpenapis).toHaveBeenCalledWith(expectedFiles)
+      expect(mockGenerateInterface).toHaveBeenCalledWith(
+        { 'openapi.json': mockSchema },
+        options || {},
+      )
+      expect(mockWriteInterface).toHaveBeenCalledWith(
+        join('df', 'api.d.ts'),
+        mockInterfaceContent,
+      )
+      expect(mockCreateUrlMap).toHaveBeenCalledWith(
+        { 'openapi.json': mockSchema },
+        options || {},
+      )
+      expect(result.env).toEqual({
+        DEVUP_API_URL_MAP: JSON.stringify(mockUrlMap),
+      })
+      expect(result).toBe(config)
+    } finally {
+      process.env.TURBOPACK = originalEnv
+    }
+  },
+)
 
 test('devupApi handles turbo mode with existing env', () => {
   const originalEnv = process.env.TURBOPACK
@@ -168,22 +171,23 @@ test.each([
   [{ webpack: undefined }, undefined],
   [{}, { tempDir: 'custom-dir' }],
   [{ webpack: undefined }, { openapiFile: 'custom-openapi.json' }],
-] as const)('devupApi handles webpack mode: config=%s, options=%s', (config: NextConfig, options:
-  | DevupApiOptions
-  | undefined) => {
-  const originalEnv = process.env.TURBOPACK
-  delete process.env.TURBOPACK
+] as const)(
+  'devupApi handles webpack mode: config=%s, options=%s',
+  (config: NextConfig, options: DevupApiOptions | undefined) => {
+    const originalEnv = process.env.TURBOPACK
+    delete process.env.TURBOPACK
 
-  try {
-    const result = devupApi(config, options)
+    try {
+      const result = devupApi(config, options)
 
-    expect(result.webpack).toBeDefined()
-    expect(typeof result.webpack).toBe('function')
-    expect(result).toBe(config)
-  } finally {
-    process.env.TURBOPACK = originalEnv
-  }
-})
+      expect(result.webpack).toBeDefined()
+      expect(typeof result.webpack).toBe('function')
+      expect(result).toBe(config)
+    } finally {
+      process.env.TURBOPACK = originalEnv
+    }
+  },
+)
 
 test('devupApi handles webpack mode with existing webpack function', () => {
   const originalEnv = process.env.TURBOPACK

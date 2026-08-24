@@ -17,24 +17,27 @@ test.each([
   ['https://api.example.com', undefined],
   ['https://api.example.com', {}],
   ['https://api.example.com', { headers: { Authorization: 'Bearer token' } }],
-] as const)('createApi accepts defaultOptions: %s', (baseUrl, defaultOptions) => {
-  const api = createApi({ baseUrl, ...defaultOptions })
-  expect(api).toBeInstanceOf(DevupApi)
-  if (defaultOptions) {
-    expect(api.getDefaultOptions()).toEqual(defaultOptions)
-  }
-})
+] as const)(
+  'createApi accepts defaultOptions: %s',
+  (baseUrl, defaultOptions) => {
+    const api = createApi({ baseUrl, ...defaultOptions })
+    expect(api).toBeInstanceOf(DevupApi)
+    if (defaultOptions) {
+      expect(api.getDefaultOptions()).toEqual(defaultOptions)
+    }
+  },
+)
 
-test.each([
-  ['openapi.json'],
-  ['openapi2.json'],
-] as const)('createApi accepts serverName: %s', (serverName) => {
-  const api = createApi({
-    baseUrl: 'https://api.example.com',
-    serverName: serverName as any,
-  })
-  expect(api).toBeInstanceOf(DevupApi)
-})
+test.each([['openapi.json'], ['openapi2.json']] as const)(
+  'createApi accepts serverName: %s',
+  (serverName) => {
+    const api = createApi({
+      baseUrl: 'https://api.example.com',
+      serverName: serverName as any,
+    })
+    expect(api).toBeInstanceOf(DevupApi)
+  },
+)
 
 test('createApi uses default serverName when not provided', () => {
   const api = createApi({ baseUrl: 'https://api.example.com' })

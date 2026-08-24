@@ -9,8 +9,8 @@
     "preview": "rsbuild preview"
   },
   "dependencies": {
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
     "@devup-api/fetch": "workspace:*"
   },
   "devDependencies": {
@@ -18,7 +18,7 @@
     "@rsbuild/plugin-react": "*",
     "@types/react": "^19",
     "@types/react-dom": "^19",
-    "typescript": "^6",
+    "typescript": "^7",
     "@devup-api/rsbuild-plugin": "workspace:*"
   }
 }
