@@ -1,0 +1,18 @@
+{
+  "changes": {
+    "packages/core/package.json": "Patch",
+    "packages/fetch/package.json": "Patch",
+    "packages/generator/package.json": "Patch",
+    "packages/hookform/package.json": "Patch",
+    "packages/next-plugin/package.json": "Patch",
+    "packages/react-query/package.json": "Patch",
+    "packages/rsbuild-plugin/package.json": "Patch",
+    "packages/ui/package.json": "Patch",
+    "packages/utils/package.json": "Patch",
+    "packages/vite-plugin/package.json": "Patch",
+    "packages/webpack-plugin/package.json": "Patch",
+    "packages/zod/package.json": "Patch"
+  },
+  "note": "Publish all npm packages through OIDC with materialized workspace dependency versions",
+  "date": "2026-08-24T19:12:59.670Z"
+}
