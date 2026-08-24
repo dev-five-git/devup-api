@@ -15,6 +15,7 @@ import {
   extractSchemaNameFromRef,
   getRequestBodyContent,
   isErrorStatusCode,
+  normalizeNullableUnion,
   normalizeServerName,
   resolveRef,
 } from './openapi-utils'
@@ -61,6 +62,7 @@ function extractContentType(
     return undefined
   }
 
+  const contentSchema = normalizeNullableUnion(jsonContent.schema)
   const contextLabel = componentType === 'response' ? 'Response' : 'Error'
   const responseDefaultNonNullable = options?.responseDefaultNonNullable ?? true
 
@@ -84,8 +86,8 @@ function extractContentType(
   }
 
   // Check if schema is a direct reference to components.schemas
-  if ('$ref' in jsonContent.schema) {
-    const schemaName = extractSchemaNameFromRef(jsonContent.schema.$ref)
+  if ('$ref' in contentSchema) {
+    const schemaName = extractSchemaNameFromRef(contentSchema.$ref)
     if (
       schemaName &&
       schema.components?.schemas?.[schemaName] &&
@@ -93,11 +95,11 @@ function extractContentType(
     ) {
       return `DevupObject<'${componentType}', '${serverName}'>['${schemaName}']`
     }
-    return extractInlineType(jsonContent.schema)
+    return extractInlineType(contentSchema)
   }
 
   // Check if it's an array with items referencing a component schema
-  const schemaObj = jsonContent.schema as OpenAPIV3_1.SchemaObject
+  const schemaObj = contentSchema as OpenAPIV3_1.SchemaObject
   if (
     schemaObj.type === 'array' &&
     schemaObj.items &&
@@ -111,11 +113,11 @@ function extractContentType(
     ) {
       return `Array<DevupObject<'${componentType}', '${serverName}'>['${schemaName}']>`
     }
-    return extractInlineType(jsonContent.schema)
+    return extractInlineType(contentSchema)
   }
 
   // Extract schema type (inline schema)
-  return extractInlineType(jsonContent.schema)
+  return extractInlineType(contentSchema)
 }
 
 /**
@@ -317,11 +319,10 @@ function generateSchemaInterface(
             const content = operation.requestBody.content
             const bodyContent = getRequestBodyContent(content)
             if (bodyContent && 'schema' in bodyContent && bodyContent.schema) {
+              const bodySchema = normalizeNullableUnion(bodyContent.schema)
               // Check if schema is a direct reference to components.schemas
-              if ('$ref' in bodyContent.schema) {
-                const schemaName = extractSchemaNameFromRef(
-                  bodyContent.schema.$ref,
-                )
+              if ('$ref' in bodySchema) {
+                const schemaName = extractSchemaNameFromRef(bodySchema.$ref)
                 // Check if schema exists in components.schemas and is used in request body
                 if (
                   schemaName &&
@@ -341,7 +342,7 @@ function generateSchemaInterface(
                 }
               } else {
                 // Check for raw multipart: multipart/form-data with empty/generic object schema
-                const schemaObj = bodyContent.schema as OpenAPIV3_1.SchemaObject
+                const schemaObj = bodySchema as OpenAPIV3_1.SchemaObject
                 const isMultipart =
                   content?.['multipart/form-data'] !== undefined &&
                   !content?.['application/json'] &&
