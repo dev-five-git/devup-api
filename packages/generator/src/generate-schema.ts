@@ -4,7 +4,9 @@ import {
   getPrimaryType,
   getRequestBodyContent,
   isNullableSchema,
+  normalizeNullableUnion,
   resolveRef,
+  splitNullableUnion,
 } from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
@@ -201,17 +203,32 @@ export function getTypeFromSchema(
     }
 
     if (schemaObj.anyOf || schemaObj.oneOf) {
-      const types = (schemaObj.anyOf || schemaObj.oneOf || []).map((s) =>
-        getTypeFromSchema(s, document, {
+      // `anyOf: [S, { type: 'null' }]` is OpenAPI 3.1's nullable notation, not a
+      // union: collapsing keeps a `$ref` member's component identity.
+      const normalized = normalizeNullableUnion(schemaObj)
+      if (normalized !== schemaObj) {
+        return getTypeFromSchema(normalized, document, {
           ...options,
           propertyName: undefined,
-        }),
+        })
+      }
+
+      const { members, nullable: hasNullMember } = splitNullableUnion(
+        schemaObj.anyOf || schemaObj.oneOf || [],
       )
+      const unionTypes = members.map((s) =>
+        formatTypeValue(
+          getTypeFromSchema(s, document, {
+            ...options,
+            propertyName: undefined,
+          }).type,
+        ),
+      )
+      if (hasNullMember || isNullableSchema(schemaObj)) {
+        unionTypes.push('null')
+      }
       return {
-        type:
-          types.length > 0
-            ? `(${types.map((t) => formatTypeValue(t.type)).join(' | ')})`
-            : 'unknown',
+        type: unionTypes.length > 0 ? `(${unionTypes.join(' | ')})` : 'unknown',
         default: schemaObj.default,
       }
     }

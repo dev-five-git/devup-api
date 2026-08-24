@@ -109,6 +109,16 @@ export function isErrorStatusCode(statusCode: string): boolean {
 // =============================================================================
 
 /**
+ * A schema that may carry the OpenAPI 3.0 `nullable` keyword. OpenAPI 3.1
+ * dropped it from the type definitions, but devup-api still accepts it as
+ * input and uses it as the normalized form of a 3.1 null union.
+ */
+export type MaybeNullableSchema = (
+  | OpenAPIV3_1.SchemaObject
+  | OpenAPIV3_1.ReferenceObject
+) & { nullable?: boolean }
+
+/**
  * Check if a schema is nullable (OpenAPI 3.0 or 3.1).
  * OpenAPI 3.0: uses `nullable: true`
  * OpenAPI 3.1: uses type array like `["string", "null"]`
@@ -121,6 +131,70 @@ export function isNullableSchema(schema: OpenAPIV3_1.SchemaObject): boolean {
     return true
   }
   return false
+}
+
+/**
+ * Check if a schema is the JSON Schema `null` type.
+ * OpenAPI 3.1 expresses nullability of a `$ref` (or of any schema that cannot
+ * carry a `type` array) as a union member: `anyOf: [..., { type: "null" }]`.
+ */
+export function isNullTypeSchema(
+  schema: OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject,
+): boolean {
+  if ('$ref' in schema) {
+    return false
+  }
+  const { type } = schema
+  if (Array.isArray(type)) {
+    return type.length > 0 && type.every((t) => t === 'null')
+  }
+  return type === 'null'
+}
+
+/**
+ * Split the members of a union (`anyOf` / `oneOf`) into the members that carry
+ * an actual type and a nullability flag contributed by `{ type: "null" }`.
+ */
+export function splitNullableUnion(
+  union: (OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject)[],
+): {
+  members: (OpenAPIV3_1.SchemaObject | OpenAPIV3_1.ReferenceObject)[]
+  nullable: boolean
+} {
+  const members = union.filter((member) => !isNullTypeSchema(member))
+  return { members, nullable: members.length !== union.length }
+}
+
+/**
+ * Normalize the OpenAPI 3.1 nullable notation `anyOf: [S, { type: "null" }]`
+ * into its OpenAPI 3.0 equivalent `{ ...S, nullable: true }`.
+ *
+ * Only unions that reduce to a single typed member are collapsed, so genuine
+ * unions keep generating a union type. Sibling keywords of the union (such as
+ * `description` or `default`) are preserved.
+ *
+ * Returns the given schema unchanged when there is nothing to collapse, so
+ * callers can detect a collapse by reference identity.
+ */
+export function normalizeNullableUnion(
+  schema: MaybeNullableSchema,
+): MaybeNullableSchema {
+  if ('$ref' in schema) {
+    return schema
+  }
+
+  const union = schema.anyOf ?? schema.oneOf
+  if (!union) {
+    return schema
+  }
+
+  const { members, nullable } = splitNullableUnion(union)
+  if (!nullable || members.length !== 1) {
+    return schema
+  }
+
+  const { anyOf, oneOf, ...siblings } = schema
+  return { ...siblings, ...members[0], nullable: true }
 }
 
 // =============================================================================

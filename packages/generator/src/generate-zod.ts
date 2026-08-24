@@ -8,8 +8,10 @@ import {
   getPrimaryType,
   isErrorStatusCode,
   isNullableSchema,
+  normalizeNullableUnion,
   normalizeServerName,
   resolveRef,
+  splitNullableUnion,
 } from './openapi-utils'
 import { wrapInterfaceKeyGuard } from './wrap-interface-key-guard'
 
@@ -44,8 +46,8 @@ function schemaToZod(
 
   const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
-  const wrapNullable = (zodStr: string): string => {
-    if (isNullableSchema(schemaObj)) {
+  const wrapNullable = (zodStr: string, forceNullable = false): string => {
+    if (forceNullable || isNullableSchema(schemaObj)) {
       return `${zodStr}.nullable()`
     }
     return zodStr
@@ -65,12 +67,21 @@ function schemaToZod(
 
   // Handle oneOf/anyOf (union)
   if (schemaObj.oneOf || schemaObj.anyOf) {
-    const schemas = (schemaObj.oneOf || schemaObj.anyOf || []).map((s) =>
+    const normalized = normalizeNullableUnion(schemaObj)
+    if (normalized !== schemaObj) {
+      return schemaToZod(normalized, document, schemaRefs, options)
+    }
+
+    const { members, nullable: hasNullMember } = splitNullableUnion(
+      schemaObj.oneOf || schemaObj.anyOf || [],
+    )
+    const schemas = members.map((s) =>
       schemaToZod(s, document, schemaRefs, options),
     )
-    if (schemas.length === 0) return 'z.unknown()'
-    if (schemas.length === 1) return wrapNullable(schemas[0] as string)
-    return wrapNullable(`z.union([${schemas.join(', ')}])`)
+    if (schemas.length === 0) return hasNullMember ? 'z.null()' : 'z.unknown()'
+    if (schemas.length === 1)
+      return wrapNullable(schemas[0] as string, hasNullMember)
+    return wrapNullable(`z.union([${schemas.join(', ')}])`, hasNullMember)
   }
 
   // Handle enum
@@ -263,8 +274,8 @@ function schemaToZodType(
 
   const schemaObj = schema as OpenAPIV3_1.SchemaObject
 
-  const wrapNullable = (zodType: string): string => {
-    if (isNullableSchema(schemaObj)) {
+  const wrapNullable = (zodType: string, forceNullable = false): string => {
+    if (forceNullable || isNullableSchema(schemaObj)) {
       return `z.ZodNullable<${zodType}>`
     }
     return zodType
@@ -289,12 +300,19 @@ function schemaToZodType(
 
   // Handle oneOf/anyOf (union)
   if (schemaObj.oneOf || schemaObj.anyOf) {
-    const types = (schemaObj.oneOf || schemaObj.anyOf || []).map((s) =>
-      schemaToZodType(s, document, options),
+    const normalized = normalizeNullableUnion(schemaObj)
+    if (normalized !== schemaObj) {
+      return schemaToZodType(normalized, document, options)
+    }
+
+    const { members, nullable: hasNullMember } = splitNullableUnion(
+      schemaObj.oneOf || schemaObj.anyOf || [],
     )
-    if (types.length === 0) return 'z.ZodUnknown'
-    if (types.length === 1) return wrapNullable(types[0] as string)
-    return wrapNullable(`z.ZodUnion<[${types.join(', ')}]>`)
+    const types = members.map((s) => schemaToZodType(s, document, options))
+    if (types.length === 0) return hasNullMember ? 'z.ZodNull' : 'z.ZodUnknown'
+    if (types.length === 1)
+      return wrapNullable(types[0] as string, hasNullMember)
+    return wrapNullable(`z.ZodUnion<[${types.join(', ')}]>`, hasNullMember)
   }
 
   // Handle enum
@@ -442,8 +460,10 @@ function collectSchemaUsage(
     const content = requestBody.content
     for (const ct of CONTENT_TYPE_PRIORITY) {
       const bodyContent = content?.[ct]
-      if (bodyContent?.schema && '$ref' in bodyContent.schema) {
-        return extractSchemaNameFromRef(bodyContent.schema.$ref)
+      if (!bodyContent?.schema) continue
+      const bodySchema = normalizeNullableUnion(bodyContent.schema)
+      if ('$ref' in bodySchema) {
+        return extractSchemaNameFromRef(bodySchema.$ref)
       }
     }
     return null
