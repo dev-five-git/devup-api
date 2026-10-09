@@ -14,7 +14,16 @@ export function getApiEndpoint(
 ): string {
   let ret = `${baseUrl}${path}`
   for (const [key, value] of Object.entries(params ?? {})) {
-    ret = ret.replace(`{${key}}`, value)
+    const placeholder = `{${key}}`
+    if (!ret.includes(placeholder)) continue
+    const encoded = encodeURIComponent(String(value))
+    // encodeURIComponent keeps "." and "..", and URL parsers resolve them as dot segments.
+    if (encoded === '.' || encoded === '..') {
+      throw new Error(
+        `Path parameter "${key}" cannot be "${encoded}": it would change the request path`,
+      )
+    }
+    ret = ret.replaceAll(placeholder, () => encoded)
   }
   return ret
 }

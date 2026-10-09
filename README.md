@@ -55,7 +55,7 @@ Just write API calls — the types are already there.
 ### **🪝 Fetch-compatible design**
 devup-api feels like using `fetch`, but with superpowers:
 
-- Path params automatically replaced  
+- Path params automatically replaced and URL-encoded (`.` and `..` are rejected)  
 - Query/body/header types enforced  
 - Typed success & error responses  
 - Optional runtime schema validation  

@@ -1,6 +1,7 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: any is used to allow for flexibility in the type */
 import { afterEach, beforeEach, expect, mock, test } from 'bun:test'
 import { DevupApi } from '../api'
+import { createApi } from '../create-api'
 
 const originalFetch = globalThis.fetch
 
@@ -220,6 +221,43 @@ test('request uses params to replace path parameters', async () => {
     expect(request.url).toBe('https://api.example.com/users/123')
   }
 })
+
+test.each([
+  ['../members', 'https://api.example.com/admin/notices/..%2Fmembers'],
+  ['a/b', 'https://api.example.com/admin/notices/a%2Fb'],
+  ['x?y=1', 'https://api.example.com/admin/notices/x%3Fy%3D1'],
+  ['x#y', 'https://api.example.com/admin/notices/x%23y'],
+] as const)(
+  'request sends path param %s as one encoded segment',
+  async (id, expected) => {
+    const api = createApi('https://api.example.com')
+    const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
+
+    await api.delete(
+      '/admin/notices/{id}' as never,
+      { params: { id } } as never,
+    )
+
+    expect(mockFetch).toHaveBeenCalledTimes(1)
+    const [request] = mockFetch.mock.calls[0] as [Request]
+    expect(request.url).toBe(expected)
+  },
+)
+
+test.each(['.', '..'] as const)(
+  'request rejects path param %s without fetching',
+  async (id) => {
+    const api = createApi('https://api.example.com')
+    const mockFetch = globalThis.fetch as unknown as ReturnType<typeof mock>
+
+    await expect(
+      api.delete('/admin/notices/{id}' as never, { params: { id } } as never),
+    ).rejects.toThrow(
+      `Path parameter "id" cannot be "${id}": it would change the request path`,
+    )
+    expect(mockFetch).not.toHaveBeenCalled()
+  },
+)
 
 test('request returns response with data on success', async () => {
   globalThis.fetch = mock(() =>
