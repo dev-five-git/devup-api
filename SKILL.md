@@ -179,7 +179,7 @@ const result = await getUser({ params: { id: '123' } })
 Notes:
 
 - Generated `df/server.ts` contains `'use server'` and top-level named async exports.
-- Generated actions return `DevupApiResponse<T, E, SerializedResponse>`.
+- Generated actions return `DevupApiResponse<T, E, SerializedResponse>`; the serialized headers omit `Set-Cookie` and `Set-Cookie2`.
 - `@devup-api/fetch/server` has a cold typing fallback before `df` exists.
 - The plugin aliases `@devup-api/fetch/server` to generated `df/server.ts` during dev/build.
 - When enabled, every operationId is generated as a named Server Action export.

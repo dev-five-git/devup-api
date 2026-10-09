@@ -109,12 +109,98 @@ test.each([
     { id: '123' },
     'https://api.example.com/users/123/profile',
   ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: '../members' },
+    'https://api.example.com/users/..%2Fmembers',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: 'a/b' },
+    'https://api.example.com/users/a%2Fb',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: 'x?y=1' },
+    'https://api.example.com/users/x%3Fy%3D1',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: 'x#y' },
+    'https://api.example.com/users/x%23y',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: '%' },
+    'https://api.example.com/users/%25',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: 'a b' },
+    'https://api.example.com/users/a%20b',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: '공지' },
+    'https://api.example.com/users/%EA%B3%B5%EC%A7%80',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: '$&' },
+    'https://api.example.com/users/%24%26',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: '$`' },
+    'https://api.example.com/users/%24%60',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: 123 },
+    'https://api.example.com/users/123',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}/friends/{id}',
+    { id: 'a/b' },
+    'https://api.example.com/users/a%2Fb/friends/a%2Fb',
+  ],
+  [
+    'https://api.example.com',
+    '/users/{id}',
+    { id: '' },
+    'https://api.example.com/users/',
+  ],
+  [
+    'https://api.example.com',
+    '/users',
+    { id: '..' },
+    'https://api.example.com/users',
+  ],
 ])(
   'getApiEndpoint: baseUrl=%s, path=%s, params=%s -> %s',
   (baseUrl, path, params, expected) => {
     expect(getApiEndpoint(baseUrl, path, params)).toBe(expected)
   },
 )
+
+test.each(['.', '..'])('getApiEndpoint rejects path param %s', (id) => {
+  expect(() =>
+    getApiEndpoint('https://api.example.com', '/users/{id}', { id }),
+  ).toThrow(
+    `Path parameter "id" cannot be "${id}": it would change the request path`,
+  )
+})
 
 test.each([
   ['a=1&b=2', 'a=1&b=2'],

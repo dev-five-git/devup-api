@@ -114,7 +114,7 @@ console.log(result.response.status)
 ### Using Path Parameters
 
 ```ts
-// Path parameters are automatically replaced
+// Path parameters are automatically replaced and URL-encoded
 const result = await api.get('/users/{userId}/posts/{postId}', {
   params: {
     userId: '123',
@@ -123,6 +123,8 @@ const result = await api.get('/users/{userId}/posts/{postId}', {
 })
 // URL becomes: /users/123/posts/456
 ```
+
+Each value is encoded with `encodeURIComponent`, so `a/b` is sent as `a%2Fb` and stays one path segment. `.` and `..` would still be resolved as dot segments, so they throw instead of sending the request.
 
 ### Using Query Parameters
 

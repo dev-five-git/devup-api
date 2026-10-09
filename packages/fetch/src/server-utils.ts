@@ -18,10 +18,10 @@ export type SerializedDevupApiResponse<T, E = unknown> = DevupApiResponse<
 function serializeResponse(response: Response): SerializedResponse {
   return {
     headers: Object.fromEntries(
-      [...response.headers.entries()].map(([key, value]) => [
-        key.toLowerCase(),
-        value,
-      ]),
+      [...response.headers.entries()]
+        .map(([key, value]) => [key.toLowerCase(), value])
+        // Browsers never expose these to JS; the result is handed to client code.
+        .filter(([key]) => key !== 'set-cookie' && key !== 'set-cookie2'),
     ),
     redirected: response.redirected,
     status: response.status,
