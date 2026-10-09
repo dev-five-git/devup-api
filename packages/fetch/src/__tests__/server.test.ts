@@ -9,6 +9,9 @@ describe('serializeApiResponse', () => {
       statusText: 'Created',
       headers: { 'X-Test': 'yes' },
     })
+    // The test DOM's Response constructor strips Set-Cookie, so append it here.
+    response.headers.append('Set-Cookie', 'session=SECRET; HttpOnly')
+    response.headers.append('Set-Cookie2', 'legacy=1')
     const result: DevupApiResponse<{ id: number }, { message: string }> = {
       data: { id: 1 },
       isOk: true,
@@ -36,6 +39,8 @@ describe('serializeApiResponse', () => {
 
   test('converts error responses to Server Action-safe plain objects', () => {
     const response = new Response('missing', { status: 404 })
+    response.headers.append('Set-Cookie', 'session=SECRET; HttpOnly')
+    response.headers.append('Set-Cookie2', 'legacy=1')
     const result: DevupApiResponse<{ id: number }, { message: string }> = {
       error: { message: 'Not found' },
       isOk: false,

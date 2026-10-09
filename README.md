@@ -764,7 +764,7 @@ export function UserButton() {
 
 The generated `df/server.ts` file contains `'use server'` and exports one named async function for every operationId in your OpenAPI schemas. You should import from `@devup-api/fetch/server`, not from `df/server.ts` directly; the build plugin aliases that module to the generated file.
 
-Generated actions return `DevupApiResponse<T, E, SerializedResponse>`. This keeps the same `data` / `error` / `isOk` / `isError` shape as normal `api.get()` calls, while replacing the native `Response` instance with a plain serializable response object that can cross the Server Action boundary.
+Generated actions return `DevupApiResponse<T, E, SerializedResponse>`. This keeps the same `data` / `error` / `isOk` / `isError` shape as normal `api.get()` calls, while replacing the native `Response` instance with a plain serializable response object that can cross the Server Action boundary. Its headers leave out `Set-Cookie` and `Set-Cookie2`, matching what browser `fetch` exposes to JavaScript.
 
 During cold typing, `@devup-api/fetch/server` is still importable before `df` exists. The fallback keeps initial setup from failing, and the generated module replaces it with strict operation-specific types after `dev` or `build` runs.
 
