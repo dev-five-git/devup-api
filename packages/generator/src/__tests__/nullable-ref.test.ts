@@ -1,7 +1,11 @@
 import { describe, expect, test } from 'bun:test'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { generateInterface } from '../generate-interface'
-import { formatTypeValue, getTypeFromSchema } from '../generate-schema'
+import {
+  createSchemaContext,
+  formatTypeValue,
+  getTypeFromSchema,
+} from '../generate-schema'
 
 const reference = { $ref: '#/components/schemas/ServiceType' }
 const nullable = { anyOf: [reference, { type: 'null' as const }] }
@@ -50,6 +54,22 @@ const document: OpenAPIV3_1.Document = {
 }
 
 describe('nullable references', () => {
+  test('uses the referenced enum name without leaking the caller context', () => {
+    const context = createSchemaContext('Wrapper')
+    context.propertyPath.push('parent')
+
+    const result = getTypeFromSchema(nullable, document, {
+      context,
+      propertyName: 'selected',
+    })
+
+    expect(formatTypeValue(result.type)).toBe('ServiceType | null')
+    expect(context.schemaName).toBe('Wrapper')
+    expect(context.propertyPath).toEqual(['parent'])
+    expect([...context.enums.keys()]).toEqual(['ServiceType'])
+    expect(context.enums.get('ServiceType')?.nullable).toBe(true)
+  })
+
   test.each([false, true])(
     'preserves optional and required enum nullability with requestDefaultNonNullable=%s',
     (requestDefaultNonNullable) => {
