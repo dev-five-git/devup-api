@@ -123,11 +123,15 @@ export type MaybeNullableSchema = (
  * OpenAPI 3.0: uses `nullable: true`
  * OpenAPI 3.1: uses type array like `["string", "null"]`
  */
-export function isNullableSchema(schema: OpenAPIV3_1.SchemaObject): boolean {
+export function isNullableSchema(schema: MaybeNullableSchema): boolean {
   if ('nullable' in schema && schema.nullable === true) {
     return true
   }
-  if (Array.isArray(schema.type) && schema.type.includes('null')) {
+  if (
+    'type' in schema &&
+    Array.isArray(schema.type) &&
+    schema.type.includes('null')
+  ) {
     return true
   }
   return false

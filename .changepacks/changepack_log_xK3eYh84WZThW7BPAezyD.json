@@ -1,0 +1,7 @@
+{
+  "changes": {
+    "packages/generator/package.json": "Patch"
+  },
+  "note": "Preserve nullable referenced enum and object types and omit unused imports from generated server actions",
+  "date": "2026-11-04T17:39:34.411812800Z"
+}

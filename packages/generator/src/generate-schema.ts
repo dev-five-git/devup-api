@@ -140,6 +140,9 @@ export function getTypeFromSchema(
         return { type: 'unknown', default: undefined }
       }
 
+      // Normalized nullable unions carry nullability beside $ref, not on its target.
+      const nullable = isNullableSchema(schema) || isNullableSchema(resolved)
+
       // If this $ref points to a used component schema, decide how to reference it
       if (
         refSchemaName &&
@@ -152,7 +155,7 @@ export function getTypeFromSchema(
         if ('enum' in resolved && resolved.enum) {
           // Return the enum type name directly (e.g., "Gender" instead of DevupObject<...>['Gender'])
           return {
-            type: refSchemaName,
+            type: nullable ? `${refSchemaName} | null` : refSchemaName,
             default: undefined,
           }
         }
@@ -164,6 +167,7 @@ export function getTypeFromSchema(
             schemaName: refSchemaName,
             serverName: options.serverName,
             componentType: options.componentType,
+            ...(nullable ? { __nullable: true } : {}),
           },
           default: undefined,
         }
@@ -176,7 +180,10 @@ export function getTypeFromSchema(
           ? { ...context, schemaName: refSchemaName, propertyPath: [] }
           : context
 
-      return getTypeFromSchema(resolved, document, {
+      const referencedSchema = nullable
+        ? { ...resolved, nullable: true }
+        : resolved
+      return getTypeFromSchema(referencedSchema, document, {
         ...options,
         context: updatedContext,
         propertyName: undefined, // Don't double-push property name
@@ -563,6 +570,7 @@ function isComponentRef(value: unknown): value is {
   schemaName: string
   serverName: string
   componentType: 'request' | 'response' | 'error'
+  __nullable?: boolean
 } {
   return (
     typeof value === 'object' &&
@@ -582,7 +590,8 @@ export function formatTypeValue(value: unknown, indent: number = 0): string {
 
   // Handle component reference marker
   if (isComponentRef(value)) {
-    return `DevupObject<'${value.componentType}', '${value.serverName}'>['${value.schemaName}']`
+    const reference = `DevupObject<'${value.componentType}', '${value.serverName}'>['${value.schemaName}']`
+    return value.__nullable ? `${reference} | null` : reference
   }
 
   // Handle array type marker
