@@ -1,5 +1,5 @@
 /** biome-ignore-all lint/suspicious/noExplicitAny: test */
-import { beforeEach, expect, spyOn, test } from 'bun:test'
+import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test'
 import * as fs from 'node:fs'
 import * as fsPromises from 'node:fs/promises'
 import type { OpenAPIV3_1 } from 'openapi-types'
@@ -28,6 +28,11 @@ beforeEach(() => {
   mockReadFile = spyOn(fsPromises, 'readFile').mockResolvedValue(
     JSON.stringify(mockOpenApiDoc),
   )
+})
+
+afterEach(() => {
+  mockReadFileSync.mockRestore()
+  mockReadFile.mockRestore()
 })
 
 test('readOpenapi reads and parses OpenAPI file', () => {

@@ -1,4 +1,4 @@
-import { beforeEach, expect, spyOn, test } from 'bun:test'
+import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test'
 import * as fs from 'node:fs'
 import * as fsPromises from 'node:fs/promises'
 import { createTmpDir, createTmpDirAsync } from '../create-tmp-dir'
@@ -11,6 +11,12 @@ beforeEach(() => {
   mockExistsSync = spyOn(fs, 'existsSync').mockReturnValue(false)
   mockMkdirSync = spyOn(fs, 'mkdirSync').mockImplementation(() => {})
   mockMkdir = spyOn(fsPromises, 'mkdir').mockResolvedValue(undefined)
+})
+
+afterEach(() => {
+  mockExistsSync.mockRestore()
+  mockMkdirSync.mockRestore()
+  mockMkdir.mockRestore()
 })
 
 test.each([

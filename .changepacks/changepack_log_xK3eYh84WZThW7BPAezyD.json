@@ -1,7 +1,8 @@
 {
   "changes": {
-    "packages/generator/package.json": "Patch"
+    "packages/generator/package.json": "Patch",
+    "packages/utils/package.json": "Patch"
   },
-  "note": "Preserve nullable referenced enum and object types and omit unused imports from generated server actions",
+  "note": "Preserve nullable referenced enum and object types, omit unused imports from generated server actions, and restore filesystem test spies so generated-client checks do not depend on test file order",
   "date": "2026-11-04T17:39:34.411812800Z"
 }
