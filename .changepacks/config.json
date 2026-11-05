@@ -3,9 +3,9 @@
   "baseBranch": "main",
   "latestPackage": null,
   "publish": {
-    "node": "bun pm pack --quiet --filename .changepacks/publish.tgz && npm publish ../../.changepacks/publish.tgz"
+    "node": "bun pm pack --quiet --filename publish.tgz && npm publish ./publish.tgz"
   },
   "publishDryRun": {
-    "node": "bun pm pack --quiet --filename .changepacks/publish.tgz && npm publish ../../.changepacks/publish.tgz --dry-run"
+    "node": "bun pm pack --quiet --filename publish.tgz && npm publish ./publish.tgz --dry-run"
   }
 }
