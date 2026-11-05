@@ -69,6 +69,8 @@ describe('generateServerActionCode', () => {
 
     expect(result).toContain("'use server'")
     expect(result).toContain('export async function getUsers')
+    expect(result).toContain('DevupGetApiStructScope')
+    expect(result).not.toContain('DevupPostApiStructScope')
   })
 
   test('does not generate actions when serverActions is explicitly disabled', () => {
@@ -90,6 +92,8 @@ describe('generateServerActionCode', () => {
 
     expect(result).toContain("'use server'")
     expect(result).not.toContain('export async function getUsers')
+    expect(result).not.toContain('import ')
+    expect(result).toContain('export {}')
   })
 
   test('does not generate actions when serverActions object is disabled', () => {
@@ -111,6 +115,8 @@ describe('generateServerActionCode', () => {
 
     expect(result).toContain("'use server'")
     expect(result).not.toContain('export async function getUsers')
+    expect(result).not.toContain('import ')
+    expect(result).toContain('export {}')
   })
 
   test('generates all operationIds with empty serverActions config', () => {

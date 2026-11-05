@@ -20,6 +20,18 @@ afterEach(() => {
   globalThis.fetch = originalFetch
 })
 
+test('request defaults to GET when no method is specified', async () => {
+  const api = new DevupApi('https://api.example.com', undefined, 'openapi.json')
+  const fetcher = globalThis.fetch as unknown as ReturnType<typeof mock>
+
+  await api.request('/test' as never)
+
+  expect(fetcher).toHaveBeenCalledTimes(1)
+  const request = fetcher.mock.calls[0]?.[0] as Request
+  expect(request.method).toBe('GET')
+  expect(request.url).toBe('https://api.example.com/test')
+})
+
 test.each([
   ['https://api.example.com', 'https://api.example.com'],
   ['https://api.example.com/', 'https://api.example.com'],

@@ -1,0 +1,9 @@
+{
+  "changes": {
+    "packages/generator/package.json": "Patch",
+    "packages/fetch/package.json": "Patch",
+    "packages/utils/package.json": "Patch"
+  },
+  "note": "Preserve nullable referenced enum and object types, omit unused imports from generated server actions, restore filesystem test spies, and verify request defaults and empty-schema generation with Bun 1.4.4 coverage",
+  "date": "2026-11-04T17:39:34.411812800Z"
+}

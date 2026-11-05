@@ -1,4 +1,4 @@
-import { beforeEach, expect, spyOn, test } from 'bun:test'
+import { afterEach, beforeEach, expect, spyOn, test } from 'bun:test'
 import * as fs from 'node:fs'
 import * as fsPromises from 'node:fs/promises'
 import { writeInterface, writeInterfaceAsync } from '../write-interface'
@@ -9,6 +9,11 @@ let mockWriteFile: ReturnType<typeof spyOn>
 beforeEach(() => {
   mockWriteFileSync = spyOn(fs, 'writeFileSync').mockImplementation(() => {})
   mockWriteFile = spyOn(fsPromises, 'writeFile').mockResolvedValue(undefined)
+})
+
+afterEach(() => {
+  mockWriteFileSync.mockRestore()
+  mockWriteFile.mockRestore()
 })
 
 test('writeInterface writes content to file', () => {

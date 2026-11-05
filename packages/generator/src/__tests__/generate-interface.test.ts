@@ -3,6 +3,14 @@ import { expect, test } from 'bun:test'
 import type { OpenAPIV3_1 } from 'openapi-types'
 import { generateInterface } from '../generate-interface'
 
+test('omits precomputed mappings when no OpenAPI documents are supplied', () => {
+  const output = generateInterface({})
+
+  expect(output).toContain('interface DevupApiServers')
+  expect(output).not.toContain('interface DevupPrecomputedMethodKeys')
+  expect(output).not.toContain('interface DevupPrecomputedScopes')
+})
+
 const createDocument = (
   document: Partial<OpenAPIV3_1.Document> = {},
 ): OpenAPIV3_1.Document =>
