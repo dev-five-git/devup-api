@@ -1,9 +1,0 @@
-{
-  "changes": {
-    "packages/fetch/package.json": "Patch",
-    "packages/generator/package.json": "Patch",
-    "packages/utils/package.json": "Patch"
-  },
-  "note": "Retry the nullable-ref and server-action fixes from a new release commit containing the corrected package-local publish archive paths; the previous release attempt failed before registry publication",
-  "date": "2026-11-05T01:58:16Z"
-}
